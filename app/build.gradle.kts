@@ -1,9 +1,22 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
 }
+
+// Supabase project URL + anon (publishable) key. Local dev reads local.properties (gitignored);
+// CI supplies the same two values as repo/action secrets via environment variables. Only the
+// anon key ever reaches this file/BuildConfig — the secret/service_role key must never appear here.
+val localProperties = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+fun secretOrEnv(propertyKey: String, envKey: String): String =
+    (localProperties.getProperty(propertyKey)?.takeIf { it.isNotBlank() })
+        ?: System.getenv(envKey).orEmpty()
 
 android {
     namespace = "com.wildodds.gymtracker"
@@ -16,6 +29,9 @@ android {
         versionCode = 2
         versionName = "2.0.0"
         multiDexEnabled = true
+
+        buildConfigField("String", "SUPABASE_URL", "\"${secretOrEnv("supabase.url", "SUPABASE_URL")}\"")
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${secretOrEnv("supabase.anonKey", "SUPABASE_ANON_KEY")}\"")
     }
 
     signingConfigs {
@@ -152,6 +168,13 @@ dependencies {
     // Local JSON (de)serialization for retention/export models + WorkManager for opt-in reminders.
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.work.runtime.ktx)
+
+    // Supabase backend (v2 online-first: Auth, Postgrest, Functions). BOM pins module versions.
+    implementation(platform(libs.supabase.bom))
+    implementation(libs.supabase.auth)
+    implementation(libs.supabase.postgrest)
+    implementation(libs.supabase.functions)
+    implementation(libs.ktor.client.okhttp)
 
     // ── Local unit tests (src/test) — run on the JVM via Robolectric ──────────────
     testImplementation(libs.junit)
