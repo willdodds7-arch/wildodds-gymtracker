@@ -1,0 +1,33 @@
+{
+  "name": "Example Upper/Lower Hypertrophy",
+  "creator": "Example Author",
+  "level": "Intermediate",
+  "goal": "Hypertrophy",
+  "intensity": "RPE",
+  "weeks": 4,
+  "days_per_week": 4,
+  "split": "Upper/Lower",
+  "style": "Hypertrophy",
+  "coach_bio": "Placeholder coach bio — replace with a short description of the coach for their profile page.",
+  "description": "A generic 4-day upper/lower split — placeholder example, not a real coach's program.",
+  "days": [
+    {
+      "name": "Day 1 - Upper",
+      "exercises": [
+        { "exercise": "Bench Press",        "sets": 4, "reps": "6-8",  "rpe": "8",   "pct1rm": "", "weight": "", "rest": "180s", "superset": "", "notes": "Top set then back-offs" },
+        { "exercise": "Chest-Supported Row", "sets": 4, "reps": "8-10", "rpe": "8",   "pct1rm": "", "weight": "", "rest": "120s", "superset": "", "notes": "" },
+        { "exercise": "Incline DB Press",    "sets": 3, "reps": "10-12","rpe": "9",   "pct1rm": "", "weight": "", "rest": "90s",  "superset": "A", "notes": "" },
+        { "exercise": "Lat Pulldown",        "sets": 3, "reps": "10-12","rpe": "9",   "pct1rm": "", "weight": "", "rest": "90s",  "superset": "A", "notes": "" }
+      ]
+    },
+    {
+      "name": "Day 2 - Lower",
+      "exercises": [
+        { "exercise": "Back Squat",     "sets": 4, "reps": "5-7",  "rpe": "8", "pct1rm": "", "weight": "", "rest": "210s", "superset": "", "notes": "" },
+        { "exercise": "Romanian Deadlift","sets": 3, "reps": "8-10","rpe": "8", "pct1rm": "", "weight": "", "rest": "150s", "superset": "", "notes": "" },
+        { "exercise": "Leg Press",      "sets": 3, "reps": "12-15","rpe": "9", "pct1rm": "", "weight": "", "rest": "90s",  "superset": "", "notes": "" },
+        { "exercise": "Standing Calf Raise","sets": 4, "reps": "12-15","rpe": "10","pct1rm": "","weight": "","rest": "60s", "superset": "", "notes": "" }
+      ]
+    }
+  ]
+}

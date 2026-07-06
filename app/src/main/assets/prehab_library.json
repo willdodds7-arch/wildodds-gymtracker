@@ -1,0 +1,188 @@
+{
+  "prehab": [
+    {
+      "region": "KNEE",
+      "exercises": [
+        {
+          "name": "Spanish Squat (band)",
+          "sets": 3,
+          "reps": "30-45s hold",
+          "note": "Knees track over toes, stay pain-free"
+        },
+        {
+          "name": "Terminal Knee Extension (band)",
+          "sets": 2,
+          "reps": "15-20",
+          "note": "Slow, controlled lockout"
+        },
+        {
+          "name": "Step-down (slow eccentric)",
+          "sets": 2,
+          "reps": "8-10 each",
+          "note": "Lower under control, pain-free depth"
+        }
+      ]
+    },
+    {
+      "region": "LOW_BACK",
+      "exercises": [
+        {
+          "name": "Dead Bug",
+          "sets": 2,
+          "reps": "8-10 each",
+          "note": "Ribs down, low back flat"
+        },
+        {
+          "name": "Bird Dog",
+          "sets": 2,
+          "reps": "8-10 each",
+          "note": "No rotation, slow"
+        },
+        {
+          "name": "Cat-Cow",
+          "sets": 1,
+          "reps": "8-10",
+          "note": "Gentle, full range"
+        }
+      ]
+    },
+    {
+      "region": "SHOULDER",
+      "exercises": [
+        {
+          "name": "Band External Rotation",
+          "sets": 3,
+          "reps": "12-15",
+          "note": "Elbow tucked, slow"
+        },
+        {
+          "name": "Scapular Wall Slides",
+          "sets": 2,
+          "reps": "10-12",
+          "note": "Keep contact, pain-free range"
+        },
+        {
+          "name": "Band Pull-Apart",
+          "sets": 2,
+          "reps": "15-20",
+          "note": "Squeeze shoulder blades"
+        }
+      ]
+    },
+    {
+      "region": "ELBOW",
+      "exercises": [
+        {
+          "name": "Wrist Extensor Eccentrics (band)",
+          "sets": 3,
+          "reps": "15",
+          "note": "Slow lowering phase"
+        },
+        {
+          "name": "Wrist Flexor Eccentrics",
+          "sets": 3,
+          "reps": "15",
+          "note": "Pain-free range"
+        },
+        {
+          "name": "Forearm Pronation/Supination",
+          "sets": 2,
+          "reps": "12-15",
+          "note": "Light, controlled"
+        }
+      ]
+    },
+    {
+      "region": "WRIST",
+      "exercises": [
+        {
+          "name": "Wrist Flexor/Extensor Stretch",
+          "sets": 2,
+          "reps": "20-30s",
+          "note": "Gentle, no pinching"
+        },
+        {
+          "name": "Wrist Curl (light)",
+          "sets": 2,
+          "reps": "15-20",
+          "note": "Light load, full control"
+        },
+        {
+          "name": "Tendon Glides",
+          "sets": 1,
+          "reps": "8-10",
+          "note": "Slow finger/wrist glides"
+        }
+      ]
+    },
+    {
+      "region": "HIP",
+      "exercises": [
+        {
+          "name": "90/90 Hip Switches",
+          "sets": 2,
+          "reps": "8-10 each",
+          "note": "Controlled, pain-free"
+        },
+        {
+          "name": "Glute Bridge",
+          "sets": 2,
+          "reps": "12-15",
+          "note": "Squeeze glutes, ribs down"
+        },
+        {
+          "name": "Clamshell (band)",
+          "sets": 2,
+          "reps": "15 each",
+          "note": "Slow, no hip hike"
+        }
+      ]
+    },
+    {
+      "region": "ANKLE",
+      "exercises": [
+        {
+          "name": "Calf Raise (slow)",
+          "sets": 3,
+          "reps": "12-15",
+          "note": "Full range, controlled"
+        },
+        {
+          "name": "Ankle Dorsiflexion (knee-to-wall)",
+          "sets": 2,
+          "reps": "10 each",
+          "note": "Heel down, pain-free"
+        },
+        {
+          "name": "Banded Ankle Mobilization",
+          "sets": 2,
+          "reps": "10 each",
+          "note": "Gentle glide"
+        }
+      ]
+    },
+    {
+      "region": "NECK",
+      "exercises": [
+        {
+          "name": "Chin Tucks",
+          "sets": 2,
+          "reps": "10",
+          "note": "Gentle, no strain"
+        },
+        {
+          "name": "Scapular Setting",
+          "sets": 2,
+          "reps": "10",
+          "note": "Light shoulder-blade squeeze"
+        },
+        {
+          "name": "Upper-Trap Stretch",
+          "sets": 1,
+          "reps": "20-30s each",
+          "note": "Gentle, pain-free"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,480 @@
+{
+ "library_version": "1.0",
+ "author": "Wild Odds",
+ "program_count": 2,
+ "programs": [
+  {
+   "name": "Strength Formula",
+   "author": "Wild Odds",
+   "split": "4x Upper Lower",
+   "style": "Strength",
+   "specialisation": "None",
+   "description": "A 4-day upper/lower strength block built around the big barbell lifts. Two pressing days (bench-led, then overhead-press-led) and two pulling/lower days (squat-led, then deadlift-led). Every session opens with a heavy main lift in the 2-5 rep range and is backed off with strength-hypertrophy accessories. Run it for 4 weeks, adding a little load each week while keeping the top sets sharp and leaving a rep in reserve.",
+   "days": [
+    {
+     "name": "Bench / Upper Pull",
+     "exercises": [
+      {
+       "name": "Bench Press",
+       "sets": 4,
+       "target_reps": "3-5",
+       "percent_1rm": "85-90%",
+       "notes": "Top strength sets - leave 1 rep in reserve. Rest 3 min."
+      },
+      {
+       "name": "Overhead Press",
+       "sets": 3,
+       "target_reps": "6-8",
+       "percent_1rm": null,
+       "notes": "Strict press. Rest 2-3 min."
+      },
+      {
+       "name": "Lat Pulldown",
+       "sets": 3,
+       "target_reps": "8-10",
+       "percent_1rm": null,
+       "notes": "Full stretch at the top."
+      },
+      {
+       "name": "Cable Row",
+       "sets": 2,
+       "target_reps": "12",
+       "percent_1rm": null,
+       "notes": "Controlled, squeeze the back."
+      }
+     ]
+    },
+    {
+     "name": "Squat / Lower",
+     "exercises": [
+      {
+       "name": "Back Squat",
+       "sets": 4,
+       "target_reps": "3-5",
+       "percent_1rm": "85-90%",
+       "notes": "Top strength sets - leave 1 rep in reserve. Rest 3 min."
+      },
+      {
+       "name": "Bulgarian Split Squat",
+       "sets": 3,
+       "target_reps": "5-8",
+       "percent_1rm": null,
+       "notes": "Per leg. Dumbbells or barbell."
+      },
+      {
+       "name": "Romanian Deadlift",
+       "sets": 3,
+       "target_reps": "8",
+       "percent_1rm": null,
+       "notes": "Slow eccentric, feel the hamstrings."
+      },
+      {
+       "name": "Glute Ham Raise",
+       "sets": 2,
+       "target_reps": "12",
+       "percent_1rm": null,
+       "notes": "On the GHD - lower under control."
+      }
+     ]
+    },
+    {
+     "name": "OHP Focus / Upper",
+     "exercises": [
+      {
+       "name": "Overhead Press",
+       "sets": 5,
+       "target_reps": "3-5",
+       "percent_1rm": "85-90%",
+       "notes": "Main lift today - heavy strict doubles/triples. Rest 3 min."
+      },
+      {
+       "name": "Bench Press",
+       "sets": 3,
+       "target_reps": "8",
+       "percent_1rm": null,
+       "notes": "Back-off volume, controlled."
+      },
+      {
+       "name": "Weighted Pull-Up",
+       "sets": 2,
+       "target_reps": "6-8",
+       "percent_1rm": null,
+       "notes": "Add load on a belt; full range."
+      },
+      {
+       "name": "Face Pull",
+       "sets": 2,
+       "target_reps": "15",
+       "percent_1rm": null,
+       "notes": "Rear delts and upper back - high reps."
+      }
+     ]
+    },
+    {
+     "name": "Deadlift Focus / Lower",
+     "exercises": [
+      {
+       "name": "Conventional Deadlift",
+       "sets": 5,
+       "target_reps": "2-4",
+       "percent_1rm": "85-92%",
+       "notes": "Main lift - reset each rep, brace hard. Rest 3-4 min."
+      },
+      {
+       "name": "Deficit Deadlift",
+       "sets": 3,
+       "target_reps": "4-6",
+       "percent_1rm": null,
+       "notes": "Deficit or paused deadlift - builds off the floor."
+      },
+      {
+       "name": "Good Morning",
+       "sets": 2,
+       "target_reps": "10",
+       "percent_1rm": null,
+       "notes": "Light to moderate, long hamstrings."
+      },
+      {
+       "name": "Farmer's Carry",
+       "sets": 2,
+       "target_reps": "30-40 m",
+       "percent_1rm": null,
+       "notes": "Heavy carry, 30-40 m per set. Grip and core."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Wild Odds Split",
+   "author": "Wild Odds",
+   "split": "5x Body Part Split",
+   "style": "Powerbuilding",
+   "specialisation": "None",
+   "description": "A 5-day body-part split pairing heavy, low-rep compound work with high-volume hypertrophy accessories: a squat-led quad day, a shoulders and core day, a back and triceps day, a hamstrings/glutes/groin day built around deadlifts, and a chest and biceps finisher. Run it for 4 weeks, adding load on the main lifts (Back Squat, Overhead Press, Deadlift) each week.",
+   "days": [
+    {
+     "name": "Quads",
+     "exercises": [
+      {
+       "name": "Back Squat",
+       "sets": 2,
+       "target_reps": "2",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Back Squat EMOM",
+       "sets": 5,
+       "target_reps": "10",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "G2 Bike",
+       "sets": 1,
+       "target_reps": "20",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Squat",
+       "sets": 4,
+       "target_reps": "20",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      }
+     ]
+    },
+    {
+     "name": "Shoulders and Core",
+     "exercises": [
+      {
+       "name": "Iso db LPO",
+       "sets": 2,
+       "target_reps": "30s",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "DAC Stretch",
+       "sets": 2,
+       "target_reps": "20",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Overhead Press",
+       "sets": 3,
+       "target_reps": "2",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Push press overhead iso",
+       "sets": 1,
+       "target_reps": "30s",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Rear delt flye",
+       "sets": 2,
+       "target_reps": "8-12",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Barbell shrug (SG)",
+       "sets": 2,
+       "target_reps": "8-12",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Lu Raise",
+       "sets": 6,
+       "target_reps": "100",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Reverse Squat",
+       "sets": 2,
+       "target_reps": "8-12",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Roman Chair",
+       "sets": 3,
+       "target_reps": "8-12",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      }
+     ]
+    },
+    {
+     "name": "Back and Tris",
+     "exercises": [
+      {
+       "name": "Seated overhead extension",
+       "sets": 3,
+       "target_reps": "8-12",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Pullover",
+       "sets": 2,
+       "target_reps": "8-12",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Tricep pushdown",
+       "sets": 2,
+       "target_reps": "8-12",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Single arm cable row",
+       "sets": 2,
+       "target_reps": "8-12",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Amrap pull-ups",
+       "sets": 1,
+       "target_reps": "8-12",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "BW Scullcrusher",
+       "sets": 5,
+       "target_reps": "100",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Palm curls",
+       "sets": 1,
+       "target_reps": "8-12",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Back of hand curls",
+       "sets": 1,
+       "target_reps": "8-12",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      }
+     ]
+    },
+    {
+     "name": "Hams, Glutes, and Groin",
+     "exercises": [
+      {
+       "name": "Reverse Hyperextension",
+       "sets": 2,
+       "target_reps": "30",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Good girl",
+       "sets": 2,
+       "target_reps": "8-12",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Bad girl",
+       "sets": 2,
+       "target_reps": "8-12",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Deadlift",
+       "sets": 2,
+       "target_reps": "2",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Pause Deadlift",
+       "sets": 2,
+       "target_reps": "6",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "45° Hyper",
+       "sets": 5,
+       "target_reps": "20",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Leg Press Calf Raise",
+       "sets": 4,
+       "target_reps": "8-12",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      }
+     ]
+    },
+    {
+     "name": "Chest and Bis",
+     "exercises": [
+      {
+       "name": "Banded ER",
+       "sets": 2,
+       "target_reps": "8-12",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Banded pec squeeze",
+       "sets": 2,
+       "target_reps": "8-12",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Chest Flye",
+       "sets": 3,
+       "target_reps": "8-12",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Incline Bench Press",
+       "sets": 3,
+       "target_reps": "8-12",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Sternal Press",
+       "sets": 2,
+       "target_reps": "8-12",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Defect Pushups",
+       "sets": 5,
+       "target_reps": "8-12",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Single arm preacher curl",
+       "sets": 2,
+       "target_reps": "8-12",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Cable Curl",
+       "sets": 2,
+       "target_reps": "8-12",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      },
+      {
+       "name": "Single arm alternating curl",
+       "sets": 2,
+       "target_reps": "8-12",
+       "percent_1rm": null,
+       "rpe": null,
+       "notes": null
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

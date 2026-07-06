@@ -1,0 +1,969 @@
+{
+  "exercises": [
+    {
+      "name": "Bench Press",
+      "pattern": "HORIZONTAL_PUSH",
+      "equipment": [
+        "BARBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 6,
+      "jointStress": [
+        "shoulder-load"
+      ]
+    },
+    {
+      "name": "Incline Bench Press",
+      "pattern": "HORIZONTAL_PUSH",
+      "equipment": [
+        "BARBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 6,
+      "jointStress": [
+        "shoulder-load"
+      ]
+    },
+    {
+      "name": "Decline Bench Press",
+      "pattern": "HORIZONTAL_PUSH",
+      "equipment": [
+        "BARBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 5,
+      "jointStress": [
+        "shoulder-load"
+      ]
+    },
+    {
+      "name": "Dumbbell Bench Press",
+      "pattern": "HORIZONTAL_PUSH",
+      "equipment": [
+        "DUMBBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 5,
+      "jointStress": [
+        "shoulder-load"
+      ]
+    },
+    {
+      "name": "Incline Dumbbell Press",
+      "pattern": "HORIZONTAL_PUSH",
+      "equipment": [
+        "DUMBBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 5,
+      "jointStress": [
+        "shoulder-load"
+      ]
+    },
+    {
+      "name": "Machine Chest Press",
+      "pattern": "HORIZONTAL_PUSH",
+      "equipment": [
+        "MACHINE"
+      ],
+      "unilateral": false,
+      "difficulty": 3,
+      "jointStress": []
+    },
+    {
+      "name": "Close Grip Bench Press",
+      "pattern": "HORIZONTAL_PUSH",
+      "equipment": [
+        "BARBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 6,
+      "jointStress": [
+        "shoulder-load",
+        "elbow-load"
+      ]
+    },
+    {
+      "name": "Push-up",
+      "pattern": "HORIZONTAL_PUSH",
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "unilateral": false,
+      "difficulty": 4,
+      "jointStress": [
+        "wrist-load"
+      ]
+    },
+    {
+      "name": "Dumbbell Fly",
+      "pattern": "HORIZONTAL_PUSH",
+      "equipment": [
+        "DUMBBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 4,
+      "jointStress": [
+        "shoulder-load"
+      ]
+    },
+    {
+      "name": "Cable Fly",
+      "pattern": "HORIZONTAL_PUSH",
+      "equipment": [
+        "CABLE"
+      ],
+      "unilateral": false,
+      "difficulty": 3,
+      "jointStress": [
+        "shoulder-load"
+      ]
+    },
+    {
+      "name": "Pec Deck",
+      "pattern": "HORIZONTAL_PUSH",
+      "equipment": [
+        "MACHINE"
+      ],
+      "unilateral": false,
+      "difficulty": 2,
+      "jointStress": [
+        "shoulder-load"
+      ]
+    },
+    {
+      "name": "Dip",
+      "pattern": "HORIZONTAL_PUSH",
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "unilateral": false,
+      "difficulty": 6,
+      "jointStress": [
+        "shoulder-load"
+      ]
+    },
+    {
+      "name": "Overhead Press",
+      "pattern": "VERTICAL_PUSH",
+      "equipment": [
+        "BARBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 6,
+      "jointStress": [
+        "overhead",
+        "shoulder-load"
+      ]
+    },
+    {
+      "name": "Arnold Press",
+      "pattern": "VERTICAL_PUSH",
+      "equipment": [
+        "DUMBBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 5,
+      "jointStress": [
+        "overhead",
+        "shoulder-load"
+      ]
+    },
+    {
+      "name": "Lateral Raise",
+      "pattern": "LATERAL_RAISE",
+      "equipment": [
+        "DUMBBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 3,
+      "jointStress": [
+        "shoulder-load"
+      ]
+    },
+    {
+      "name": "Front Raise",
+      "pattern": "FRONT_RAISE",
+      "equipment": [
+        "DUMBBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 3,
+      "jointStress": [
+        "shoulder-load"
+      ]
+    },
+    {
+      "name": "Face Pull",
+      "pattern": "REAR_DELT_RAISE",
+      "equipment": [
+        "CABLE"
+      ],
+      "unilateral": false,
+      "difficulty": 2,
+      "jointStress": []
+    },
+    {
+      "name": "Reverse Fly",
+      "pattern": "REAR_DELT_RAISE",
+      "equipment": [
+        "DUMBBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 3,
+      "jointStress": []
+    },
+    {
+      "name": "Shrug",
+      "pattern": "SHRUG",
+      "equipment": [
+        "BARBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 3,
+      "jointStress": []
+    },
+    {
+      "name": "Upright Row",
+      "pattern": "SHRUG",
+      "equipment": [
+        "BARBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 4,
+      "jointStress": [
+        "shoulder-load"
+      ]
+    },
+    {
+      "name": "Pull-up",
+      "pattern": "VERTICAL_PULL",
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "unilateral": false,
+      "difficulty": 7,
+      "jointStress": [
+        "shoulder-load"
+      ]
+    },
+    {
+      "name": "Chin-up",
+      "pattern": "VERTICAL_PULL",
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "unilateral": false,
+      "difficulty": 6,
+      "jointStress": [
+        "shoulder-load"
+      ]
+    },
+    {
+      "name": "Lat Pulldown",
+      "pattern": "VERTICAL_PULL",
+      "equipment": [
+        "CABLE"
+      ],
+      "unilateral": false,
+      "difficulty": 3,
+      "jointStress": []
+    },
+    {
+      "name": "Barbell Row",
+      "pattern": "HORIZONTAL_PULL",
+      "equipment": [
+        "BARBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 6,
+      "jointStress": [
+        "lumbar-loading"
+      ]
+    },
+    {
+      "name": "Dumbbell Row",
+      "pattern": "HORIZONTAL_PULL",
+      "equipment": [
+        "DUMBBELL"
+      ],
+      "unilateral": true,
+      "difficulty": 4,
+      "jointStress": [
+        "lumbar-loading"
+      ]
+    },
+    {
+      "name": "Cable Row",
+      "pattern": "HORIZONTAL_PULL",
+      "equipment": [
+        "CABLE"
+      ],
+      "unilateral": false,
+      "difficulty": 3,
+      "jointStress": []
+    },
+    {
+      "name": "Machine Row",
+      "pattern": "HORIZONTAL_PULL",
+      "equipment": [
+        "MACHINE"
+      ],
+      "unilateral": false,
+      "difficulty": 3,
+      "jointStress": []
+    },
+    {
+      "name": "T-Bar Row",
+      "pattern": "HORIZONTAL_PULL",
+      "equipment": [
+        "BARBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 5,
+      "jointStress": [
+        "lumbar-loading"
+      ]
+    },
+    {
+      "name": "Chest Supported Row",
+      "pattern": "HORIZONTAL_PULL",
+      "equipment": [
+        "DUMBBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 3,
+      "jointStress": []
+    },
+    {
+      "name": "Barbell Curl",
+      "pattern": "ELBOW_FLEXION",
+      "equipment": [
+        "BARBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 3,
+      "jointStress": [
+        "elbow-load"
+      ]
+    },
+    {
+      "name": "Dumbbell Curl",
+      "pattern": "ELBOW_FLEXION",
+      "equipment": [
+        "DUMBBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 3,
+      "jointStress": [
+        "elbow-load"
+      ]
+    },
+    {
+      "name": "Hammer Curl",
+      "pattern": "ELBOW_FLEXION",
+      "equipment": [
+        "DUMBBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 3,
+      "jointStress": [
+        "elbow-load"
+      ]
+    },
+    {
+      "name": "Preacher Curl",
+      "pattern": "ELBOW_FLEXION",
+      "equipment": [
+        "BARBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 3,
+      "jointStress": [
+        "elbow-load"
+      ]
+    },
+    {
+      "name": "Concentration Curl",
+      "pattern": "ELBOW_FLEXION",
+      "equipment": [
+        "DUMBBELL"
+      ],
+      "unilateral": true,
+      "difficulty": 2,
+      "jointStress": []
+    },
+    {
+      "name": "Cable Curl",
+      "pattern": "ELBOW_FLEXION",
+      "equipment": [
+        "CABLE"
+      ],
+      "unilateral": false,
+      "difficulty": 2,
+      "jointStress": []
+    },
+    {
+      "name": "Incline Curl",
+      "pattern": "ELBOW_FLEXION",
+      "equipment": [
+        "DUMBBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 3,
+      "jointStress": [
+        "elbow-load"
+      ]
+    },
+    {
+      "name": "Skullcrusher",
+      "pattern": "ELBOW_EXTENSION",
+      "equipment": [
+        "BARBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 4,
+      "jointStress": [
+        "elbow-load"
+      ]
+    },
+    {
+      "name": "Tricep Pushdown",
+      "pattern": "ELBOW_EXTENSION",
+      "equipment": [
+        "CABLE"
+      ],
+      "unilateral": false,
+      "difficulty": 2,
+      "jointStress": []
+    },
+    {
+      "name": "Overhead Tricep Extension",
+      "pattern": "ELBOW_EXTENSION",
+      "equipment": [
+        "DUMBBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 3,
+      "jointStress": [
+        "overhead",
+        "elbow-load"
+      ]
+    },
+    {
+      "name": "Tricep Dip",
+      "pattern": "ELBOW_EXTENSION",
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "unilateral": false,
+      "difficulty": 5,
+      "jointStress": [
+        "shoulder-load",
+        "elbow-load"
+      ]
+    },
+    {
+      "name": "Wrist Curl",
+      "pattern": "UNKNOWN",
+      "equipment": [
+        "DUMBBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 1,
+      "jointStress": [
+        "wrist-load"
+      ]
+    },
+    {
+      "name": "Squat",
+      "pattern": "SQUAT",
+      "equipment": [
+        "BARBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 8,
+      "jointStress": [
+        "deep-knee-flexion",
+        "spinal-compression",
+        "lumbar-loading"
+      ]
+    },
+    {
+      "name": "Hack Squat",
+      "pattern": "SQUAT",
+      "equipment": [
+        "MACHINE"
+      ],
+      "unilateral": false,
+      "difficulty": 5,
+      "jointStress": [
+        "deep-knee-flexion"
+      ]
+    },
+    {
+      "name": "Leg Press",
+      "pattern": "SQUAT",
+      "equipment": [
+        "MACHINE"
+      ],
+      "unilateral": false,
+      "difficulty": 4,
+      "jointStress": [
+        "loaded-knee-flexion"
+      ]
+    },
+    {
+      "name": "Goblet Squat",
+      "pattern": "SQUAT",
+      "equipment": [
+        "DUMBBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 4,
+      "jointStress": [
+        "deep-knee-flexion"
+      ]
+    },
+    {
+      "name": "Lunge",
+      "pattern": "LUNGE",
+      "equipment": [
+        "DUMBBELL"
+      ],
+      "unilateral": true,
+      "difficulty": 4,
+      "jointStress": [
+        "deep-knee-flexion"
+      ]
+    },
+    {
+      "name": "Bulgarian Split Squat",
+      "pattern": "LUNGE",
+      "equipment": [
+        "DUMBBELL"
+      ],
+      "unilateral": true,
+      "difficulty": 5,
+      "jointStress": [
+        "deep-knee-flexion"
+      ]
+    },
+    {
+      "name": "Step-up",
+      "pattern": "LUNGE",
+      "equipment": [
+        "DUMBBELL"
+      ],
+      "unilateral": true,
+      "difficulty": 4,
+      "jointStress": []
+    },
+    {
+      "name": "Leg Extension",
+      "pattern": "KNEE_EXTENSION",
+      "equipment": [
+        "MACHINE"
+      ],
+      "unilateral": false,
+      "difficulty": 2,
+      "jointStress": [
+        "loaded-knee-flexion"
+      ]
+    },
+    {
+      "name": "Lying Leg Curl",
+      "pattern": "KNEE_FLEXION",
+      "equipment": [
+        "MACHINE"
+      ],
+      "unilateral": false,
+      "difficulty": 2,
+      "jointStress": []
+    },
+    {
+      "name": "Seated Leg Curl",
+      "pattern": "KNEE_FLEXION",
+      "equipment": [
+        "MACHINE"
+      ],
+      "unilateral": false,
+      "difficulty": 2,
+      "jointStress": []
+    },
+    {
+      "name": "Nordic Curl",
+      "pattern": "KNEE_FLEXION",
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "unilateral": false,
+      "difficulty": 7,
+      "jointStress": []
+    },
+    {
+      "name": "Deadlift",
+      "pattern": "HIP_HINGE",
+      "equipment": [
+        "BARBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 8,
+      "jointStress": [
+        "lumbar-loading",
+        "spinal-compression",
+        "hip-flexion"
+      ]
+    },
+    {
+      "name": "Sumo Deadlift",
+      "pattern": "HIP_HINGE",
+      "equipment": [
+        "BARBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 7,
+      "jointStress": [
+        "lumbar-loading",
+        "hip-flexion"
+      ]
+    },
+    {
+      "name": "Romanian Deadlift",
+      "pattern": "HIP_HINGE",
+      "equipment": [
+        "BARBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 6,
+      "jointStress": [
+        "lumbar-loading",
+        "hip-flexion"
+      ]
+    },
+    {
+      "name": "Hip Thrust",
+      "pattern": "HIP_HINGE",
+      "equipment": [
+        "BARBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 4,
+      "jointStress": []
+    },
+    {
+      "name": "Good Morning",
+      "pattern": "HIP_HINGE",
+      "equipment": [
+        "BARBELL"
+      ],
+      "unilateral": false,
+      "difficulty": 6,
+      "jointStress": [
+        "lumbar-loading",
+        "hip-flexion"
+      ]
+    },
+    {
+      "name": "Back Extension",
+      "pattern": "HIP_HINGE",
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "unilateral": false,
+      "difficulty": 3,
+      "jointStress": [
+        "lumbar-loading"
+      ]
+    },
+    {
+      "name": "Calf Raise",
+      "pattern": "CALF_RAISE",
+      "equipment": [
+        "MACHINE"
+      ],
+      "unilateral": false,
+      "difficulty": 2,
+      "jointStress": []
+    },
+    {
+      "name": "Crunch",
+      "pattern": "CORE_FLEXION",
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "unilateral": false,
+      "difficulty": 2,
+      "jointStress": []
+    },
+    {
+      "name": "Leg Raise",
+      "pattern": "CORE_FLEXION",
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "unilateral": false,
+      "difficulty": 3,
+      "jointStress": []
+    },
+    {
+      "name": "Russian Twist",
+      "pattern": "CORE_ROTATION",
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "unilateral": false,
+      "difficulty": 2,
+      "jointStress": []
+    },
+    {
+      "name": "Plank",
+      "pattern": "CORE_ANTI_EXTENSION",
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "unilateral": false,
+      "difficulty": 2,
+      "jointStress": []
+    },
+    {
+      "name": "Ab Wheel",
+      "pattern": "CORE_ANTI_EXTENSION",
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "unilateral": false,
+      "difficulty": 5,
+      "jointStress": [
+        "lumbar-loading"
+      ]
+    },
+    {
+      "name": "Bodyweight Squat",
+      "pattern": "SQUAT",
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "unilateral": false,
+      "difficulty": 2,
+      "jointStress": [
+        "deep-knee-flexion"
+      ]
+    },
+    {
+      "name": "Pistol Squat",
+      "pattern": "SQUAT",
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "unilateral": true,
+      "difficulty": 7,
+      "jointStress": [
+        "deep-knee-flexion"
+      ]
+    },
+    {
+      "name": "Band Squat",
+      "pattern": "SQUAT",
+      "equipment": [
+        "BANDS"
+      ],
+      "unilateral": false,
+      "difficulty": 3,
+      "jointStress": [
+        "deep-knee-flexion"
+      ]
+    },
+    {
+      "name": "Glute Bridge",
+      "pattern": "HIP_HINGE",
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "unilateral": false,
+      "difficulty": 2,
+      "jointStress": []
+    },
+    {
+      "name": "Single-Leg Glute Bridge",
+      "pattern": "HIP_HINGE",
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "unilateral": true,
+      "difficulty": 4,
+      "jointStress": []
+    },
+    {
+      "name": "Band Good Morning",
+      "pattern": "HIP_HINGE",
+      "equipment": [
+        "BANDS"
+      ],
+      "unilateral": false,
+      "difficulty": 3,
+      "jointStress": [
+        "lumbar-loading"
+      ]
+    },
+    {
+      "name": "Reverse Lunge",
+      "pattern": "LUNGE",
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "unilateral": true,
+      "difficulty": 3,
+      "jointStress": [
+        "deep-knee-flexion"
+      ]
+    },
+    {
+      "name": "Walking Lunge",
+      "pattern": "LUNGE",
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "unilateral": true,
+      "difficulty": 4,
+      "jointStress": [
+        "deep-knee-flexion"
+      ]
+    },
+    {
+      "name": "Pike Push-up",
+      "pattern": "VERTICAL_PUSH",
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "unilateral": false,
+      "difficulty": 5,
+      "jointStress": [
+        "overhead",
+        "shoulder-load"
+      ]
+    },
+    {
+      "name": "Band Overhead Press",
+      "pattern": "VERTICAL_PUSH",
+      "equipment": [
+        "BANDS"
+      ],
+      "unilateral": false,
+      "difficulty": 3,
+      "jointStress": [
+        "overhead",
+        "shoulder-load"
+      ]
+    },
+    {
+      "name": "Inverted Row",
+      "pattern": "HORIZONTAL_PULL",
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "unilateral": false,
+      "difficulty": 4,
+      "jointStress": []
+    },
+    {
+      "name": "Band Row",
+      "pattern": "HORIZONTAL_PULL",
+      "equipment": [
+        "BANDS"
+      ],
+      "unilateral": false,
+      "difficulty": 2,
+      "jointStress": []
+    },
+    {
+      "name": "Band Pulldown",
+      "pattern": "VERTICAL_PULL",
+      "equipment": [
+        "BANDS"
+      ],
+      "unilateral": false,
+      "difficulty": 2,
+      "jointStress": []
+    },
+    {
+      "name": "Band Curl",
+      "pattern": "ELBOW_FLEXION",
+      "equipment": [
+        "BANDS"
+      ],
+      "unilateral": false,
+      "difficulty": 2,
+      "jointStress": [
+        "elbow-load"
+      ]
+    },
+    {
+      "name": "Bench Dip",
+      "pattern": "ELBOW_EXTENSION",
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "unilateral": false,
+      "difficulty": 4,
+      "jointStress": [
+        "shoulder-load",
+        "elbow-load"
+      ]
+    },
+    {
+      "name": "Band Pushdown",
+      "pattern": "ELBOW_EXTENSION",
+      "equipment": [
+        "BANDS"
+      ],
+      "unilateral": false,
+      "difficulty": 2,
+      "jointStress": []
+    },
+    {
+      "name": "Band Lateral Raise",
+      "pattern": "LATERAL_RAISE",
+      "equipment": [
+        "BANDS"
+      ],
+      "unilateral": false,
+      "difficulty": 2,
+      "jointStress": [
+        "shoulder-load"
+      ]
+    },
+    {
+      "name": "Band Pull-Apart",
+      "pattern": "REAR_DELT_RAISE",
+      "equipment": [
+        "BANDS"
+      ],
+      "unilateral": false,
+      "difficulty": 2,
+      "jointStress": []
+    },
+    {
+      "name": "Bodyweight Calf Raise",
+      "pattern": "CALF_RAISE",
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "unilateral": false,
+      "difficulty": 2,
+      "jointStress": []
+    },
+    {
+      "name": "Band Chest Press",
+      "pattern": "HORIZONTAL_PUSH",
+      "equipment": [
+        "BANDS"
+      ],
+      "unilateral": false,
+      "difficulty": 3,
+      "jointStress": [
+        "shoulder-load"
+      ]
+    }
+  ]
+}

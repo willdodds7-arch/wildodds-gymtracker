@@ -1,0 +1,28 @@
+# Build outputs
+build/
+*/build/
+.gradle/
+app/build/
+
+# Local machine config — never shared (SDK path, per-dev overrides)
+local.properties
+
+# IDE
+.idea/
+*.iml
+.DS_Store
+
+# Signing — production keystores must never enter the repo
+*.jks
+*.keystore
+keystore.properties
+
+# Secrets — Supabase/Google keys land in BuildConfig via local.properties or CI secrets, never here
+secrets.properties
+*.env
+
+# Ad-hoc local backups made during editing sessions (git itself is now the backup)
+backups/
+
+# Coding-agent local session/config data — machine-specific, not project source
+.claude/
