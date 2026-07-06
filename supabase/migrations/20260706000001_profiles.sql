@@ -12,15 +12,20 @@ alter table public.profiles enable row level security;
 
 -- Owner-only: a user can only see/change their own profile row. No policy at all = no access,
 -- so each operation (select/insert/update/delete) needs its own explicit policy.
+-- (drop-then-create, since CREATE POLICY has no IF NOT EXISTS — this keeps the script re-runnable.)
+drop policy if exists "profiles_select_own" on public.profiles;
 create policy "profiles_select_own" on public.profiles
   for select using (auth.uid() = id);
 
+drop policy if exists "profiles_insert_own" on public.profiles;
 create policy "profiles_insert_own" on public.profiles
   for insert with check (auth.uid() = id);
 
+drop policy if exists "profiles_update_own" on public.profiles;
 create policy "profiles_update_own" on public.profiles
   for update using (auth.uid() = id) with check (auth.uid() = id);
 
+drop policy if exists "profiles_delete_own" on public.profiles;
 create policy "profiles_delete_own" on public.profiles
   for delete using (auth.uid() = id);
 
