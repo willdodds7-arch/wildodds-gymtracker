@@ -1,0 +1,29 @@
+name: Supabase keep-alive
+
+# Supabase pauses free-tier projects after ~7 days without any API/database activity.
+# A trivial authenticated REST query every 3 days counts as activity and keeps it awake.
+# (The query returns [] — RLS hides all rows from the anon role — but still touches the DB.)
+on:
+  schedule:
+    - cron: "17 3 */3 * *" # every 3 days at 03:17 UTC (odd minute to avoid cron-spike throttling)
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping Supabase REST endpoint
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" \
+            "$SUPABASE_URL/rest/v1/profiles?select=id&limit=1" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY")
+          echo "Supabase responded with HTTP $status"
+          if [ "$status" != "200" ]; then
+            echo "::error::Supabase ping failed (HTTP $status) — project may be paused or keys rotated."
+            exit 1
+          fi
