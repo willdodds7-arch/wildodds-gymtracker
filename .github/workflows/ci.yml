@@ -20,6 +20,18 @@ jobs:
           java-version: 17
           cache: gradle
 
+      # The build's debug signing config points at ~/.android/debug.keystore explicitly, and
+      # with an explicit storeFile AGP validates existence rather than auto-generating it —
+      # fresh runners have never created one. These are the standard, public debug-keystore
+      # values every Android SDK uses; nothing here is a secret.
+      - name: Generate debug keystore
+        run: |
+          mkdir -p ~/.android
+          keytool -genkeypair -keystore ~/.android/debug.keystore \
+            -storepass android -alias androiddebugkey -keypass android \
+            -dname "CN=Android Debug,O=Android,C=US" \
+            -keyalg RSA -keysize 2048 -validity 10000
+
       # No local.properties in CI — app/build.gradle.kts falls back to these env vars.
       # Only the anon (publishable) key is ever exposed here; it's client-side by design,
       # protected by RLS. The service_role key must never appear in CI for app builds.
