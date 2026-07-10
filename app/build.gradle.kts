@@ -33,6 +33,10 @@ android {
         buildConfigField("String", "SUPABASE_URL", "\"${secretOrEnv("supabase.url", "SUPABASE_URL")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${secretOrEnv("supabase.anonKey", "SUPABASE_ANON_KEY")}\"")
 
+        // Google OAuth *Web* client id (not the Android one) for Credential Manager sign-in.
+        // Blank until the Google Cloud OAuth client exists — the Google button hides itself.
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${secretOrEnv("google.webClientId", "GOOGLE_WEB_CLIENT_ID")}\"")
+
         // Only consumed by ProfilesRlsIntegrationTest (a manual, @Ignore'd-by-default live-network
         // test) — never referenced by app code. Blank for anyone who hasn't set up test accounts.
         buildConfigField("String", "RLS_TEST_EMAIL_A", "\"${secretOrEnv("supabase.rlsTestEmailA", "SUPABASE_RLS_TEST_EMAIL_A")}\"")
@@ -182,6 +186,12 @@ dependencies {
     implementation(libs.supabase.postgrest)
     implementation(libs.supabase.functions)
     implementation(libs.ktor.client.okhttp)
+
+    // Google sign-in via Credential Manager (Phase 2) — exchanges the Google ID token with
+    // supabase.auth.signInWith(IDToken). Inert until GOOGLE_WEB_CLIENT_ID is configured.
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services)
+    implementation(libs.googleid)
 
     // ── Local unit tests (src/test) — run on the JVM via Robolectric ──────────────
     testImplementation(libs.junit)

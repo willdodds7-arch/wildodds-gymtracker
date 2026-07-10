@@ -60,8 +60,33 @@ Rules for every new table (non-negotiable, from the v2 spec):
 - Rate limit for sign-ups/sign-ins: raised 30 → 100 per 5 min per IP.
 - Test users (auto-confirmed, created via Auth → Users → Add user): `backupdodds2@gmail.com`,
   `lemon.rust6@gmail.com`, `willdoddsu@gmail.com`. Throwaway; delete before launch.
-- Google sign-in: **not configured yet** (Phase 2 — needs a Google Cloud OAuth client; steps
-  will be documented here when built).
+- Google sign-in: code path is built (Credential Manager → `auth.signInWith(IDToken)`), but the
+  button hides itself until `GOOGLE_WEB_CLIENT_ID` is configured — see setup steps below.
+- Deep links: the app registers `wildodds://auth` for password-reset/confirmation links.
+  **Manual step:** dashboard → Authentication → URL Configuration → add `wildodds://auth` to
+  the Redirect URLs allow-list, or reset links will fall back to the Site URL.
+
+## Google sign-in setup (manual, one-time — Phase 2)
+
+The app needs a Google Cloud **Web** OAuth client (its ID is what Supabase validates ID tokens
+against) plus an **Android** OAuth client (ties your package + signing key to that consent
+screen). Steps:
+
+1. Go to https://console.cloud.google.com → create a project (e.g. "Wild Odds Gym Tracker").
+2. **APIs & Services → OAuth consent screen**: External; app name, your email; scopes: just the
+   default (email/profile); add yourself as a test user while in testing mode.
+3. **APIs & Services → Credentials → Create credentials → OAuth client ID**:
+   - Type **Web application**, name "Supabase Auth". No redirect URI needed for the
+     Credential Manager flow. Copy its **Client ID** (`…apps.googleusercontent.com`).
+   - Again: type **Android**, package name `com.wildodds.gymtracker.offline`, SHA-1 from
+     `keytool -list -v -keystore %USERPROFILE%\.android\debug.keystore -alias androiddebugkey -storepass android`
+     (repeat later with the production upload keystore's SHA-1 — Google sign-in silently fails
+     on builds signed with a key whose SHA-1 isn't registered).
+4. Supabase dashboard → Authentication → Sign In / Providers → **Google**: enable, paste the
+   **Web** client ID (and its secret). Also add the Web client ID under "Authorized Client IDs"
+   if that field is present (needed for ID-token flows).
+5. `local.properties`: `google.webClientId=<the WEB client id>` — the Google button appears on
+   the next build. CI equivalent env var: `GOOGLE_WEB_CLIENT_ID`.
 
 ## CI (GitHub Actions)
 

@@ -133,6 +133,24 @@ fun SettingsScreen(
   val expandedState   = remember { mutableStateMapOf<String, Boolean>() }
   var showClearDialog by remember { mutableStateOf(false) }
 
+  // Account (Phase 2)
+  val analyticsConsent by vm.analyticsConsent.collectAsStateWithLifecycle()
+  var showSignOutDialog by remember { mutableStateOf(false) }
+  if (showSignOutDialog) {
+  AlertDialog(
+  onDismissRequest = { showSignOutDialog = false },
+  title  = { Text("Sign out?") },
+  text  = { Text("You'll be signed out on this device. Your training data stays on the phone, and everything already synced stays in your account.") },
+  confirmButton = {
+  TextButton(
+  onClick = { showSignOutDialog = false; vm.signOut() },
+  colors  = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+  ) { Text("Sign out") }
+  },
+  dismissButton = { TextButton(onClick = { showSignOutDialog = false }) { Text("Cancel") } }
+  )
+  }
+
   if (showClearDialog) {
   AlertDialog(
   onDismissRequest = { showClearDialog = false },
@@ -213,7 +231,8 @@ fun SettingsScreen(
   summary  = entry.summary,
   checked  = toggleStates[entry.key] ?: entry.default,
   accent   = accent,
-  onToggle = { vm.setFlag(entry.key, it) }
+  onToggle = { vm.setFlag(entry.key, it) },
+  testTag  = "toggle_${entry.key}"
   )
   SettingControl.ACCENT -> AccentSection(
   hue = accentHue, sat = accentSat, accent = accent,
@@ -263,6 +282,23 @@ fun SettingsScreen(
   SettingControl.REMINDER_SETTINGS -> ActionRow(
   title = entry.title, summary = entry.summary,
   tint = accent, onClick = { showReminderSheet = true }
+  )
+  SettingControl.ACCOUNT -> ActionRow(
+  title = entry.title,
+  summary = vm.signedInEmail?.let { "Signed in as $it" } ?: entry.summary,
+  tint = accent, onClick = { /* account management lands in Phase 5 */ }
+  )
+  SettingControl.SHARE_USAGE_STATS -> ToggleRow(
+  title    = entry.title,
+  summary  = entry.summary,
+  checked  = analyticsConsent == "granted",
+  accent   = accent,
+  onToggle = { vm.setAnalyticsConsent(it) },
+  testTag  = "toggle_${entry.key}"
+  )
+  SettingControl.SIGN_OUT -> ActionRow(
+  title = entry.title, summary = entry.summary,
+  tint = MaterialTheme.colorScheme.error, onClick = { showSignOutDialog = true }
   )
   }
   }
@@ -335,7 +371,7 @@ private fun GroupHeader(title: String, expanded: Boolean, collapsible: Boolean, 
 // ── Rows ─────────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun ToggleRow(title: String, summary: String, checked: Boolean, accent: Color, onToggle: (Boolean) -> Unit) {
+private fun ToggleRow(title: String, summary: String, checked: Boolean, accent: Color, onToggle: (Boolean) -> Unit, testTag: String = "") {
   Row(
   modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
   horizontalArrangement = Arrangement.SpaceBetween,
@@ -350,6 +386,7 @@ private fun ToggleRow(title: String, summary: String, checked: Boolean, accent: 
   Switch(
   checked = checked,
   onCheckedChange = onToggle,
+  modifier = if (testTag.isEmpty()) Modifier else Modifier.testTag(testTag),
   colors = SwitchDefaults.colors(
   checkedThumbColor = accent,
   checkedTrackColor = accent.copy(0.4f))

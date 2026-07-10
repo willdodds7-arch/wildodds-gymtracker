@@ -7,7 +7,7 @@ package com.wildodds.gymtracker.ui.settings
  */
 enum class SettingControl {
   TOGGLE, ACCENT, TIMER_SOUND, API_KEY, CLEAR_DATA, DOWNLOAD_TEMPLATE, WEARABLE_CONNECT,
-  PRIVACY_POLICY, EXPORT_DATA, REMINDER_SETTINGS, HABITS
+  PRIVACY_POLICY, EXPORT_DATA, REMINDER_SETTINGS, HABITS, ACCOUNT, SIGN_OUT, SHARE_USAGE_STATS
 }
 
 /**
@@ -36,7 +36,12 @@ object SettingsRegistry {
 
   /** Preferred display order; groups not listed here are appended in first-seen order. */
   val groupOrder: List<String> =
-  listOf("Appearance", "Session", "Wearables", "Tools", "Display", "AI Import", "Data")
+  listOf("Account", "Appearance", "Session", "Wearables", "Tools", "Display", "AI Import", "Data")
+
+  // Phase 2 (online-first) — account controls.
+  const val ACCOUNT = "action_account"
+  const val SIGN_OUT = "action_sign_out"
+  const val SHARE_USAGE_STATS = "action_share_usage_stats"
 
   /** Flag key for the session exit-confirmation guard (a safety feature, default ON). */
   const val SESSION_EXIT_GUARD = "feat_session_exit_guard"
@@ -94,6 +99,26 @@ object SettingsRegistry {
   const val ON_DEMAND_LIBRARY = "feat_ondemand_library"
 
   private val _entries: MutableList<SettingsEntry> = mutableListOf(
+  SettingsEntry(
+  key = ACCOUNT, title = "Account",
+  summary = "The account this app is signed in to", group = "Account",
+  keywords = listOf("account", "email", "profile", "login", "signed in", "user"),
+  control = SettingControl.ACCOUNT
+  ),
+  SettingsEntry(
+  key = SHARE_USAGE_STATS, title = "Share usage statistics",
+  summary = "Send anonymous feature-usage events (which screens get used — never workout data, names or location). Off keeps everything local.",
+  group = "Account",
+  keywords = listOf("analytics", "usage", "statistics", "diagnostics", "telemetry", "consent", "privacy", "tracking", "opt out"),
+  control = SettingControl.SHARE_USAGE_STATS
+  ),
+  SettingsEntry(
+  key = SIGN_OUT, title = "Sign out",
+  summary = "Sign out of your account on this device — your local training data stays",
+  group = "Account",
+  keywords = listOf("sign out", "log out", "logout", "signout", "account", "switch"),
+  control = SettingControl.SIGN_OUT
+  ),
   SettingsEntry(
   key = "dark_mode", title = "Dark Mode",
   summary = "Use a dark colour theme", group = "Appearance",

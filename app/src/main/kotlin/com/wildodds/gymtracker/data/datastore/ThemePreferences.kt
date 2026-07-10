@@ -31,6 +31,13 @@ class ThemePreferences(private val context: Context) {
   private val ONE_RM_BENCH_KEY           = floatPreferencesKey("one_rm_bench")
   private val ONE_RM_DEADLIFT_KEY        = floatPreferencesKey("one_rm_deadlift")
   private val ONE_RM_OHP_KEY             = floatPreferencesKey("one_rm_ohp")
+  // ── Onboarding / account (Phase 2, online-first) ─────────────────────────────
+  private val AGE_GATE_PASSED_KEY        = booleanPreferencesKey("age_gate_passed")
+  private val AGE_GATE_BLOCKED_KEY       = booleanPreferencesKey("age_gate_blocked")
+  private val ONBOARDING_COMPLETE_KEY    = booleanPreferencesKey("onboarding_complete")
+  // "unset" | "granted" | "denied" — pre-consent ("unset") is treated exactly like "denied"
+  // by the analytics layer (events dropped entirely), per Rule 4.
+  private val ANALYTICS_CONSENT_KEY      = stringPreferencesKey("analytics_consent")
 
   val isDarkMode: Flow<Boolean> = context.dataStore.data.map { prefs ->
   prefs[DARK_MODE_KEY] ?: false
@@ -48,6 +55,12 @@ class ThemePreferences(private val context: Context) {
   val feat1rmCalculator: Flow<Boolean>       = context.dataStore.data.map { it[FEAT_1RM_CALC_KEY]        ?: true }
   // "none" | "ding" | "ronnie"
   val timerSound: Flow<String>               = context.dataStore.data.map { it[TIMER_SOUND_KEY]          ?: "ding" }
+  // Onboarding / account (Phase 2). Only pass/fail booleans are stored — never the birth date
+  // itself (data minimisation: the age gate runs before ANY data collection).
+  val ageGatePassed: Flow<Boolean>           = context.dataStore.data.map { it[AGE_GATE_PASSED_KEY]       ?: false }
+  val ageGateBlocked: Flow<Boolean>          = context.dataStore.data.map { it[AGE_GATE_BLOCKED_KEY]      ?: false }
+  val onboardingComplete: Flow<Boolean>      = context.dataStore.data.map { it[ONBOARDING_COMPLETE_KEY]   ?: false }
+  val analyticsConsent: Flow<String>         = context.dataStore.data.map { it[ANALYTICS_CONSENT_KEY]     ?: "unset" }
   // Manually-entered 1RMs (kg). 0f = not set yet.
   val oneRmSquat: Flow<Float>                = context.dataStore.data.map { it[ONE_RM_SQUAT_KEY]          ?: 0f }
   val oneRmBench: Flow<Float>                = context.dataStore.data.map { it[ONE_RM_BENCH_KEY]          ?: 0f }
@@ -75,6 +88,10 @@ class ThemePreferences(private val context: Context) {
   suspend fun setFeatProgressionPicker(v: Boolean) { context.dataStore.edit { it[FEAT_PROGRESSION_KEY]    = v } }
   suspend fun setFeat1rmCalculator(v: Boolean)     { context.dataStore.edit { it[FEAT_1RM_CALC_KEY]        = v } }
   suspend fun setTimerSound(v: String)             { context.dataStore.edit { it[TIMER_SOUND_KEY]          = v } }
+  suspend fun setAgeGatePassed(v: Boolean)         { context.dataStore.edit { it[AGE_GATE_PASSED_KEY]      = v } }
+  suspend fun setAgeGateBlocked(v: Boolean)        { context.dataStore.edit { it[AGE_GATE_BLOCKED_KEY]     = v } }
+  suspend fun setOnboardingComplete(v: Boolean)    { context.dataStore.edit { it[ONBOARDING_COMPLETE_KEY]  = v } }
+  suspend fun setAnalyticsConsent(v: String)       { context.dataStore.edit { it[ANALYTICS_CONSENT_KEY]    = v } }
   suspend fun setOneRm(lift: com.wildodds.gymtracker.data.profile.MainLift, kg: Float) {
   context.dataStore.edit {
   it[when (lift) {

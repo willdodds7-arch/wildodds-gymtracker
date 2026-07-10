@@ -73,6 +73,31 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
   viewModelScope.launch { prefs.setFlag(key, value) }
   }
 
+  // ── Account (Phase 2, online-first) ──────────────────────────────────────────
+  // Lazy + guarded: constructing AuthRepository builds the Supabase client, whose Auth plugin
+  // needs device session storage that JVM/Robolectric tests don't have. Guarding keeps every
+  // Settings test (and any exotic runtime failure) rendering the screen instead of crashing.
+  private val authRepo by lazy { com.wildodds.gymtracker.data.backend.AuthRepository() }
+
+  val signedInEmail: String? get() = runCatching { authRepo.currentUserEmail }.getOrNull()
+
+  /** "unset" | "granted" | "denied" — the Settings toggle shows granted as ON, anything else OFF. */
+  val analyticsConsent: StateFlow<String> = prefs.analyticsConsent
+  .stateIn(viewModelScope, SharingStarted.Eagerly, "unset")
+
+  fun setAnalyticsConsent(granted: Boolean) {
+  viewModelScope.launch { prefs.setAnalyticsConsent(if (granted) "granted" else "denied") }
+  }
+
+  /** Signs out on this device only; local Room data is untouched. Onboarding (consent/username)
+   *  re-runs on the next sign-in. */
+  fun signOut() {
+  viewModelScope.launch(Dispatchers.IO) {
+  runCatching { authRepo.signOut() }
+  prefs.setOnboardingComplete(false)
+  }
+  }
+
   fun toggleDarkMode() {
   viewModelScope.launch { prefs.setDarkMode(!isDarkMode.value) }
   }

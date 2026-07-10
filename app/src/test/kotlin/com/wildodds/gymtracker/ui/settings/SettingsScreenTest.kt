@@ -4,11 +4,13 @@ import android.app.Application
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
-import androidx.compose.ui.test.isToggleable
+import androidx.compose.ui.test.hasScrollAction
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.test.core.app.ApplicationProvider
 import org.junit.Rule
 import org.junit.Test
@@ -21,9 +23,9 @@ import org.robolectric.annotation.GraphicsMode
  * flipping it updates the control. Runs the real [SettingsViewModel] (DataStore-backed) so
  * the toggle round-trips through persistence exactly as it does in the app.
  *
- * Dark Mode is the first toggle on the screen, so we select the first toggleable node — the
- * screen's scrollable Column flattens the semantics tree, so a label-relative matcher would
- * ambiguously match every switch.
+ * Toggle switches carry a "toggle_<flagKey>" testTag (labels and switches are separate nodes in
+ * the flattened semantics tree, so a label-relative matcher can't reach the switch). The list
+ * is lazy and the Account group now precedes Appearance, so scroll to the row first.
  */
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -41,19 +43,18 @@ class SettingsScreenTest {
   MaterialTheme { SettingsScreen(vm = vm) }
   }
 
-  // The screen and its Dark Mode label render.
   compose.onNodeWithText("Settings").assertExists()
+
+  compose.onNode(hasScrollAction()).performScrollToNode(hasTestTag("toggle_dark_mode"))
   compose.onNodeWithText("Dark Mode").assertExists()
 
-  // Dark Mode is the first toggle and defaults off.
-  compose.onAllNodes(isToggleable()).onFirst().assertIsOff()
-
-  compose.onAllNodes(isToggleable()).onFirst().performClick()
+  compose.onNodeWithTag("toggle_dark_mode").assertIsOff()
+  compose.onNodeWithTag("toggle_dark_mode").performClick()
 
   // The flip round-trips through DataStore → StateFlow → recomposition; wait for it.
   compose.waitUntil(timeoutMillis = 5_000) {
-  runCatching { compose.onAllNodes(isToggleable()).onFirst().assertIsOn() }.isSuccess
+  runCatching { compose.onNodeWithTag("toggle_dark_mode").assertIsOn() }.isSuccess
   }
-  compose.onAllNodes(isToggleable()).onFirst().assertIsOn()
+  compose.onNodeWithTag("toggle_dark_mode").assertIsOn()
   }
 }
