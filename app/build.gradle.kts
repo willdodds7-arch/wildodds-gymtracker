@@ -32,6 +32,13 @@ android {
 
         buildConfigField("String", "SUPABASE_URL", "\"${secretOrEnv("supabase.url", "SUPABASE_URL")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${secretOrEnv("supabase.anonKey", "SUPABASE_ANON_KEY")}\"")
+
+        // Only consumed by ProfilesRlsIntegrationTest (a manual, @Ignore'd-by-default live-network
+        // test) — never referenced by app code. Blank for anyone who hasn't set up test accounts.
+        buildConfigField("String", "RLS_TEST_EMAIL_A", "\"${secretOrEnv("supabase.rlsTestEmailA", "SUPABASE_RLS_TEST_EMAIL_A")}\"")
+        buildConfigField("String", "RLS_TEST_PASSWORD_A", "\"${secretOrEnv("supabase.rlsTestPasswordA", "SUPABASE_RLS_TEST_PASSWORD_A")}\"")
+        buildConfigField("String", "RLS_TEST_EMAIL_B", "\"${secretOrEnv("supabase.rlsTestEmailB", "SUPABASE_RLS_TEST_EMAIL_B")}\"")
+        buildConfigField("String", "RLS_TEST_PASSWORD_B", "\"${secretOrEnv("supabase.rlsTestPasswordB", "SUPABASE_RLS_TEST_PASSWORD_B")}\"")
     }
 
     signingConfigs {
