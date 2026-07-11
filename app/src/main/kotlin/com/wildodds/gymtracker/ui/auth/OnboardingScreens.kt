@@ -351,7 +351,16 @@ fun PostAuthSetupFlow(actions: AuthActions) {
         }
       )
     }
-    composable("username") { UsernameScreen(actions) }
+    composable("username") {
+      UsernameScreen(
+        actions,
+        onContinue = { username ->
+          actions.beginFirstBackup(username)
+          navController.navigate("backup") { popUpTo("username") { inclusive = true } }
+        }
+      )
+    }
+    composable("backup") { FirstBackupScreen(onDone = { actions.finishOnboarding(null) }) }
   }
 }
 
@@ -393,7 +402,7 @@ private fun ConsentScreen(onChoice: (Boolean) -> Unit) {
 }
 
 @Composable
-private fun UsernameScreen(actions: AuthActions) {
+private fun UsernameScreen(actions: AuthActions, onContinue: (String?) -> Unit) {
   val accent = LocalAccentColor.current
   var username by remember { mutableStateOf("") }
   OnboardingScaffold {
@@ -413,14 +422,59 @@ private fun UsernameScreen(actions: AuthActions) {
     )
     Spacer(Modifier.height(24.dp))
     Button(
-      onClick = { actions.finishOnboarding(username) },
+      onClick = { onContinue(username) },
       enabled = username.isNotBlank(),
       modifier = Modifier.fillMaxWidth().height(52.dp).testTag("username_save"),
       shape = RoundedCornerShape(12.dp),
       colors = ButtonDefaults.buttonColors(containerColor = accent)
-    ) { Text("Save & start training", fontWeight = FontWeight.Bold) }
-    TextButton(onClick = { actions.finishOnboarding(null) }, modifier = Modifier.testTag("username_skip")) {
+    ) { Text("Save & continue", fontWeight = FontWeight.Bold) }
+    TextButton(onClick = { onContinue(null) }, modifier = Modifier.testTag("username_skip")) {
       Text("Skip for now", color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+    Spacer(Modifier.height(40.dp))
+  }
+}
+
+/**
+ * First-login claim (Phase 3): existing local training data uploads to the new account while
+ * the user watches — or they continue immediately and it finishes in the background (Rule 1:
+ * nothing about sync ever blocks the user).
+ */
+@Composable
+private fun FirstBackupScreen(onDone: () -> Unit) {
+  val accent = LocalAccentColor.current
+  val sync by com.wildodds.gymtracker.data.sync.SyncStatus.state.collectAsState()
+  OnboardingScaffold {
+    Spacer(Modifier.height(120.dp))
+    Text("Backing up your training", fontWeight = FontWeight.Bold, fontSize = 24.sp,
+      color = MaterialTheme.colorScheme.onBackground, textAlign = TextAlign.Center,
+      modifier = Modifier.testTag("backup_title"))
+    Spacer(Modifier.height(12.dp))
+    Text(
+      when (sync.phase) {
+        com.wildodds.gymtracker.data.sync.SyncPhase.OK -> "All your programs and logs are safely in your account."
+        com.wildodds.gymtracker.data.sync.SyncPhase.FAILED -> "Couldn't finish just now — it'll retry automatically in the background."
+        else -> "Uploading your existing programs and workout history to your account…"
+      },
+      style = MaterialTheme.typography.bodyMedium,
+      color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center
+    )
+    Spacer(Modifier.height(32.dp))
+    if (sync.phase == com.wildodds.gymtracker.data.sync.SyncPhase.RUNNING) {
+      CircularProgressIndicator(color = accent)
+      Spacer(Modifier.height(32.dp))
+    }
+    Button(
+      onClick = onDone,
+      modifier = Modifier.fillMaxWidth().height(52.dp).testTag("backup_continue"),
+      shape = RoundedCornerShape(12.dp),
+      colors = ButtonDefaults.buttonColors(containerColor = accent)
+    ) {
+      Text(
+        if (sync.phase == com.wildodds.gymtracker.data.sync.SyncPhase.OK) "Start training"
+        else "Continue — finish in background",
+        fontWeight = FontWeight.Bold
+      )
     }
     Spacer(Modifier.height(40.dp))
   }

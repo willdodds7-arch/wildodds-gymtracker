@@ -39,7 +39,29 @@ class MigrationTest {
   seedVersion1Database()
 
   // 2. Run every migration in order and validate the final schema against the latest schema JSON.
-  helper.runMigrationsAndValidate(TEST_DB, 20, true, *AppDatabase.ALL_MIGRATIONS).close()
+  helper.runMigrationsAndValidate(TEST_DB, 21, true, *AppDatabase.ALL_MIGRATIONS).close()
+  }
+
+  /** v20→v21 backfills sync metadata: every pre-existing row must get a unique, non-blank syncId. */
+  @Test
+  fun migration20To21BackfillsSyncIds() {
+  seedVersion1Database()
+  val upToV20 = AppDatabase.ALL_MIGRATIONS.filter { it.startVersion in 1 until 20 }.toTypedArray()
+  val db = helper.runMigrationsAndValidate(TEST_DB, 20, true, *upToV20)
+  db.execSQL("INSERT INTO programs (name, totalWeeks, createdAt) VALUES ('A', 4, 1)")
+  db.execSQL("INSERT INTO programs (name, totalWeeks, createdAt) VALUES ('B', 4, 2)")
+  db.close()
+
+  val migration20to21 = AppDatabase.ALL_MIGRATIONS.first { it.startVersion == 20 }
+  val migrated = helper.runMigrationsAndValidate(TEST_DB, 21, true, migration20to21)
+  val cursor = migrated.query(
+  "SELECT COUNT(*), COUNT(DISTINCT syncId) FROM programs WHERE syncId != '' AND updatedAt > 0"
+  )
+  cursor.moveToFirst()
+  assertEquals(2, cursor.getInt(0))
+  assertEquals(2, cursor.getInt(1)) // distinct — no two rows share a syncId
+  cursor.close()
+  migrated.close()
   }
 
   /**

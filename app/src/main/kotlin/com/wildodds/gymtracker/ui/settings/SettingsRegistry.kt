@@ -7,7 +7,8 @@ package com.wildodds.gymtracker.ui.settings
  */
 enum class SettingControl {
   TOGGLE, ACCENT, TIMER_SOUND, API_KEY, CLEAR_DATA, DOWNLOAD_TEMPLATE, WEARABLE_CONNECT,
-  PRIVACY_POLICY, EXPORT_DATA, REMINDER_SETTINGS, HABITS, ACCOUNT, SIGN_OUT, SHARE_USAGE_STATS
+  PRIVACY_POLICY, EXPORT_DATA, REMINDER_SETTINGS, HABITS, ACCOUNT, SIGN_OUT, SHARE_USAGE_STATS,
+  SYNC_NOW
 }
 
 /**
@@ -42,6 +43,10 @@ object SettingsRegistry {
   const val ACCOUNT = "action_account"
   const val SIGN_OUT = "action_sign_out"
   const val SHARE_USAGE_STATS = "action_share_usage_stats"
+
+  // Phase 3 (online-first) — sync controls.
+  const val SYNC_NOW = "action_sync_now"
+  const val SYNC_WIFI_ONLY = "feat_sync_wifi_only"
 
   /** Flag key for the session exit-confirmation guard (a safety feature, default ON). */
   const val SESSION_EXIT_GUARD = "feat_session_exit_guard"
@@ -111,6 +116,20 @@ object SettingsRegistry {
   group = "Account",
   keywords = listOf("analytics", "usage", "statistics", "diagnostics", "telemetry", "consent", "privacy", "tracking", "opt out"),
   control = SettingControl.SHARE_USAGE_STATS
+  ),
+  SettingsEntry(
+  key = SYNC_NOW, title = "Sync now",
+  summary = "Back up and reconcile your training data with your account",
+  group = "Account",
+  keywords = listOf("sync", "backup", "upload", "cloud", "reconcile", "refresh", "last synced"),
+  control = SettingControl.SYNC_NOW
+  ),
+  SettingsEntry(
+  key = SYNC_WIFI_ONLY, title = "Sync over Wi-Fi only",
+  summary = "Skip background sync on mobile data",
+  group = "Account",
+  keywords = listOf("wifi", "wi-fi", "sync", "data", "mobile", "metered", "cellular"),
+  default = false
   ),
   SettingsEntry(
   key = SIGN_OUT, title = "Sign out",

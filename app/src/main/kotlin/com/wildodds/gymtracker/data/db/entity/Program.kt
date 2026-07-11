@@ -1,5 +1,6 @@
 ﻿package com.wildodds.gymtracker.data.db.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -32,5 +33,11 @@ data class Program(
   // dead column) rather than dropped — SQLite's ALTER TABLE DROP COLUMN needs SQLite 3.35+
   // (~Android 12L), newer than this app's minSdk 26 devices can guarantee. See AppDatabase
   // MIGRATION_19_20.
-  val isRunning: Boolean = false
+  val isRunning: Boolean = false,
+  // ── Sync metadata (Phase 3, online-first) ────────────────────────────────────
+  // syncId: globally-unique row identity across devices ('' until the insert trigger fills it).
+  // updatedAt: last local modification (epoch ms), maintained by SQLite triggers — the
+  // last-write-wins key for sync. See SyncTriggers + MIGRATION_20_21.
+  @ColumnInfo(defaultValue = "") val syncId: String = "",
+  @ColumnInfo(defaultValue = "0") val updatedAt: Long = 0
 )

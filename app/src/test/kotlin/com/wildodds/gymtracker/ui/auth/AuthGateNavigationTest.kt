@@ -49,6 +49,7 @@ class AuthGateNavigationTest {
     override fun clearError() {}
     override fun setAnalyticsConsent(granted: Boolean) {}
     override fun finishOnboarding(username: String?) {}
+    override fun beginFirstBackup(username: String?) {}
   }
 
   private fun setGate(actions: AuthActions) {

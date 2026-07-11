@@ -1,5 +1,6 @@
 ﻿package com.wildodds.gymtracker.data.db.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -34,5 +35,11 @@ data class SessionCompletion(
   val peakHeartRate: Int? = null,
   val hrSeries: String? = null,         // compact JSON, e.g. "[72,80,95]"
   // Phase 3F — final in-session fatigue score (0..100) for later trend use.
-  val fatigueScore: Int? = null
+  val fatigueScore: Int? = null,
+  // ── Sync metadata (Phase 3, online-first) ────────────────────────────────────
+  // syncId: globally-unique row identity across devices ('' until the insert trigger fills it).
+  // updatedAt: last local modification (epoch ms), maintained by SQLite triggers — the
+  // last-write-wins key for sync. See SyncTriggers + MIGRATION_20_21.
+  @ColumnInfo(defaultValue = "") val syncId: String = "",
+  @ColumnInfo(defaultValue = "0") val updatedAt: Long = 0
 )

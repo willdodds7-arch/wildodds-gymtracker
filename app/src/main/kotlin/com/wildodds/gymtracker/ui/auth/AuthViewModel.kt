@@ -89,6 +89,21 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), AuthActions {
     }
   }
 
+  override fun beginFirstBackup(username: String?) {
+    viewModelScope.launch(Dispatchers.IO) {
+      if (!username.isNullOrBlank()) repo.setUsername(username.trim())
+      // Run the first sync directly (not via WorkManager) so the backup screen sees SyncStatus
+      // move RUNNING → OK/FAILED promptly; failures are fine — periodic sync retries later.
+      runCatching {
+        com.wildodds.gymtracker.data.sync.SyncEngine(
+          db = com.wildodds.gymtracker.data.db.AppDatabase.getInstance(getApplication()),
+          backend = com.wildodds.gymtracker.data.sync.SupabaseSyncBackend(),
+          cursors = com.wildodds.gymtracker.data.sync.PrefsSyncCursorStore(getApplication())
+        ).syncNow()
+      }
+    }
+  }
+
   fun signOut() {
     viewModelScope.launch(Dispatchers.IO) {
       repo.signOut()

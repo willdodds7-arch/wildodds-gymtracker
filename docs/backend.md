@@ -88,6 +88,39 @@ screen). Steps:
 5. `local.properties`: `google.webClientId=<the WEB client id>` — the Google button appears on
    the next build. CI equivalent env var: `GOOGLE_WEB_CLIENT_ID`.
 
+## Sync (Phase 3)
+
+Offline-first: Room is the source of truth; the server reconciles when online. Design:
+
+- **Change tracking is done by SQLite triggers** (`SyncTriggers`, installed from AppDatabase's
+  onOpen): inserts get a random `syncId` + `updatedAt = now(ms)`, updates bump `updatedAt`
+  (unless the write set it itself — that's how pull-apply preserves remote timestamps), deletes
+  write a `sync_tombstones` row. No repository write path knows sync exists.
+- **Server storage is ONE generic table** (`sync_rows`: user_id, entity_type, sync_id,
+  updated_at, deleted_at, payload jsonb, seq) rather than seven typed mirrors — the server never
+  queries inside payloads, additive Room migrations need no server migration, and there's one
+  RLS surface. Parent references inside payloads are the parent's syncId, remapped to local ids
+  on apply.
+- **Push-then-pull, batched (500), last-write-wins on `updatedAt`.** Push goes through the
+  `sync_push` RPC, which upserts conditionally (only strictly-newer rows replace stored ones) —
+  so a device can never clobber a newer edit from another device. Pull walks the monotonic
+  `seq` cursor and applies parent→child, skipping anything locally newer.
+- **Accepted LWW trade-offs** (single-user personal app): client clock skew can pick the
+  "wrong" winner between near-simultaneous edits; an update newer than a delete resurrects the
+  row. Timestamps are true milliseconds (`julianday`-based — `strftime('%s')` is whole seconds,
+  which made same-second edit+delete tie and drop the delete; caught by the convergence tests).
+- **Scheduling:** WorkManager — periodic 6h + one-shot on app open + Settings "Sync now"
+  (with "Last synced …" status) + the first-login backup screen. "Sync over Wi-Fi only"
+  toggle (default off). Signed-out or veto'd runs are silent no-ops, never errors.
+- **Synced entity types** (only these seven — running/tracking data was removed in Phase 0 and
+  is excluded by construction): programs, program_phases, sessions, exercises, workout_logs,
+  set_logs, session_completions. Habits/templates/achievements stay local for now; adding one
+  later = payload codec + SyncDao queries + the same table, no server change.
+- **Tests:** two-device convergence, airplane-mode-then-sync, LWW conflict on both devices,
+  tombstone propagation with cascade, echo suppression — all against two real Room DBs with the
+  production triggers and a fake transport implementing sync_push's exact semantics
+  (`SyncEngineTest`). Cross-user RLS for sync_rows: `SyncRlsIntegrationTest` (live, @Ignore'd).
+
 ## CI (GitHub Actions)
 
 - `.github/workflows/ci.yml` — build + full unit-test suite on every push/PR to `main`.

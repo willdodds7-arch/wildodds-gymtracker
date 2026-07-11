@@ -133,8 +133,9 @@ fun SettingsScreen(
   val expandedState   = remember { mutableStateMapOf<String, Boolean>() }
   var showClearDialog by remember { mutableStateOf(false) }
 
-  // Account (Phase 2)
+  // Account (Phase 2) + sync (Phase 3)
   val analyticsConsent by vm.analyticsConsent.collectAsStateWithLifecycle()
+  val syncState by vm.syncState.collectAsStateWithLifecycle()
   var showSignOutDialog by remember { mutableStateOf(false) }
   if (showSignOutDialog) {
   AlertDialog(
@@ -295,6 +296,20 @@ fun SettingsScreen(
   accent   = accent,
   onToggle = { vm.setAnalyticsConsent(it) },
   testTag  = "toggle_${entry.key}"
+  )
+  SettingControl.SYNC_NOW -> ActionRow(
+  title = when (syncState.phase) {
+  com.wildodds.gymtracker.data.sync.SyncPhase.RUNNING -> "Syncing…"
+  else -> entry.title
+  },
+  summary = when {
+  syncState.phase == com.wildodds.gymtracker.data.sync.SyncPhase.FAILED ->
+  "Last attempt failed — tap to retry"
+  syncState.lastSyncAt > 0L ->
+  "Last synced ${android.text.format.DateUtils.getRelativeTimeSpanString(syncState.lastSyncAt)}"
+  else -> "Never synced yet"
+  },
+  tint = accent, onClick = { vm.syncNow() }
   )
   SettingControl.SIGN_OUT -> ActionRow(
   title = entry.title, summary = entry.summary,

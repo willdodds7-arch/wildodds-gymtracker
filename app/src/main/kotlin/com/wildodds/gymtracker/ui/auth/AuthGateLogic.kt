@@ -67,4 +67,8 @@ interface AuthActions {
   fun clearError()
   fun setAnalyticsConsent(granted: Boolean)
   fun finishOnboarding(username: String?)
+
+  /** First-login claim: saves the username and kicks off the initial upload of any existing
+   *  local training data. The backup screen watches SyncStatus for its progress. */
+  fun beginFirstBackup(username: String?)
 }

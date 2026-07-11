@@ -89,6 +89,22 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
   viewModelScope.launch { prefs.setAnalyticsConsent(if (granted) "granted" else "denied") }
   }
 
+  // ── Sync (Phase 3) ───────────────────────────────────────────────────────────
+  val syncState: StateFlow<com.wildodds.gymtracker.data.sync.SyncState> =
+  com.wildodds.gymtracker.data.sync.SyncStatus.state
+
+  init {
+  // Seed the "Last synced …" label from the persisted cursor (SyncStatus resets per process).
+  val persisted = com.wildodds.gymtracker.data.sync.PrefsSyncCursorStore(app).lastSyncAt
+  if (persisted > 0L) {
+  com.wildodds.gymtracker.data.sync.SyncStatus.update { it.copy(lastSyncAt = maxOf(it.lastSyncAt, persisted)) }
+  }
+  }
+
+  fun syncNow() {
+  runCatching { com.wildodds.gymtracker.data.sync.SyncScheduler.syncNow(getApplication()) }
+  }
+
   /** Signs out on this device only; local Room data is untouched. Onboarding (consent/username)
    *  re-runs on the next sign-in. */
   fun signOut() {
