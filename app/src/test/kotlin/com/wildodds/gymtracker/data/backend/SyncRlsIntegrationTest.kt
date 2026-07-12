@@ -28,14 +28,17 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
 /**
  * Phase 3 gate: "RLS cross-user write fails" for sync_rows, against the REAL Supabase project.
  * Same pattern as ProfilesRlsIntegrationTest: pre-confirmed test accounts from local.properties,
  * @Ignore'd by default (live network). Requires 20260712000001_sync_rows.sql to be applied.
- * Verified passing manually — see commit history for the date.
+ * Verified passing manually against the live project on 2026-07-13.
  */
 @Ignore("live-network integration test against the real Supabase project — see class doc")
+@RunWith(RobolectricTestRunner::class)
 class SyncRlsIntegrationTest {
 
   @Serializable
