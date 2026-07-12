@@ -136,6 +136,17 @@ fun SettingsScreen(
   // Account (Phase 2) + sync (Phase 3)
   val analyticsConsent by vm.analyticsConsent.collectAsStateWithLifecycle()
   val syncState by vm.syncState.collectAsStateWithLifecycle()
+
+  // Account lifecycle (Phase 5): export via SAF create-document.
+  val accountVm: com.wildodds.gymtracker.ui.account.AccountViewModel = viewModel()
+  val exportState by accountVm.export.collectAsStateWithLifecycle()
+  val exportLauncher = rememberLauncherForActivityResult(
+  ActivityResultContracts.CreateDocument("application/zip")
+  ) { uri -> if (uri != null) accountVm.exportTo(uri) }
+  LaunchedEffect(exportState.done, exportState.error) {
+  if (exportState.done) { Toast.makeText(context, "Data exported", Toast.LENGTH_SHORT).show(); accountVm.resetExport() }
+  exportState.error?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show(); accountVm.resetExport() }
+  }
   var showSignOutDialog by remember { mutableStateOf(false) }
   if (showSignOutDialog) {
   AlertDialog(
@@ -311,9 +322,19 @@ fun SettingsScreen(
   },
   tint = accent, onClick = { vm.syncNow() }
   )
+  SettingControl.EXPORT_ACCOUNT -> ActionRow(
+  title = if (exportState.inProgress) "Exporting…" else entry.title,
+  summary = entry.summary,
+  tint = accent,
+  onClick = { if (!exportState.inProgress) exportLauncher.launch("wildodds-export.zip") }
+  )
   SettingControl.SIGN_OUT -> ActionRow(
   title = entry.title, summary = entry.summary,
   tint = MaterialTheme.colorScheme.error, onClick = { showSignOutDialog = true }
+  )
+  SettingControl.DELETE_ACCOUNT -> ActionRow(
+  title = entry.title, summary = entry.summary,
+  tint = MaterialTheme.colorScheme.error, onClick = { navController?.navigate("delete_account") }
   )
   }
   }

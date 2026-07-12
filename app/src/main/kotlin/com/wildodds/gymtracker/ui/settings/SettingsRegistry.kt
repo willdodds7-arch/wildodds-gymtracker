@@ -8,7 +8,7 @@ package com.wildodds.gymtracker.ui.settings
 enum class SettingControl {
   TOGGLE, ACCENT, TIMER_SOUND, API_KEY, CLEAR_DATA, DOWNLOAD_TEMPLATE, WEARABLE_CONNECT,
   PRIVACY_POLICY, EXPORT_DATA, REMINDER_SETTINGS, HABITS, ACCOUNT, SIGN_OUT, SHARE_USAGE_STATS,
-  SYNC_NOW
+  SYNC_NOW, EXPORT_ACCOUNT, DELETE_ACCOUNT
 }
 
 /**
@@ -47,6 +47,10 @@ object SettingsRegistry {
   // Phase 3 (online-first) — sync controls.
   const val SYNC_NOW = "action_sync_now"
   const val SYNC_WIFI_ONLY = "feat_sync_wifi_only"
+
+  // Phase 5 (online-first) — account lifecycle.
+  const val EXPORT_ACCOUNT = "action_export_account"
+  const val DELETE_ACCOUNT = "action_delete_account"
 
   /** Flag key for the session exit-confirmation guard (a safety feature, default ON). */
   const val SESSION_EXIT_GUARD = "feat_session_exit_guard"
@@ -132,11 +136,25 @@ object SettingsRegistry {
   default = false
   ),
   SettingsEntry(
+  key = EXPORT_ACCOUNT, title = "Export my data",
+  summary = "Download a copy of your account and training data as a JSON file",
+  group = "Account",
+  keywords = listOf("export", "download", "my data", "gdpr", "ccpa", "portability", "copy", "json", "backup"),
+  control = SettingControl.EXPORT_ACCOUNT
+  ),
+  SettingsEntry(
   key = SIGN_OUT, title = "Sign out",
   summary = "Sign out of your account on this device — your local training data stays",
   group = "Account",
   keywords = listOf("sign out", "log out", "logout", "signout", "account", "switch"),
   control = SettingControl.SIGN_OUT
+  ),
+  SettingsEntry(
+  key = DELETE_ACCOUNT, title = "Delete account",
+  summary = "Permanently delete your account and all its data — immediate and irreversible",
+  group = "Account",
+  keywords = listOf("delete", "account", "remove", "erase", "close", "gdpr", "right to be forgotten", "deletion"),
+  control = SettingControl.DELETE_ACCOUNT
   ),
   SettingsEntry(
   key = "dark_mode", title = "Dark Mode",

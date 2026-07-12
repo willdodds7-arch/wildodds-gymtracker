@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Delete your account — Wild Odds Gym Tracker</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      max-width: 720px; margin: 0 auto; padding: 40px 20px; line-height: 1.6; }
+    h1 { font-size: 1.7rem; }
+    h2 { font-size: 1.2rem; margin-top: 32px; }
+    a { color: #2f6fb0; }
+    code { background: #8882; padding: 1px 5px; border-radius: 4px; }
+    .card { border: 1px solid #8883; border-radius: 12px; padding: 20px; margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <h1>Delete your Wild Odds Gym Tracker account</h1>
+  <p>Deleting your account is <strong>immediate and permanent</strong>. It removes your profile,
+    your synced programs and workout history, and your usage analytics from our servers. There is
+    no grace period and the data cannot be recovered afterwards.</p>
+
+  <h2>If you have the app installed (fastest)</h2>
+  <div class="card">
+    Open the app, then go to <strong>Profile → the gear icon → Settings → Account →
+    Delete account</strong>. You'll type <code>DELETE</code> to confirm and re-enter your password,
+    and you can choose whether to also erase the copy of your training data stored on your device.
+  </div>
+
+  <h2>If you no longer have the app</h2>
+  <div class="card">
+    Email <a id="req" href="#">the request address below</a> from the email address on your
+    account, with the subject <strong>“Delete my account”</strong>. We'll verify it's you and
+    delete the account and all associated data within 30 days (usually much sooner), then confirm
+    by reply.
+    <p style="margin-top:14px">Request address:
+      <strong><span id="email">support [at] REPLACE-ME</span></strong></p>
+  </div>
+
+  <h2>What gets deleted</h2>
+  <ul>
+    <li>Your account (sign-in identity).</li>
+    <li>Your profile (username, consent record).</li>
+    <li>Your synced training data (programs, sessions, exercises, workout logs, sets, completions).</li>
+    <li>Your usage analytics events.</li>
+  </ul>
+  <p>Training data stored only on your own device is under your control — the in-app flow lets you
+    erase it too, or you can simply uninstall the app.</p>
+
+  <p style="margin-top:32px"><a href="index.html">← Back</a> ·
+    <a href="privacy.html">Privacy Policy</a></p>
+
+  <script>
+    // Assemble the contact address at runtime to reduce scraping. REPLACE the user/domain below.
+    var user = "support", domain = "REPLACE-ME.example";
+    var addr = user + "@" + domain;
+    document.getElementById("email").textContent = addr;
+    var a = document.getElementById("req");
+    a.href = "mailto:" + addr + "?subject=Delete%20my%20account";
+  </script>
+</body>
+</html>

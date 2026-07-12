@@ -100,6 +100,9 @@ fun AppNavigation() {
         composable("settings") {
             SettingsScreen(navController = navController)
         }
+        composable("delete_account") {
+            com.wildodds.gymtracker.ui.account.DeleteAccountScreen(navController = navController)
+        }
     }
 }
 
