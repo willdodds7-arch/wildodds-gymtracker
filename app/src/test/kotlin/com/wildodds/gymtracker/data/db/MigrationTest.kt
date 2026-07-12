@@ -39,7 +39,7 @@ class MigrationTest {
   seedVersion1Database()
 
   // 2. Run every migration in order and validate the final schema against the latest schema JSON.
-  helper.runMigrationsAndValidate(TEST_DB, 21, true, *AppDatabase.ALL_MIGRATIONS).close()
+  helper.runMigrationsAndValidate(TEST_DB, 22, true, *AppDatabase.ALL_MIGRATIONS).close()
   }
 
   /** v20→v21 backfills sync metadata: every pre-existing row must get a unique, non-blank syncId. */

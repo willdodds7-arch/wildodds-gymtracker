@@ -71,6 +71,8 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
   /** Toggle/set any registry flag by key. */
   fun setFlag(key: String, value: Boolean) {
   viewModelScope.launch { prefs.setFlag(key, value) }
+  com.wildodds.gymtracker.data.analytics.AnalyticsGate.log(
+  com.wildodds.gymtracker.data.analytics.AnalyticsEvent.FeatureToggled(key, value))
   }
 
   // ── Account (Phase 2, online-first) ──────────────────────────────────────────
@@ -86,7 +88,12 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
   .stateIn(viewModelScope, SharingStarted.Eagerly, "unset")
 
   fun setAnalyticsConsent(granted: Boolean) {
-  viewModelScope.launch { prefs.setAnalyticsConsent(if (granted) "granted" else "denied") }
+  viewModelScope.launch(Dispatchers.IO) {
+  val value = if (granted) "granted" else "denied"
+  prefs.setAnalyticsConsent(value)
+  runCatching { authRepo.setAnalyticsConsentOnProfile(value) } // audit mirror, best-effort
+  if (!granted) com.wildodds.gymtracker.data.analytics.AnalyticsGate.onConsentRevoked(getApplication())
+  }
   }
 
   // ── Sync (Phase 3) ───────────────────────────────────────────────────────────

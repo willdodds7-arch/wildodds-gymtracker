@@ -96,4 +96,17 @@ class AuthRepository(private val client: SupabaseClient = SupabaseModule.client)
         Unit
       }
     }
+
+  /** Mirror the analytics consent state onto the profile for auditability (Phase 4). Best-effort:
+   *  the on-device ThemePreferences value is authoritative for gating; this is just the audit copy. */
+  suspend fun setAnalyticsConsentOnProfile(consent: String): RemoteResult<Unit> =
+    withContext(Dispatchers.IO) {
+      runRemote {
+        val id = checkNotNull(currentUserId) { "not signed in" }
+        client.postgrest.from("profiles").update({ set("analytics_consent", consent) }) {
+          filter { eq("id", id) }
+        }
+        Unit
+      }
+    }
 }

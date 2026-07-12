@@ -76,7 +76,10 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), AuthActions {
   // ── Post-auth setup (consent → username) ────────────────────────────────────
   override fun setAnalyticsConsent(granted: Boolean) {
     viewModelScope.launch(Dispatchers.IO) {
-      prefs.setAnalyticsConsent(if (granted) "granted" else "denied")
+      val value = if (granted) "granted" else "denied"
+      prefs.setAnalyticsConsent(value)
+      runCatching { repo.setAnalyticsConsentOnProfile(value) } // audit mirror, best-effort
+      if (!granted) com.wildodds.gymtracker.data.analytics.AnalyticsGate.onConsentRevoked(getApplication())
     }
   }
 

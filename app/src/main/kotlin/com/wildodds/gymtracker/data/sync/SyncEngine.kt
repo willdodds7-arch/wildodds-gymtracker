@@ -39,11 +39,15 @@ class SyncEngine(
       pull()
       cursors.lastSyncAt = System.currentTimeMillis()
       SyncStatus.update { it.copy(phase = SyncPhase.OK, lastSyncAt = cursors.lastSyncAt) }
+      com.wildodds.gymtracker.data.analytics.AnalyticsGate.log(
+        com.wildodds.gymtracker.data.analytics.AnalyticsEvent.SyncCompleted("success"))
       Result.Success
     } catch (e: Exception) {
       // Rule 1: sync failure is a non-event for the app — data stays local, we retry later.
       val msg = e.message ?: e::class.simpleName.orEmpty()
       SyncStatus.update { it.copy(phase = SyncPhase.FAILED, message = msg) }
+      com.wildodds.gymtracker.data.analytics.AnalyticsGate.log(
+        com.wildodds.gymtracker.data.analytics.AnalyticsEvent.SyncCompleted("failure"))
       Result.Failure(msg)
     }
   }
