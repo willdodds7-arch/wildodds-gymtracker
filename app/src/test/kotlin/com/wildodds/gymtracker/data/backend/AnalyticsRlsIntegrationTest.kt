@@ -31,7 +31,7 @@ import org.robolectric.RobolectricTestRunner
  * Phase 4 gate: "clients cannot read events (RLS test)" for analytics_events, against the REAL
  * project. Proves a client CAN insert its own rows but CANNOT select any (no SELECT policy exists,
  * so RLS denies reads to everyone). @Ignore'd by default (live network); requires
- * 20260713000001_analytics.sql applied. Verified passing manually — see commit history.
+ * 20260713000001_analytics.sql applied. Verified passing against the live project on 2026-07-13.
  */
 @Ignore("live-network integration test against the real Supabase project — see class doc")
 @RunWith(RobolectricTestRunner::class)
