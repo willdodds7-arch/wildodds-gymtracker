@@ -42,6 +42,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.withStyle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -78,8 +79,71 @@ fun OnboardingFlow(actions: AuthActions) {
         }
       )
     }
-    composable("auth") { AuthScreen(actions) }
+    composable("auth") { AuthScreen(actions, navController) }
+    legalRoute(navController)
   }
+}
+
+/** Registers an offline legal-doc viewer inside an onboarding NavHost, so the "I agree" links and
+ *  consent-screen links open the BUNDLED docs without leaving onboarding or needing a connection. */
+private fun androidx.navigation.NavGraphBuilder.legalRoute(navController: NavHostController) {
+  composable(
+    route = "legal/{docKey}",
+    arguments = listOf(androidx.navigation.navArgument("docKey") { type = androidx.navigation.NavType.StringType })
+  ) { entry ->
+    val doc = com.wildodds.gymtracker.ui.legal.LegalDoc.byKey(entry.arguments?.getString("docKey"))
+    if (doc != null) com.wildodds.gymtracker.ui.legal.LegalDocScreen(navController, doc)
+    else navController.popBackStack()
+  }
+}
+
+/** "I agree to the Privacy Policy and Terms of Service", with the two doc names tappable. */
+@Composable
+private fun LegalAgreementText(navController: NavHostController) {
+  val accent = LocalAccentColor.current
+  val body = MaterialTheme.colorScheme.onSurfaceVariant
+  val annotated = androidx.compose.ui.text.buildAnnotatedString {
+    withStyle(androidx.compose.ui.text.SpanStyle(color = body)) { append("I agree to the ") }
+    pushStringAnnotation("nav", "legal/privacy")
+    withStyle(androidx.compose.ui.text.SpanStyle(color = accent)) { append("Privacy Policy") }
+    pop()
+    withStyle(androidx.compose.ui.text.SpanStyle(color = body)) { append(" and ") }
+    pushStringAnnotation("nav", "legal/terms")
+    withStyle(androidx.compose.ui.text.SpanStyle(color = accent)) { append("Terms of Service") }
+    pop()
+  }
+  androidx.compose.foundation.text.ClickableText(
+    text = annotated,
+    style = MaterialTheme.typography.bodySmall,
+    modifier = Modifier.testTag("auth_agree_text"),
+    onClick = { offset ->
+      annotated.getStringAnnotations("nav", offset, offset).firstOrNull()?.let { navController.navigate(it.item) }
+    }
+  )
+}
+
+/** Standalone "Privacy Policy · Terms of Service" links for the consent screen. */
+@Composable
+private fun LegalAgreementLinks(navController: NavHostController) {
+  val accent = LocalAccentColor.current
+  val annotated = androidx.compose.ui.text.buildAnnotatedString {
+    pushStringAnnotation("nav", "legal/privacy")
+    withStyle(androidx.compose.ui.text.SpanStyle(color = accent)) { append("Privacy Policy") }
+    pop()
+    withStyle(
+      androidx.compose.ui.text.SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)
+    ) { append("   ·   ") }
+    pushStringAnnotation("nav", "legal/terms")
+    withStyle(androidx.compose.ui.text.SpanStyle(color = accent)) { append("Terms of Service") }
+    pop()
+  }
+  androidx.compose.foundation.text.ClickableText(
+    text = annotated,
+    style = MaterialTheme.typography.bodySmall,
+    onClick = { offset ->
+      annotated.getStringAnnotations("nav", offset, offset).firstOrNull()?.let { navController.navigate(it.item) }
+    }
+  )
 }
 
 @Composable
@@ -215,13 +279,14 @@ private fun AgeBlockedScreen() {
 // ── Sign in / create account ───────────────────────────────────────────────────
 
 @Composable
-private fun AuthScreen(actions: AuthActions) {
+private fun AuthScreen(actions: AuthActions, navController: NavHostController) {
   val accent = LocalAccentColor.current
   val form by actions.form.collectAsState()
   var isSignUp by remember { mutableStateOf(false) }
   var email by remember { mutableStateOf("") }
   var password by remember { mutableStateOf("") }
   var showReset by remember { mutableStateOf(false) }
+  var agreed by remember { mutableStateOf(false) }
 
   OnboardingScaffold {
     Spacer(Modifier.height(80.dp))
@@ -269,10 +334,23 @@ private fun AuthScreen(actions: AuthActions) {
         style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
     }
 
+    // Sign-up requires explicit agreement to the Privacy Policy + Terms (with tappable links).
+    if (isSignUp) {
+      Spacer(Modifier.height(14.dp))
+      Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+        androidx.compose.material3.Checkbox(
+          checked = agreed, onCheckedChange = { agreed = it },
+          modifier = Modifier.testTag("auth_agree_checkbox")
+        )
+        Spacer(Modifier.width(4.dp))
+        LegalAgreementText(navController)
+      }
+    }
+
     Spacer(Modifier.height(20.dp))
     Button(
       onClick = { if (isSignUp) actions.signUp(email, password) else actions.signIn(email, password) },
-      enabled = !form.isLoading && email.isNotBlank() && password.length >= 6,
+      enabled = !form.isLoading && email.isNotBlank() && password.length >= 6 && (!isSignUp || agreed),
       modifier = Modifier.fillMaxWidth().height(52.dp).testTag("auth_submit"),
       shape = RoundedCornerShape(12.dp),
       colors = ButtonDefaults.buttonColors(containerColor = accent)
@@ -345,12 +423,14 @@ fun PostAuthSetupFlow(actions: AuthActions) {
   NavHost(navController, startDestination = "consent", modifier = Modifier.fillMaxSize()) {
     composable("consent") {
       ConsentScreen(
+        navController = navController,
         onChoice = { granted ->
           actions.setAnalyticsConsent(granted)
           navController.navigate("username") { popUpTo("consent") { inclusive = true } }
         }
       )
     }
+    legalRoute(navController)
     composable("username") {
       UsernameScreen(
         actions,
@@ -369,7 +449,7 @@ fun PostAuthSetupFlow(actions: AuthActions) {
  * honest about what is and isn't collected, and declining changes nothing about the app.
  */
 @Composable
-private fun ConsentScreen(onChoice: (Boolean) -> Unit) {
+private fun ConsentScreen(navController: NavHostController, onChoice: (Boolean) -> Unit) {
   val accent = LocalAccentColor.current
   OnboardingScaffold {
     Spacer(Modifier.height(96.dp))
@@ -384,7 +464,10 @@ private fun ConsentScreen(onChoice: (Boolean) -> Unit) {
       color = MaterialTheme.colorScheme.onSurfaceVariant,
       textAlign = TextAlign.Center
     )
-    Spacer(Modifier.height(36.dp))
+    Spacer(Modifier.height(12.dp))
+    // Links to the same bundled docs (offline) referenced at sign-up.
+    LegalAgreementLinks(navController)
+    Spacer(Modifier.height(24.dp))
     // Equal prominence: same component, same size, same shape.
     OutlinedButton(
       onClick = { onChoice(true) },

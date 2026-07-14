@@ -8,7 +8,7 @@ package com.wildodds.gymtracker.ui.settings
 enum class SettingControl {
   TOGGLE, ACCENT, TIMER_SOUND, API_KEY, CLEAR_DATA, DOWNLOAD_TEMPLATE, WEARABLE_CONNECT,
   PRIVACY_POLICY, EXPORT_DATA, REMINDER_SETTINGS, HABITS, ACCOUNT, SIGN_OUT, SHARE_USAGE_STATS,
-  SYNC_NOW, EXPORT_ACCOUNT, DELETE_ACCOUNT
+  SYNC_NOW, EXPORT_ACCOUNT, DELETE_ACCOUNT, LEGAL_DOC
 }
 
 /**
@@ -37,7 +37,7 @@ object SettingsRegistry {
 
   /** Preferred display order; groups not listed here are appended in first-seen order. */
   val groupOrder: List<String> =
-  listOf("Account", "Appearance", "Session", "Wearables", "Tools", "Display", "AI Import", "Data")
+  listOf("Account", "Appearance", "Session", "Wearables", "Tools", "Display", "AI Import", "Data", "Legal & privacy")
 
   // Phase 2 (online-first) — account controls.
   const val ACCOUNT = "action_account"
@@ -352,13 +352,42 @@ object SettingsRegistry {
   "share", "ecosystem", "wearable"),
   default = false
   ),
+  // Phase 6 — bundled legal docs (rendered offline). Each row's key is the LegalDoc.key so the
+  // Settings screen navigates to "legal/<key>".
   SettingsEntry(
-  key = PRIVACY_POLICY, title = "Privacy & data",
-  summary = "How your data is handled — it stays on your device",
-  group = "Data",
-  keywords = listOf("privacy", "policy", "data", "gdpr", "consent", "export", "delete",
-  "deletion", "health data", "terms", "compliance", "offline"),
-  control = SettingControl.PRIVACY_POLICY
+  key = "privacy", title = "Privacy Policy",
+  summary = "What we collect, why, and your rights over it",
+  group = "Legal & privacy",
+  keywords = listOf("privacy", "policy", "data", "gdpr", "ccpa", "consent", "collection", "processor", "supabase", "rights"),
+  control = SettingControl.LEGAL_DOC
+  ),
+  SettingsEntry(
+  key = "terms", title = "Terms of Service",
+  summary = "The rules for using the app",
+  group = "Legal & privacy",
+  keywords = listOf("terms", "service", "tos", "agreement", "acceptable use", "liability", "medical", "gplv3", "governing law"),
+  control = SettingControl.LEGAL_DOC
+  ),
+  SettingsEntry(
+  key = "health", title = "Health & fitness data notice",
+  summary = "How your training and heart-rate data is handled",
+  group = "Legal & privacy",
+  keywords = listOf("health", "fitness", "data", "heart rate", "workout", "training", "sold", "shared", "notice"),
+  control = SettingControl.LEGAL_DOC
+  ),
+  SettingsEntry(
+  key = "licenses", title = "Open-source licenses",
+  summary = "The open-source components this app is built on",
+  group = "Legal & privacy",
+  keywords = listOf("open source", "licenses", "licences", "oss", "attribution", "apache", "mit", "gplv3", "credits"),
+  control = SettingControl.LEGAL_DOC
+  ),
+  SettingsEntry(
+  key = "support", title = "Support",
+  summary = "Get help and find answers to common questions",
+  group = "Legal & privacy",
+  keywords = listOf("support", "help", "contact", "email", "faq", "questions", "problem", "issue"),
+  control = SettingControl.LEGAL_DOC
   ),
   SettingsEntry(
   key = "action_download_template", title = "Download Template",

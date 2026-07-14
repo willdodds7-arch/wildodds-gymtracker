@@ -1,11 +1,12 @@
 name: Deploy site to GitHub Pages
 
-# Publishes /site (privacy, account-deletion, support pages) to GitHub Pages. The account-deletion
-# URL is required by Google Play; its live address is recorded in docs/play-store.md.
+# Publishes the static pages in /site PLUS HTML renderings of the canonical /legal markdown docs
+# (single source of truth) to GitHub Pages. The account-deletion URL is required by Google Play;
+# its live address is recorded in docs/play-store.md.
 on:
   push:
     branches: [main]
-    paths: ["site/**", ".github/workflows/pages.yml"]
+    paths: ["site/**", "legal/**", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:
@@ -13,22 +14,51 @@ permissions:
   pages: write
   id-token: write
 
-# One deploy at a time; don't cancel an in-progress publish.
 concurrency:
   group: pages
   cancel-in-progress: false
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Render /legal → HTML and assemble _site
+        run: python site/build_site.py
+      - name: Link-check the built site
+        run: |
+          python - <<'PY'
+          import os, re, sys
+          site = "_site"
+          pages = [f for f in os.listdir(site) if f.endswith(".html")]
+          present = set(pages)
+          broken = []
+          for p in pages:
+              html = open(os.path.join(site, p), encoding="utf-8").read()
+              for href in re.findall(r'href="([^"]+)"', html):
+                  if href.startswith("http") or href.startswith("mailto:") or href.startswith("#"):
+                      continue
+                  target = href.split("#")[0]
+                  if target and target not in present:
+                      broken.append(f"{p} -> {href}")
+          if broken:
+              print("Broken internal links:"); [print(" ", b) for b in broken]; sys.exit(1)
+          print(f"Link check OK across {len(pages)} pages:", sorted(pages))
+          PY
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
   deploy:
+    needs: build
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
       - id: deployment
         uses: actions/deploy-pages@v4

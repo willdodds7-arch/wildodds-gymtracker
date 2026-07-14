@@ -103,6 +103,14 @@ fun AppNavigation() {
         composable("delete_account") {
             com.wildodds.gymtracker.ui.account.DeleteAccountScreen(navController = navController)
         }
+        composable(
+            route = "legal/{docKey}",
+            arguments = listOf(navArgument("docKey") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val doc = com.wildodds.gymtracker.ui.legal.LegalDoc.byKey(backStackEntry.arguments?.getString("docKey"))
+            if (doc != null) com.wildodds.gymtracker.ui.legal.LegalDocScreen(navController, doc)
+            else navController.popBackStack()
+        }
     }
 }
 

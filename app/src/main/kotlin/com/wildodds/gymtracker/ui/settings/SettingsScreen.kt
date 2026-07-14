@@ -336,6 +336,10 @@ fun SettingsScreen(
   title = entry.title, summary = entry.summary,
   tint = MaterialTheme.colorScheme.error, onClick = { navController?.navigate("delete_account") }
   )
+  SettingControl.LEGAL_DOC -> ActionRow(
+  title = entry.title, summary = entry.summary,
+  tint = accent, onClick = { navController?.navigate("legal/${entry.key}") }
+  )
   }
   }
   }

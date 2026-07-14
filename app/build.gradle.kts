@@ -5,6 +5,17 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.license)
+}
+
+// Open-source licence report (Phase 6). Generates JSON at build time from the resolved deps;
+// tools/build_oss_licenses.py converts the offline-debug report into legal/open-source-licenses.md,
+// which is bundled + rendered offline like the other legal docs.
+licenseReport {
+    generateJsonReport = true
+    generateHtmlReport = false
+    generateCsvReport = false
+    generateTextReport = false
 }
 
 // Supabase project URL + anon (publishable) key. Local dev reads local.properties (gitignored);
@@ -99,6 +110,11 @@ android {
     sourceSets {
         getByName("debug") {
             assets.srcDir("schemas")
+        }
+        // Bundle the canonical legal docs (Phase 6) as assets so they render OFFLINE in-app —
+        // single source of truth in /legal, never fetched from the network.
+        getByName("main") {
+            assets.srcDir("$rootDir/legal")
         }
     }
 
