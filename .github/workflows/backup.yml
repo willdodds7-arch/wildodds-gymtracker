@@ -1,0 +1,118 @@
+name: Backup & restore drill
+
+# Nightly: dump the schema. Weekly (Sundays): also take an encrypted data snapshot.
+# Every run then performs a REAL restore drill — the dump is restored into a throwaway Postgres
+# service container and asserted against. A backup that has never been restored isn't a backup.
+#
+# Requires secrets:
+#   DATABASE_URL      — the Supabase Postgres connection string (Project Settings → Database →
+#                       Connection string → URI). Contains the DB password: keep it a secret.
+#   BACKUP_PASSPHRASE — passphrase used to symmetrically encrypt the weekly data snapshot.
+on:
+  schedule:
+    - cron: "23 2 * * *" # nightly 02:23 UTC
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    # The restore target: a disposable Postgres the drill restores INTO. Never the real database.
+    services:
+      scratch:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: drill
+          POSTGRES_DB: drill
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install postgres client 16 (match the server major version)
+        run: |
+          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /usr/share/keyrings/pgdg.gpg
+          sudo sed -i 's|deb http|deb [signed-by=/usr/share/keyrings/pgdg.gpg] http|' /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update && sudo apt-get install -y postgresql-client-16
+
+      - name: Guard — required secret present
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::DATABASE_URL secret is not set — see docs/security-review.md open actions."
+            exit 1
+          fi
+
+      - name: Dump schema (nightly)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          mkdir -p out
+          pg_dump --schema-only --no-owner --no-privileges \
+            --schema=public "$DATABASE_URL" > out/schema.sql
+          echo "schema dump: $(wc -l < out/schema.sql) lines"
+
+      - name: Encrypted data snapshot (weekly, Sundays)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          # Only on Sundays (or manual runs) — data snapshots are heavier than the schema.
+          if [ "$(date -u +%u)" != "7" ] && [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+            echo "Not Sunday — skipping the data snapshot."; exit 0
+          fi
+          if [ -z "$BACKUP_PASSPHRASE" ]; then
+            echo "::error::BACKUP_PASSPHRASE secret is not set."; exit 1
+          fi
+          pg_dump --data-only --no-owner --no-privileges --schema=public "$DATABASE_URL" \
+            | gzip \
+            | gpg --batch --yes --symmetric --cipher-algo AES256 \
+                  --passphrase "$BACKUP_PASSPHRASE" -o out/data.sql.gz.gpg
+          echo "encrypted data snapshot: $(du -h out/data.sql.gz.gpg | cut -f1)"
+
+      - name: RESTORE DRILL — restore the schema dump into the throwaway Postgres
+        env:
+          PGPASSWORD: drill
+        run: |
+          set -e
+          # Supabase-specific roles/extensions don't exist in vanilla Postgres; create the roles the
+          # dump's GRANTs/policies reference so the restore is faithful rather than error-swallowed.
+          for role in anon authenticated service_role authenticator supabase_admin; do
+            psql -h localhost -U postgres -d drill -v ON_ERROR_STOP=1 \
+              -c "do \$\$ begin if not exists (select from pg_roles where rolname='$role') then create role $role; end if; end \$\$;"
+          done
+          # auth.uid() is referenced by every RLS policy; stub the schema+function so policies restore.
+          psql -h localhost -U postgres -d drill -v ON_ERROR_STOP=1 \
+            -c "create schema if not exists auth;" \
+            -c "create or replace function auth.uid() returns uuid language sql stable as \$\$ select null::uuid \$\$;"
+
+          psql -h localhost -U postgres -d drill -v ON_ERROR_STOP=1 -f out/schema.sql
+
+      - name: Assert the restored schema is real
+        env:
+          PGPASSWORD: drill
+        run: |
+          set -e
+          q() { psql -h localhost -U postgres -d drill -tAc "$1"; }
+          for t in profiles sync_rows analytics_events; do
+            exists=$(q "select count(*) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relname='$t' and c.relkind='r';")
+            [ "$exists" = "1" ] || { echo "::error::restored schema is missing table $t"; exit 1; }
+            rls=$(q "select c.relrowsecurity from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relname='$t';")
+            [ "$rls" = "t" ] || { echo "::error::restored table $t has RLS disabled"; exit 1; }
+            pols=$(q "select count(*) from pg_policy p join pg_class c on c.oid=p.polrelid join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relname='$t';")
+            echo "restored $t: rls=$rls policies=$pols"
+            [ "$pols" -ge 1 ] || { echo "::error::restored table $t has no policies"; exit 1; }
+          done
+          echo "RESTORE DRILL PASSED — schema restores with every table's RLS + policies intact."
+
+      - name: Upload backup artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: supabase-backup-${{ github.run_id }}
+          path: out/
+          retention-days: 30
