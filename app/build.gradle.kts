@@ -56,6 +56,20 @@ android {
         buildConfigField("String", "RLS_TEST_PASSWORD_B", "\"${secretOrEnv("supabase.rlsTestPasswordB", "SUPABASE_RLS_TEST_PASSWORD_B")}\"")
     }
 
+    // Release signing (Phase 7). Credentials come from keystore.properties (gitignored) or CI env
+    // vars — never committed. You generate + back up the keystore yourself (see docs/launch-runbook.md).
+    // When no release keystore is configured, the release build falls back to debug signing so a
+    // local `assembleOfflineRelease` still works for R8 smoke-testing (that artifact is NOT
+    // Play-uploadable — Play rejects debug-signed bundles).
+    val keystoreProps = Properties().apply {
+        val f = rootProject.file("keystore.properties")
+        if (f.exists()) f.inputStream().use { load(it) }
+    }
+    fun ksProp(key: String, env: String): String =
+        (keystoreProps.getProperty(key)?.takeIf { it.isNotBlank() }) ?: System.getenv(env).orEmpty()
+    val releaseStorePath = ksProp("storeFile", "RELEASE_STORE_FILE")
+    val hasReleaseKeystore = releaseStorePath.isNotBlank() && file(releaseStorePath).exists()
+
     signingConfigs {
         getByName("debug") {
             storeFile = file("${System.getProperty("user.home")}/.android/debug.keystore")
@@ -63,13 +77,21 @@ android {
             keyAlias = "androiddebugkey"
             keyPassword = "android"
         }
+        if (hasReleaseKeystore) {
+            create("release") {
+                storeFile = file(releaseStorePath)
+                storePassword = ksProp("storePassword", "RELEASE_STORE_PASSWORD")
+                keyAlias = ksProp("keyAlias", "RELEASE_KEY_ALIAS")
+                keyPassword = ksProp("keyPassword", "RELEASE_KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("debug")
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
+            isMinifyEnabled = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName(if (hasReleaseKeystore) "release" else "debug")
         }
     }
 
