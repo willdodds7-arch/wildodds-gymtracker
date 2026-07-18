@@ -1,6 +1,6 @@
 # Health & Fitness Data Notice
 
-**Version 1.0 — Last updated 13 July 2026**
+**Version 1.0 — Last updated 19 July 2026**
 
 Wild Odds Gym Tracker records training information that is health-adjacent. This notice explains,
 in plain terms, what that data is and how we handle it. It supplements the Privacy Policy.
@@ -41,4 +41,4 @@ which screen was opened or whether a feature is on or off.
 
 ## Contact
 
-**support@REPLACE-ME.example**
+**wildoddssupport@gmail.com**

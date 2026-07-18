@@ -14,31 +14,30 @@ class AuthGateLogicTest {
 
   private val session = UserSession(accessToken = "a", refreshToken = "r", expiresIn = 3600, tokenType = "bearer")
 
+  private val authed = SessionStatus.Authenticated(session, SessionSource.Storage)
+
   @Test
-  fun loadingFromStorage_showsLoading() {
-    assertEquals(GateDestination.LOADING, gateDestination(SessionStatus.LoadingFromStorage, false))
-    assertEquals(GateDestination.LOADING, gateDestination(SessionStatus.LoadingFromStorage, true))
+  fun onboardingComplete_alwaysGoesToMain_withOrWithoutASession() {
+    // Accounts are optional: a completed intro means the app, regardless of session state.
+    assertEquals(GateDestination.MAIN, gateDestination(authed, true))                        // signed in
+    assertEquals(GateDestination.MAIN, gateDestination(SessionStatus.NotAuthenticated(false), true)) // no account
+    assertEquals(GateDestination.MAIN, gateDestination(SessionStatus.NetworkError, true))    // signed in, offline
   }
 
   @Test
-  fun notAuthenticated_routesToOnboarding_regardlessOfOnboardingFlag() {
+  fun notComplete_showsTheIntro_onceTheSessionHasResolved() {
     assertEquals(GateDestination.ONBOARDING, gateDestination(SessionStatus.NotAuthenticated(false), false))
-    assertEquals(GateDestination.ONBOARDING, gateDestination(SessionStatus.NotAuthenticated(true), true))
+    assertEquals(GateDestination.ONBOARDING, gateDestination(authed, false))
   }
 
   @Test
-  fun authenticated_routesToMain_onceOnboardingIsComplete() {
-    val status = SessionStatus.Authenticated(session, SessionSource.Storage)
-    assertEquals(GateDestination.POST_AUTH_SETUP, gateDestination(status, false))
-    assertEquals(GateDestination.MAIN, gateDestination(status, true))
+  fun stillLoadingSession_andNotComplete_showsLoading_toAvoidFlashingTheIntro() {
+    assertEquals(GateDestination.LOADING, gateDestination(SessionStatus.LoadingFromStorage, false))
   }
 
   @Test
-  fun networkError_neverBlocksTheApp() {
-    // Rule 1: NetworkError means a stored session exists but couldn't refresh — the user is
-    // simply offline. They must land in the app, not on a login wall.
-    assertEquals(GateDestination.MAIN, gateDestination(SessionStatus.NetworkError, true))
-    assertEquals(GateDestination.POST_AUTH_SETUP, gateDestination(SessionStatus.NetworkError, false))
+  fun completeWins_evenWhileTheSessionIsStillLoading() {
+    assertEquals(GateDestination.MAIN, gateDestination(SessionStatus.LoadingFromStorage, true))
   }
 
   // ── Age gate ─────────────────────────────────────────────────────────────────

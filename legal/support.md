@@ -1,18 +1,20 @@
 # Support
 
-**Last updated 13 July 2026**
+**Last updated 19 July 2026**
 
 Need help with Wild Odds Gym Tracker? Here's how to get it and where to find common answers.
 
 ## Contact
 
-Email **support@REPLACE-ME.example** and we'll get back to you. Including your app version (shown at
+Email **wildoddssupport@gmail.com** and we'll get back to you. Including your app version (shown at
 the bottom of Settings) helps us help you faster.
 
 ## Common topics
 
-- **Signing in.** The app requires an account. You can sign in with email and password or with
-  Google. If you forget your password, use "Forgot password?" on the sign-in screen.
+- **Accounts are optional.** You can use the app fully without one — your training stays on your
+  device. An account adds cross-device sync; sign in with email and password or with Google. If you
+  forget your password, use "Forgot password?" on the sign-in screen. You can create an account
+  anytime from Settings.
 - **Syncing across devices.** Your training data is stored on your device and backed up to your
   account. Sign in on another device with the same account to see it there. You can force a sync
   from Settings → Account → Sync now, and restrict background sync to Wi-Fi in the same place.

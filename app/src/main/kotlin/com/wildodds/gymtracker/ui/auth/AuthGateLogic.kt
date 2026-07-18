@@ -5,22 +5,23 @@ import kotlinx.coroutines.flow.StateFlow
 import java.time.LocalDate
 
 /** What the root of the app shows. Pure function of session + onboarding state, so it's unit-testable. */
-enum class GateDestination { LOADING, ONBOARDING, POST_AUTH_SETUP, MAIN }
+enum class GateDestination { LOADING, ONBOARDING, MAIN }
 
 /**
- * Rule 1 (offline-first) is encoded here: [SessionStatus.NetworkError] means a stored session
- * exists but couldn't be refreshed — the user has an account and is merely offline, so they go
- * STRAIGHT into the app. A dropped connection never blocks a workout. Only a genuinely absent
- * session (never signed in, or signed out) routes to onboarding/auth.
+ * Online-first became account-OPTIONAL: the intro (which offers, but never forces, an account) runs
+ * once and sets `onboardingComplete`. After that the user is in the app — signed in or not. So the
+ * routing key is `onboardingComplete`, not the session:
+ *  - onboardingComplete ⇒ MAIN, whether or not there's a session (a signed-in-but-offline user, or a
+ *    no-account user, both belong in the app — Rule 1: nothing about the network blocks a workout).
+ *  - still resolving the stored session on cold start ⇒ LOADING (avoids flashing the intro at a
+ *    returning user for a frame).
+ *  - otherwise ⇒ ONBOARDING (the thin 3-screen intro).
  */
-fun gateDestination(status: SessionStatus, onboardingComplete: Boolean): GateDestination =
-  when (status) {
-    is SessionStatus.LoadingFromStorage -> GateDestination.LOADING
-    is SessionStatus.NotAuthenticated -> GateDestination.ONBOARDING
-    is SessionStatus.Authenticated,
-    is SessionStatus.NetworkError ->
-      if (onboardingComplete) GateDestination.MAIN else GateDestination.POST_AUTH_SETUP
-  }
+fun gateDestination(status: SessionStatus, onboardingComplete: Boolean): GateDestination = when {
+  onboardingComplete -> GateDestination.MAIN
+  status is SessionStatus.LoadingFromStorage -> GateDestination.LOADING
+  else -> GateDestination.ONBOARDING
+}
 
 /**
  * Age gate (13+, hard block). Computed from a full date of birth so a birthday later this year

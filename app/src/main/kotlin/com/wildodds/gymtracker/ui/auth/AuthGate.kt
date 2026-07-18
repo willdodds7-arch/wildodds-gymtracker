@@ -56,7 +56,6 @@ fun AuthGate(
   when (gateDestination(status, onboardingComplete)) {
     GateDestination.LOADING -> GateLoadingScreen()
     GateDestination.ONBOARDING -> OnboardingFlow(actions)
-    GateDestination.POST_AUTH_SETUP -> PostAuthSetupFlow(actions)
     GateDestination.MAIN -> mainContent()
   }
 
@@ -102,7 +101,7 @@ private fun SetNewPasswordDialog(actions: AuthActions, onDone: () -> Unit) {
     confirmButton = {
       Button(
         onClick = { actions.updatePassword(password, onDone) },
-        enabled = !form.isLoading && password.length >= 6,
+        enabled = !form.isLoading && password.length >= 8,
         shape = RoundedCornerShape(10.dp),
         colors = ButtonDefaults.buttonColors(containerColor = accent)
       ) { Text("Save password") }

@@ -32,10 +32,10 @@ Everything is encrypted in transit (HTTPS) and deletable (in-app + web deletion)
 
 | Data type | Play category | Collected | Shared | Purpose | Optional? | Encrypted in transit | Deletable |
 |---|---|---|---|---|---|---|---|
-| Email address | Personal info → Email address | Yes | No | Account management (sign-in) | No (required for account) | Yes | Yes |
-| User ID | Personal info → User IDs | Yes | No | Account management | No | Yes | Yes |
+| Email address | Personal info → Email address | Yes (only if you create an account) | No | Account management (sign-in) | Yes — the app is fully usable with no account | Yes | Yes |
+| User ID | Personal info → User IDs | Yes (only if you create an account) | No | Account management | Yes | Yes | Yes |
 | Username (optional) | Personal info → Name | Yes (if set) | No | App functionality (profile) | Yes | Yes | Yes |
-| Fitness/workout data (programs, sets, reps, weights, notes) | Health & fitness → Fitness info | Yes | No | App functionality (logging + sync) | No | Yes | Yes |
+| Fitness/workout data (programs, sets, reps, weights, notes) | Health & fitness → Fitness info | Yes (only if you create an account — otherwise it stays on-device and isn't "collected") | No | App functionality (logging + sync) | Yes | Yes | Yes |
 | Heart rate (via Health Connect) | Health & fitness → Health info | Yes (only if you connect a wearable) | No | App functionality (session summaries) | Yes | Yes (on device; not synced to our server) | Yes |
 | App interactions (usage analytics) | App activity → App interactions | Yes (only if you opt in) | No | Analytics | Yes | Yes | Yes |
 | Other diagnostic (app version, OS version, device class) | App info & performance → Diagnostics | Yes (only with analytics opt-in) | No | Analytics | Yes | Yes | Yes |

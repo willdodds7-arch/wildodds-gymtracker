@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Version 1.0 — Last updated 13 July 2026**
+**Version 1.0 — Last updated 19 July 2026**
 
 This Privacy Policy explains what Wild Odds Gym Tracker ("the app", "we") collects, why, and the
 control you have over it. It describes what the app actually does today — not aspirations.
@@ -8,7 +8,9 @@ control you have over it. It describes what the app actually does today — not 
 ## Who we are
 
 Wild Odds Gym Tracker is an Android app for planning and logging resistance-training programs.
-Using it requires an account. You must be at least **13 years old** to create one.
+**You can use it with or without an account** — without one, your training stays only on your
+device and nothing is collected. An account (optional) adds cross-device sync. You must be at
+least **13 years old** to create an account.
 
 ## What we collect
 
@@ -90,4 +92,4 @@ app and on our website.
 
 ## Contact
 
-Questions or requests: **support@REPLACE-ME.example**
+Questions or requests: **wildoddssupport@gmail.com**

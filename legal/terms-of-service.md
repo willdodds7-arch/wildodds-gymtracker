@@ -1,15 +1,15 @@
 # Terms of Service
 
-**Version 1.0 — Last updated 13 July 2026**
+**Version 1.0 — Last updated 19 July 2026**
 
 These Terms govern your use of Wild Odds Gym Tracker ("the app"). By creating an account and using
 the app, you agree to them.
 
 ## Your account
 
-You must be at least **13 years old** to use the app. You're responsible for keeping your sign-in
-credentials secure and for activity under your account. Provide accurate information when signing
-up.
+The app can be used without an account. If you choose to create one, you must be at least **13
+years old**. You're responsible for keeping your sign-in credentials secure and for activity under
+your account. Provide accurate information when signing up.
 
 ## Acceptable use
 
@@ -56,10 +56,11 @@ unlawfully. On deletion, your account and data are removed as described in the P
 
 ## Governing law
 
-> **[GOVERNING LAW — TO BE COMPLETED BY THE OPERATOR]**
-> Specify the governing law and the courts/jurisdiction that apply to these Terms (for example,
-> the state/country where you are based). This placeholder must be replaced before public release.
+These Terms are governed by the laws of the Australian Capital Territory, Australia, without
+regard to conflict-of-laws principles. You and we submit to the exclusive jurisdiction of the
+courts of the Australian Capital Territory, Australia for any dispute arising out of or relating
+to these Terms or the app.
 
 ## Contact
 
-**support@REPLACE-ME.example**
+**wildoddssupport@gmail.com**

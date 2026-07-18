@@ -3,10 +3,12 @@ package com.wildodds.gymtracker.ui.auth
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.Text
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import com.wildodds.gymtracker.ui.theme.AppTheme
 import io.github.jan.supabase.gotrue.SessionSource
@@ -19,9 +21,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 /**
- * Phase 2 gate: "main graph unreachable without a session (navigation test)". Drives the real
- * AuthGate + onboarding composables with a [FakeAuthActions] — the real AuthViewModel constructs
- * the Supabase client, which can't initialise its session storage on the JVM.
+ * Onboarding navigation test for the thin, account-OPTIONAL intro: welcome → account → tour. The
+ * no-account path reaches the app in three taps; the 13+ age gate and consent live only on the
+ * "create account" branch. Driven with a [FakeAuthActions] (the real AuthViewModel builds the
+ * Supabase client, which can't init its session storage on the JVM).
  */
 @RunWith(RobolectricTestRunner::class)
 class AuthGateNavigationTest {
@@ -38,6 +41,7 @@ class AuthGateNavigationTest {
     override val ageGateBlocked = MutableStateFlow(false)
     override val form = MutableStateFlow(AuthFormState())
 
+    var finished = false
     override fun recordAgeGateResult(oldEnough: Boolean) {
       if (oldEnough) ageGatePassed.value = true else ageGateBlocked.value = true
     }
@@ -48,7 +52,7 @@ class AuthGateNavigationTest {
     override fun updatePassword(newPassword: String, onDone: () -> Unit) {}
     override fun clearError() {}
     override fun setAnalyticsConsent(granted: Boolean) {}
-    override fun finishOnboarding(username: String?) {}
+    override fun finishOnboarding(username: String?) { finished = true; onboardingComplete.value = true }
     override fun beginFirstBackup(username: String?) {}
   }
 
@@ -65,50 +69,61 @@ class AuthGateNavigationTest {
     return SessionStatus.Authenticated(session, SessionSource.Storage)
   }
 
+  // Onboarding screens scroll (OnboardingScaffold), and buttons can sit below the small test
+  // viewport — scroll a node into view before touching it.
+  private fun ComposeContentTestRule.tap(tag: String) = onNodeWithTag(tag).performScrollTo().performClick()
+  private fun ComposeContentTestRule.type(tag: String, text: String) =
+    onNodeWithTag(tag).performScrollTo().performTextInput(text)
+
   @Test
-  fun withoutASession_onboardingShows_andMainGraphIsUnreachable() {
+  fun freshLaunch_showsTheWelcome_notTheApp() {
     setGate(FakeAuthActions())
-    composeRule.onNodeWithTag("welcome_continue").assertIsDisplayed()
+    composeRule.onNodeWithTag("welcome_continue").assertExists()
     composeRule.onNodeWithText("MAIN_APP_CONTENT").assertDoesNotExist()
   }
 
   @Test
-  fun underThirteen_isHardBlocked_beforeAnyAccountStep() {
+  fun skippingTheAccount_reachesTheApp_inThreeTaps_noAgeGateNoConsent() {
     setGate(FakeAuthActions())
-    composeRule.onNodeWithTag("welcome_continue").performClick()
-    composeRule.onNodeWithTag("age_day").performTextInput("1")
-    composeRule.onNodeWithTag("age_month").performTextInput("1")
-    composeRule.onNodeWithTag("age_year").performTextInput("2020")
-    composeRule.onNodeWithTag("age_continue").performClick()
-
-    composeRule.onNodeWithTag("age_blocked").assertIsDisplayed()
-    // No sign-up form, no main app — nowhere to go from the block screen.
+    composeRule.tap("welcome_continue")   // → account
+    composeRule.tap("account_skip")       // → tour (no age gate, no auth)
     composeRule.onNodeWithTag("auth_title").assertDoesNotExist()
-    composeRule.onNodeWithText("MAIN_APP_CONTENT").assertDoesNotExist()
+    composeRule.onNodeWithTag("consent_title").assertDoesNotExist()
+    composeRule.tap("tour_skip")          // → finish → app
+    composeRule.onNodeWithText("MAIN_APP_CONTENT").assertIsDisplayed()
   }
 
   @Test
-  fun ofAge_reachesTheSignInForm_butStillNotTheMainGraph() {
+  fun ageGateAndConsentAppearOnlyOnTheCreateAccountBranch() {
     setGate(FakeAuthActions())
-    composeRule.onNodeWithTag("welcome_continue").performClick()
-    composeRule.onNodeWithTag("age_day").performTextInput("1")
-    composeRule.onNodeWithTag("age_month").performTextInput("1")
-    composeRule.onNodeWithTag("age_year").performTextInput("1995")
-    composeRule.onNodeWithTag("age_continue").performClick()
-
-    composeRule.onNodeWithTag("auth_title").assertIsDisplayed()
-    composeRule.onNodeWithText("MAIN_APP_CONTENT").assertDoesNotExist()
+    composeRule.tap("welcome_continue")
+    composeRule.tap("account_create")     // → age gate
+    composeRule.type("age_day", "1")
+    composeRule.type("age_month", "1")
+    composeRule.type("age_year", "1995")
+    composeRule.tap("age_continue")
+    composeRule.onNodeWithTag("auth_title").assertExists()   // reaches the sign-in form
   }
 
   @Test
-  fun authenticatedButOnboardingIncomplete_showsConsent_notMain() {
-    setGate(FakeAuthActions(initialStatus = authenticated()))
-    composeRule.onNodeWithTag("consent_title").assertIsDisplayed()
-    composeRule.onNodeWithText("MAIN_APP_CONTENT").assertDoesNotExist()
+  fun underThirteen_cannotMakeAnAccount_butCanStillUseTheAppLocally() {
+    setGate(FakeAuthActions())
+    composeRule.tap("welcome_continue")
+    composeRule.tap("account_create")
+    composeRule.type("age_day", "1")
+    composeRule.type("age_month", "1")
+    composeRule.type("age_year", "2020")
+    composeRule.tap("age_continue")
+
+    composeRule.onNodeWithTag("age_blocked_signup").assertExists()
+    composeRule.onNodeWithTag("auth_title").assertDoesNotExist()   // no account created
+    composeRule.tap("age_blocked_continue") // → tour
+    composeRule.tap("tour_skip")
+    composeRule.onNodeWithText("MAIN_APP_CONTENT").assertIsDisplayed()
   }
 
   @Test
-  fun authenticatedWithOnboardingComplete_showsMain() {
+  fun onceOnboardingComplete_theAppShows() {
     val fake = FakeAuthActions(initialStatus = authenticated())
     fake.onboardingComplete.value = true
     setGate(fake)
@@ -116,12 +131,14 @@ class AuthGateNavigationTest {
   }
 
   @Test
-  fun consentScreen_acceptAndDeclineAreBothPresent_andDeclineMovesOn() {
-    val fake = FakeAuthActions(initialStatus = authenticated())
-    setGate(fake)
-    composeRule.onNodeWithTag("consent_accept").assertIsDisplayed()
-    composeRule.onNodeWithTag("consent_decline").assertIsDisplayed()
-    composeRule.onNodeWithTag("consent_decline").performClick()
-    composeRule.onNodeWithTag("username_field").assertIsDisplayed()
+  fun tour_canBeTakenThroughToTheApp() {
+    setGate(FakeAuthActions())
+    composeRule.tap("welcome_continue")
+    composeRule.tap("account_skip")
+    composeRule.tap("tour_take")          // enter the tour cards
+    composeRule.tap("tour_next")          // card 1 → 2
+    composeRule.tap("tour_next")          // card 2 → 3
+    composeRule.tap("tour_next")          // "Start training" → finish
+    composeRule.onNodeWithText("MAIN_APP_CONTENT").assertIsDisplayed()
   }
 }
