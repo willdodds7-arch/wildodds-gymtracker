@@ -87,10 +87,6 @@ fun SettingsScreen(
   val claudeApiKey  by vm.claudeApiKey.collectAsStateWithLifecycle()
   val toggleStates  by vm.toggleStates.collectAsStateWithLifecycle()
 
-  var showPrivacySheet by remember { mutableStateOf(false) }
-  if (showPrivacySheet) {
-  PrivacyPolicySheet(onDismiss = { showPrivacySheet = false })
-  }
   var showExportSheet by remember { mutableStateOf(false) }
   if (showExportSheet) {
   ExportSheet(onDismiss = { showExportSheet = false })
@@ -136,6 +132,18 @@ fun SettingsScreen(
   // Account (Phase 2) + sync (Phase 3)
   val analyticsConsent by vm.analyticsConsent.collectAsStateWithLifecycle()
   val syncState by vm.syncState.collectAsStateWithLifecycle()
+  val signedInEmail by vm.signedInEmail.collectAsStateWithLifecycle()
+  // Refresh when returning here (e.g. straight after signing in via the account_auth flow).
+  LaunchedEffect(Unit) { vm.refreshAccountState() }
+  var showAccountInfo by remember { mutableStateOf(false) }
+  if (showAccountInfo) {
+  AlertDialog(
+  onDismissRequest = { showAccountInfo = false },
+  title = { Text("Account") },
+  text = { Text("Signed in as ${signedInEmail ?: "…"}.\n\nYour training data syncs to this account. Sign out or delete the account from the rows below; export a copy anytime.") },
+  confirmButton = { TextButton(onClick = { showAccountInfo = false }) { Text("OK") } }
+  )
+  }
 
   // Account lifecycle (Phase 5): export via SAF create-document.
   val accountVm: com.wildodds.gymtracker.ui.account.AccountViewModel = viewModel()
@@ -237,6 +245,11 @@ fun SettingsScreen(
   }
   if (isExpanded) {
   items(groupEntries, key = { it.key }) { entry ->
+  // Account-scoped rows would be dead controls with no session — hide rather than disable.
+  val needsAccount = entry.control == SettingControl.SIGN_OUT ||
+  entry.control == SettingControl.DELETE_ACCOUNT ||
+  entry.control == SettingControl.SYNC_NOW
+  if (needsAccount && signedInEmail == null) return@items
   when (entry.control) {
   SettingControl.TOGGLE -> ToggleRow(
   title    = entry.title,
@@ -279,10 +292,6 @@ fun SettingsScreen(
   onInstall = { openHealthConnectInStore(context) },
   onManage  = { openHealthConnectApp(context) }
   )
-  SettingControl.PRIVACY_POLICY -> ActionRow(
-  title = entry.title, summary = entry.summary,
-  tint = accent, onClick = { showPrivacySheet = true }
-  )
   SettingControl.HABITS -> ActionRow(
   title = entry.title, summary = entry.summary,
   tint = accent, onClick = { navController?.navigate("habits") }
@@ -296,9 +305,13 @@ fun SettingsScreen(
   tint = accent, onClick = { showReminderSheet = true }
   )
   SettingControl.ACCOUNT -> ActionRow(
-  title = entry.title,
-  summary = vm.signedInEmail?.let { "Signed in as $it" } ?: entry.summary,
-  tint = accent, onClick = { /* account management lands in Phase 5 */ }
+  title = if (signedInEmail == null) "Sign in / Create account" else entry.title,
+  summary = signedInEmail?.let { "Signed in as $it" }
+  ?: "Optional — adds cross-device sync. Your data stays on this phone either way.",
+  tint = accent,
+  onClick = {
+  if (signedInEmail == null) navController?.navigate("account_auth") else showAccountInfo = true
+  }
   )
   SettingControl.SHARE_USAGE_STATS -> ToggleRow(
   title    = entry.title,
@@ -652,47 +665,6 @@ private fun Footer() {
   fontWeight = FontWeight.SemiBold)
   Text("v${BuildConfig.VERSION_NAME}", color = MaterialTheme.colorScheme.onSurfaceVariant,
   style = MaterialTheme.typography.labelMedium)
-  }
-}
-
-// ── Privacy ──────────────────────────────────────────────────────────────────────
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun PrivacyPolicySheet(onDismiss: () -> Unit) {
-  ModalBottomSheet(onDismissRequest = onDismiss) {
-  Column(Modifier.fillMaxWidth().heightIn(max = 560.dp).verticalScroll(rememberScrollState())
-  .padding(horizontal = 24.dp).padding(bottom = 36.dp)) {
-  Text("Privacy & data", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold,
-  color = MaterialTheme.colorScheme.onBackground)
-  Spacer(Modifier.height(6.dp))
-  Text("PLACEHOLDER — not yet a legal privacy policy.", style = MaterialTheme.typography.labelMedium,
-  color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
-  Spacer(Modifier.height(12.dp))
-  Text(
-  "Wild Odds Gym Tracker is fully offline. Your programs, logs and habits are stored only on " +
-  "your device — there are no accounts and nothing is ever sent to a server. Heart-rate and " +
-  "recovery data read via Health Connect stays on your device and is used only for your " +
-  "summaries. Use Export data to take a copy of everything with you at any time.",
-  style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-  Spacer(Modifier.height(16.dp))
-  Text("Before public release (TODO):", style = MaterialTheme.typography.titleSmall,
-  fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground)
-  Spacer(Modifier.height(6.dp))
-  listOf(
-  "A real, reviewed privacy policy + terms, linked here.",
-  "Explicit health-data consent before reading Health Connect data.",
-  "Clear statement of what's stored, where, and for how long."
-  ).forEach { item ->
-  Text("•  $item", style = MaterialTheme.typography.bodyMedium,
-  color = MaterialTheme.colorScheme.onSurfaceVariant)
-  Spacer(Modifier.height(4.dp))
-  }
-  Spacer(Modifier.height(8.dp))
-  Text("See docs/PRIVACY_COMPLIANCE_TODO.md in the project for the full checklist.",
-  style = MaterialTheme.typography.labelSmall,
-  color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
-  }
   }
 }
 

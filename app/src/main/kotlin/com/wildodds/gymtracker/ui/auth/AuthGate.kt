@@ -1,5 +1,6 @@
 package com.wildodds.gymtracker.ui.auth
 
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,10 +54,20 @@ fun AuthGate(
   val status by actions.sessionStatus.collectAsState()
   val onboardingComplete by actions.onboardingComplete.collectAsState()
 
-  when (gateDestination(status, onboardingComplete)) {
-    GateDestination.LOADING -> GateLoadingScreen()
-    GateDestination.ONBOARDING -> OnboardingFlow(actions)
-    GateDestination.MAIN -> mainContent()
+  // Crossfade between gate destinations so intro → app (and sign-out transitions) never hard-cut.
+  androidx.compose.animation.AnimatedContent(
+    targetState = gateDestination(status, onboardingComplete),
+    transitionSpec = {
+      androidx.compose.animation.fadeIn(androidx.compose.animation.core.tween(300)) togetherWith
+        androidx.compose.animation.fadeOut(androidx.compose.animation.core.tween(200))
+    },
+    label = "authGate"
+  ) { destination ->
+    when (destination) {
+      GateDestination.LOADING -> GateLoadingScreen()
+      GateDestination.ONBOARDING -> OnboardingFlow(actions)
+      GateDestination.MAIN -> mainContent()
+    }
   }
 
   val pendingReset by RecoveryFlow.pendingPasswordReset.collectAsState()

@@ -54,9 +54,13 @@ fun AppNavigation() {
     val navController = rememberNavController()
 
     NavHost(
-        navController    = navController,
-        startDestination = "main",
-        modifier         = Modifier.fillMaxSize()
+        navController      = navController,
+        startDestination   = "main",
+        modifier           = Modifier.fillMaxSize(),
+        enterTransition    = { NavTransitions.enter },
+        exitTransition     = { NavTransitions.exit },
+        popEnterTransition = { NavTransitions.popEnter },
+        popExitTransition  = { NavTransitions.popExit }
     ) {
         // Single composable hosts all tabs — no per-tab back-stack entries,
         // no two-way pager↔nav sync, no freeze on recomposition.
@@ -99,6 +103,9 @@ fun AppNavigation() {
         }
         composable("settings") {
             SettingsScreen(navController = navController)
+        }
+        composable("account_auth") {
+            com.wildodds.gymtracker.ui.auth.AccountAuthFlow(onDone = { navController.popBackStack() })
         }
         composable("delete_account") {
             com.wildodds.gymtracker.ui.account.DeleteAccountScreen(navController = navController)
@@ -149,6 +156,9 @@ private fun MainPagerScreen(
     ) {
         HorizontalPager(
             state    = pagerState,
+            // Compose neighbouring tabs ahead of time so the first swipe never stutters on a
+            // cold page composition.
+            beyondBoundsPageCount = 1,
             modifier = Modifier
                 .fillMaxSize()
                 .navigationBarsPadding()

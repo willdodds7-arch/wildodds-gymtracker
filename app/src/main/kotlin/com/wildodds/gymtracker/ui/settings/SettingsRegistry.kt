@@ -7,7 +7,7 @@ package com.wildodds.gymtracker.ui.settings
  */
 enum class SettingControl {
   TOGGLE, ACCENT, TIMER_SOUND, API_KEY, CLEAR_DATA, DOWNLOAD_TEMPLATE, WEARABLE_CONNECT,
-  PRIVACY_POLICY, EXPORT_DATA, REMINDER_SETTINGS, HABITS, ACCOUNT, SIGN_OUT, SHARE_USAGE_STATS,
+  EXPORT_DATA, REMINDER_SETTINGS, HABITS, ACCOUNT, SIGN_OUT, SHARE_USAGE_STATS,
   SYNC_NOW, EXPORT_ACCOUNT, DELETE_ACCOUNT, LEGAL_DOC
 }
 
@@ -68,8 +68,7 @@ object SettingsRegistry {
   const val REST_DAY_RECS = "feat_rest_day_recs"
   const val ADAPTIVE_PLAN = "feat_adaptive_plan"
 
-  // Privacy info + local data export + health write-back (all local; the app never touches a server).
-  const val PRIVACY_POLICY = "action_privacy_policy"
+  // Local data export + health write-back settings keys.
   const val WRITE_TO_HEALTH_CONNECT = "feat_write_to_health_connect"
   const val EXPORT_DATA = "action_export_data"
 

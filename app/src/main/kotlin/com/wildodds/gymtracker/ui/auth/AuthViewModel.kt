@@ -110,8 +110,7 @@ class AuthViewModel(app: Application) : AndroidViewModel(app), AuthActions {
   fun signOut() {
     viewModelScope.launch(Dispatchers.IO) {
       repo.signOut()
-      // Next sign-in re-runs consent/username; local Room data is deliberately untouched.
-      prefs.setOnboardingComplete(false)
+      // Accounts are optional: signing out keeps the user in the app with their local data.
     }
   }
 

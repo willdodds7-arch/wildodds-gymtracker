@@ -44,6 +44,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.withStyle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -64,7 +65,11 @@ fun OnboardingFlow(actions: AuthActions) {
   NavHost(
     navController = navController,
     startDestination = "welcome",
-    modifier = Modifier.fillMaxSize()
+    modifier = Modifier.fillMaxSize(),
+    enterTransition = { com.wildodds.gymtracker.ui.navigation.NavTransitions.enter },
+    exitTransition = { com.wildodds.gymtracker.ui.navigation.NavTransitions.exit },
+    popEnterTransition = { com.wildodds.gymtracker.ui.navigation.NavTransitions.popEnter },
+    popExitTransition = { com.wildodds.gymtracker.ui.navigation.NavTransitions.popExit }
   ) {
     composable("welcome") { WelcomeScreen(onContinue = { navController.navigate("account") }) }
 
@@ -630,5 +635,64 @@ private fun ConsentScreen(navController: NavHostController, onChoice: (Boolean) 
       shape = RoundedCornerShape(12.dp)
     ) { Text("Decline", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground) }
     Spacer(Modifier.height(40.dp))
+  }
+}
+
+// ── Sign in / create account from Settings (post-onboarding) ───────────────────
+
+/**
+ * The account branch of onboarding, reachable any time from Settings → Account. Same rules as at
+ * first launch: 13+ age gate before an account is created, consent asked once after the first
+ * sign-in. [onDone] fires when the flow finishes (signed in, or backed out of an under-13 block).
+ */
+@Composable
+fun AccountAuthFlow(onDone: () -> Unit, actions: AuthActions = viewModel<AuthViewModel>()) {
+  val navController = rememberNavController()
+  val agePassed by actions.ageGatePassed.collectAsState()
+  val context = androidx.compose.ui.platform.LocalContext.current
+  val consent by remember {
+    com.wildodds.gymtracker.data.datastore.ThemePreferences(context).analyticsConsent
+  }.collectAsState(initial = null)
+
+  NavHost(
+    navController = navController,
+    startDestination = if (agePassed) "auth" else "age_gate",
+    modifier = Modifier.fillMaxSize(),
+    enterTransition = { com.wildodds.gymtracker.ui.navigation.NavTransitions.enter },
+    exitTransition = { com.wildodds.gymtracker.ui.navigation.NavTransitions.exit },
+    popEnterTransition = { com.wildodds.gymtracker.ui.navigation.NavTransitions.popEnter },
+    popExitTransition = { com.wildodds.gymtracker.ui.navigation.NavTransitions.popExit }
+  ) {
+    composable("age_gate") {
+      AgeGateScreen(
+        onResult = { oldEnough ->
+          actions.recordAgeGateResult(oldEnough)
+          navController.navigate(if (oldEnough) "auth" else "age_blocked_signup")
+        }
+      )
+    }
+    composable("age_blocked_signup") { AgeBlockedSignupScreen(onContinueWithout = onDone) }
+    composable("auth") {
+      val status by actions.sessionStatus.collectAsState()
+      LaunchedEffect(status, consent) {
+        if (status is io.github.jan.supabase.gotrue.SessionStatus.Authenticated) {
+          // Consent is asked exactly once; a returning user who already answered goes straight out.
+          if (consent == "unset") navController.navigate("consent") { popUpTo("auth") { inclusive = true } }
+          else if (consent != null) onDone()
+        }
+      }
+      AuthScreen(actions, navController)
+    }
+    composable("consent") {
+      ConsentScreen(
+        navController = navController,
+        onChoice = { granted ->
+          actions.setAnalyticsConsent(granted)
+          actions.beginFirstBackup(null)
+          onDone()
+        }
+      )
+    }
+    legalRoute(navController)
   }
 }

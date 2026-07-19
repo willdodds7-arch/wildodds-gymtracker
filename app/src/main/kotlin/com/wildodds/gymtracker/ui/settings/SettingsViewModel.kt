@@ -81,7 +81,18 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
   // Settings test (and any exotic runtime failure) rendering the screen instead of crashing.
   private val authRepo by lazy { com.wildodds.gymtracker.data.backend.AuthRepository() }
 
-  val signedInEmail: String? get() = runCatching { authRepo.currentUserEmail }.getOrNull()
+  // Observable so the Account rows update the moment sign-in/out completes (a plain getter only
+  // refreshed on recomposition). Guarded: constructing the Supabase client can fail on JVM tests.
+  private val _signedInEmail = MutableStateFlow<String?>(null)
+  val signedInEmail: StateFlow<String?> = _signedInEmail.asStateFlow()
+
+  fun refreshAccountState() {
+  viewModelScope.launch(Dispatchers.IO) {
+  _signedInEmail.value = runCatching { authRepo.currentUserEmail }.getOrNull()
+  }
+  }
+
+  init { refreshAccountState() }
 
   /** "unset" | "granted" | "denied" — the Settings toggle shows granted as ON, anything else OFF. */
   val analyticsConsent: StateFlow<String> = prefs.analyticsConsent
@@ -112,12 +123,12 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
   runCatching { com.wildodds.gymtracker.data.sync.SyncScheduler.syncNow(getApplication()) }
   }
 
-  /** Signs out on this device only; local Room data is untouched. Onboarding (consent/username)
-   *  re-runs on the next sign-in. */
+  /** Signs out on this device only. Local Room data is untouched and — accounts being optional —
+   *  the user stays right where they are in the app; no re-running the intro. */
   fun signOut() {
   viewModelScope.launch(Dispatchers.IO) {
   runCatching { authRepo.signOut() }
-  prefs.setOnboardingComplete(false)
+  _signedInEmail.value = null
   }
   }
 
