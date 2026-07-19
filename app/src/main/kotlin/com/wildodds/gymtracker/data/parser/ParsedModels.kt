@@ -49,5 +49,35 @@ data class ParsedProgram(
   val coachBio: String = "",
   val daysPerWeek: Int = 0,
   val split: String = "",
-  val style: String = ""
+  val style: String = "",
+  // Offer a main-lift picker when starting (the Russian routine run on bench/OHP/deadlift).
+  val liftSwappable: Boolean = false
 )
+
+/**
+ * Run a lift-swappable program (e.g. the Russian Squat Routine) on a different main lift: the
+ * dominant %1RM-prescribed exercise is renamed to [target]'s canonical movement everywhere, and the
+ * program title gains the lift, so 1RM prefill + the missing-1RM prompt follow the chosen lift
+ * automatically (both key off the exercise NAME). No-op if the program already runs on [target].
+ */
+fun ParsedProgram.swappedToLift(target: com.wildodds.gymtracker.data.profile.MainLift): ParsedProgram {
+  val primaryName = sessions.asSequence()
+    .flatMap { it.exercises.asSequence() }
+    .filter { it.pct1rmTarget.isNotBlank() }
+    .groupingBy { it.name }.eachCount()
+    .maxByOrNull { it.value }?.key ?: return this
+  if (com.wildodds.gymtracker.data.profile.MainLift.forExercise(primaryName) == target) return this
+
+  val targetName = when (target) {
+    com.wildodds.gymtracker.data.profile.MainLift.SQUAT -> "Back Squat"
+    com.wildodds.gymtracker.data.profile.MainLift.BENCH -> "Bench Press"
+    com.wildodds.gymtracker.data.profile.MainLift.DEADLIFT -> "Deadlift"
+    com.wildodds.gymtracker.data.profile.MainLift.OHP -> "Overhead Press"
+  }
+  return copy(
+    name = "$name — ${target.label}",
+    sessions = sessions.map { s ->
+      s.copy(exercises = s.exercises.map { e -> if (e.name == primaryName) e.copy(name = targetName) else e })
+    }
+  )
+}

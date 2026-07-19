@@ -74,7 +74,10 @@ class DefaultProgramJsonParser(private val context: Context) {
     // Override the repeat length for a single-week (`days`) block. 0 = default block length.
     @SerializedName("block_weeks") val blockWeeks: Int = 0,
     // Per-week shape: every week listed explicitly (takes precedence over `days`).
-    val weeks: List<JsonWeek> = emptyList()
+    val weeks: List<JsonWeek> = emptyList(),
+    // The whole program can be run on a different main lift (e.g. Russian Squat Routine on OHP):
+    // the start flow offers a lift picker and rewrites the main-lift exercises before import.
+    @SerializedName("lift_swappable") val liftSwappable: Boolean = false
   )
 
   internal data class JsonWeek(
@@ -166,6 +169,7 @@ internal fun DefaultProgramJsonParser.JsonBlock.toParsedProgram(index: Int): Par
     daysPerWeek = daysPerWeek,
     split = split.trim(),
     style = style.trim(),
-    repeatWeeks = if (perWeek) 1 else weekCount
+    repeatWeeks = if (perWeek) 1 else weekCount,
+    liftSwappable = liftSwappable
   )
 }

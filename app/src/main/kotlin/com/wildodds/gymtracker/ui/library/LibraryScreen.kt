@@ -122,11 +122,23 @@ fun LibraryScreen(
     }
   )
   }
+  // %1RM programs pass through the start gate (lift picker for swappable programs + a prompt
+  // for any 1RMs the percentages need but the user hasn't set).
+  var pendingStart by remember { mutableStateOf<PendingProgramStart?>(null) }
+  ProgramStartGate(
+  pending = pendingStart,
+  onDismiss = { pendingStart = null },
+  onProceed = { prog, activate ->
+  pendingStart = null
+  if (activate) vm.setDefaultAsActive(prog) else vm.addDefaultToLibrary(prog)
+  }
+  )
+
   if (showBrowseSheet) {
   BrowseDefaultsSheet(
   programs  = defaultPrograms,
-  onAddToLibrary = { vm.addDefaultToLibrary(it); showBrowseSheet = false },
-  onSetAsActive  = { vm.setDefaultAsActive(it); showBrowseSheet = false },
+  onAddToLibrary = { pendingStart = PendingProgramStart(it, activate = false); showBrowseSheet = false },
+  onSetAsActive  = { pendingStart = PendingProgramStart(it, activate = true); showBrowseSheet = false },
   onDismiss  = { showBrowseSheet = false }
   )
   }

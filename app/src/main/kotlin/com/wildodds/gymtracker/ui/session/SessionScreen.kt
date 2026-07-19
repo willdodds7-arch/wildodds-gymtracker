@@ -39,6 +39,8 @@ import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Flight
+import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.FullscreenExit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Link
@@ -63,6 +65,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextRange
@@ -582,6 +585,9 @@ fun SessionScreen(
   if (featTimer && timerState.isVisible) {
   TimerPanel(timerState = timerState, vm = vm)
   }
+  if (featTimer && timerState.isFullscreen) {
+  FullscreenTimerOverlay(timerState = timerState, vm = vm)
+  }
 
   // ── "+ Add Exercise" row ─────────────────────────────────────────────
   if (featAddEx && state.exercises.isNotEmpty()) {
@@ -709,7 +715,11 @@ private fun TimerPanel(timerState: SessionViewModel.TimerState, vm: SessionViewM
   fun Int.toMmSs() = "%d:%02d".format(this / 60, this % 60)
   val isRest = timerState.mode == SessionViewModel.TimerMode.REST
   val displaySeconds = timerState.currentSeconds
+  val inDelay = timerState.delayRemaining > 0
+  val timeText = if (inDelay) "-${timerState.delayRemaining}"
+  else "%d:%02d".format(displaySeconds / 60, displaySeconds % 60)
   val timeColor = when {
+  inDelay -> accent
   isRest && displaySeconds <= 10 && timerState.isRunning -> MaterialTheme.colorScheme.error
   timerState.isRunning -> accent
   else -> MaterialTheme.colorScheme.onBackground
@@ -742,8 +752,8 @@ private fun TimerPanel(timerState: SessionViewModel.TimerState, vm: SessionViewM
   }
   }
 
-  // Time display
-  Text(displaySeconds.toMmSs(), fontSize = 26.sp, fontWeight = FontWeight.Bold,
+  // Time display (shows the -10 … -1 lead-in during a delayed start)
+  Text(timeText, fontSize = 26.sp, fontWeight = FontWeight.Bold,
   color = timeColor, modifier = Modifier.padding(horizontal = 4.dp))
 
   // REST duration adjuster
@@ -762,13 +772,25 @@ private fun TimerPanel(timerState: SessionViewModel.TimerState, vm: SessionViewM
 
   Spacer(Modifier.weight(1f))
 
-  // Play / Pause
-  IconButton(onClick = { if (timerState.isRunning) vm.pauseTimer() else vm.startTimer() },
+  // Delayed start: 10-second lead-in (counts -10 … -1, then the timer begins)
+  Surface(
+  onClick = { if (!timerState.isRunning && !inDelay) vm.startTimerWithDelay(10) },
+  shape = RoundedCornerShape(16.dp),
+  color = if (inDelay) accent.copy(alpha = 0.15f) else Color.Transparent,
+  border = androidx.compose.foundation.BorderStroke(1.dp, if (inDelay) accent else MaterialTheme.colorScheme.outline),
+  modifier = Modifier.testTag("timer_delay_start")
+  ) {
+  Text("10s", modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp),
+  color = if (inDelay) accent else MaterialTheme.colorScheme.onSurfaceVariant,
+  style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+  }
+  // Play / Pause (pausing during the lead-in cancels it)
+  IconButton(onClick = { if (timerState.isRunning || inDelay) vm.pauseTimer() else vm.startTimer() },
   modifier = Modifier.size(36.dp)) {
   Icon(
-  if (timerState.isRunning) Icons.Default.Pause else Icons.Default.PlayArrow,
+  if (timerState.isRunning || inDelay) Icons.Default.Pause else Icons.Default.PlayArrow,
   null,
-  tint  = if (timerState.isRunning) MaterialTheme.colorScheme.onSurfaceVariant else accent,
+  tint  = if (timerState.isRunning || inDelay) MaterialTheme.colorScheme.onSurfaceVariant else accent,
   modifier = Modifier.size(20.dp)
   )
   }
@@ -777,6 +799,78 @@ private fun TimerPanel(timerState: SessionViewModel.TimerState, vm: SessionViewM
   Icon(Icons.Default.Refresh, null,
   tint  = MaterialTheme.colorScheme.onSurfaceVariant,
   modifier = Modifier.size(18.dp))
+  }
+  // Fullscreen
+  IconButton(onClick = { vm.toggleTimerFullscreen() },
+  modifier = Modifier.size(36.dp).testTag("timer_fullscreen")) {
+  Icon(Icons.Default.Fullscreen, "Fullscreen timer",
+  tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
+  }
+  }
+  }
+}
+
+/**
+ * Full-screen timer overlay: giant digits readable from across the gym, with the same
+ * start/pause/reset/10s-delay controls. Back or the shrink icon returns to the compact bar.
+ */
+@Composable
+private fun FullscreenTimerOverlay(timerState: SessionViewModel.TimerState, vm: SessionViewModel) {
+  val accent = LocalAccentColor.current
+  val isRest = timerState.mode == SessionViewModel.TimerMode.REST
+  val inDelay = timerState.delayRemaining > 0
+  val timeText = if (inDelay) "-${timerState.delayRemaining}"
+  else "%d:%02d".format(timerState.currentSeconds / 60, timerState.currentSeconds % 60)
+  val timeColor = when {
+  inDelay -> accent
+  isRest && timerState.currentSeconds <= 10 && timerState.isRunning -> MaterialTheme.colorScheme.error
+  timerState.isRunning -> accent
+  else -> MaterialTheme.colorScheme.onBackground
+  }
+
+  androidx.compose.ui.window.Dialog(
+  onDismissRequest = { vm.toggleTimerFullscreen() },
+  properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
+  ) {
+  Box(
+  Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).testTag("timer_fullscreen_overlay"),
+  contentAlignment = Alignment.Center
+  ) {
+  Column(horizontalAlignment = Alignment.CenterHorizontally) {
+  Text(if (isRest) "REST" else "STOPWATCH",
+  style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+  Text(timeText, fontSize = 120.sp, fontWeight = FontWeight.Bold, color = timeColor)
+  if (inDelay) {
+  Text("get ready…", style = MaterialTheme.typography.bodyMedium, color = accent)
+  }
+  Spacer(Modifier.height(24.dp))
+  Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(18.dp)) {
+  Surface(
+  onClick = { if (!timerState.isRunning && !inDelay) vm.startTimerWithDelay(10) },
+  shape = RoundedCornerShape(20.dp),
+  color = if (inDelay) accent.copy(alpha = 0.15f) else Color.Transparent,
+  border = androidx.compose.foundation.BorderStroke(1.dp, if (inDelay) accent else MaterialTheme.colorScheme.outline)
+  ) {
+  Text("10s", modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
+  color = if (inDelay) accent else MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
+  }
+  IconButton(onClick = { if (timerState.isRunning || inDelay) vm.pauseTimer() else vm.startTimer() },
+  modifier = Modifier.size(64.dp)) {
+  Icon(
+  if (timerState.isRunning || inDelay) Icons.Default.Pause else Icons.Default.PlayArrow,
+  null, tint = accent, modifier = Modifier.size(44.dp)
+  )
+  }
+  IconButton(onClick = { vm.resetTimer() }, modifier = Modifier.size(52.dp)) {
+  Icon(Icons.Default.Refresh, null,
+  tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(30.dp))
+  }
+  IconButton(onClick = { vm.toggleTimerFullscreen() },
+  modifier = Modifier.size(52.dp).testTag("timer_fullscreen_exit")) {
+  Icon(Icons.Default.FullscreenExit, "Exit fullscreen",
+  tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(30.dp))
+  }
+  }
   }
   }
   }

@@ -394,15 +394,18 @@ class SessionViewModel(app: Application, savedStateHandle: SavedStateHandle) : A
   (exercise.sets * recoveryAdjustment!!.volumeScale).roundToInt().coerceIn(1, exercise.sets)
   else exercise.sets
 
-  // Program-prescribed %1RM working weight (e.g. "Bench Press @ 80%") derived from the user's
-  // configured 1RM. Takes precedence over week-to-week carry-forward so a percentage-based
-  // program (e.g. Candito's weekly wave) prefills each week's prescribed load.
-  val pct1rmPrefill = pct1rmPrefillWeight(exercise.name, exercise.pct1rmTarget, userOneRms)
+  // Program-prescribed %1RM working weights derived from the user's configured 1RM — per SET,
+  // because slash-lists ("58.5/67.5/76.5%", i.e. 5/3/1's wave) prescribe a different percentage
+  // for each set. Takes precedence over week-to-week carry-forward so a percentage-based
+  // program (Candito / 5/3/1 / Russian / Calgary) prefills each week's prescribed loads.
+  val pct1rmPrefills = com.wildodds.gymtracker.data.profile.PctPrefill.weights(
+  exercise.name, exercise.pct1rmTarget, setCount, userOneRms)
 
   val sets = (1..setCount).map { setNum ->
   val existing = currentSets.find { it.setNumber == setNum }
   val prev  = prevSets.find { it.setNumber == setNum }
   val adj  = adjustedPrev[setNum]
+  val pct1rmPrefill = pct1rmPrefills?.getOrNull(setNum - 1)
   val prefillWeight = (adj?.weightKg ?: prev?.weightKg)?.let { scaleWeight(it, loadScale) }
   val prefillReps  = adj?.reps ?: prev?.reps
   SetRowState(
@@ -895,7 +898,11 @@ class SessionViewModel(app: Application, savedStateHandle: SavedStateHandle) : A
   val mode: TimerMode = TimerMode.REST,
   val restDuration: Int = 90,   // seconds for REST countdown
   val currentSeconds: Int = 0,  // REST = remaining, STOPWATCH = elapsed
-  val isRunning: Boolean = false
+  val isRunning: Boolean = false,
+  // Fullscreen overlay for across-the-gym visibility.
+  val isFullscreen: Boolean = false,
+  // Delayed start: counts -10, -9 … -1, then the timer proper begins. 0 = no delay pending.
+  val delayRemaining: Int = 0
   )
 
   private val _timerState = MutableStateFlow(TimerState())
@@ -909,6 +916,31 @@ class SessionViewModel(app: Application, savedStateHandle: SavedStateHandle) : A
   fun toggleTimerVisible() {
   _timerState.value = _timerState.value.copy(isVisible = !_timerState.value.isVisible)
   if (!_timerState.value.isVisible) pauseTimer()
+  }
+
+  fun toggleTimerFullscreen() {
+  _timerState.value = _timerState.value.copy(isFullscreen = !_timerState.value.isFullscreen)
+  }
+
+  /**
+   * Start after a lead-in: the display counts -[seconds] … -1 (time to rack in / get set),
+   * then the timer proper starts. Tapping pause/reset during the lead-in cancels it.
+   */
+  fun startTimerWithDelay(seconds: Int = 10) {
+  val s = _timerState.value
+  if (s.isRunning || s.delayRemaining > 0) return
+  timerJob?.cancel()
+  _timerState.value = s.copy(delayRemaining = seconds)
+  timerJob = viewModelScope.launch {
+  while (true) {
+  delay(1000L)
+  val current = _timerState.value
+  if (current.delayRemaining <= 0) break
+  val next = current.delayRemaining - 1
+  _timerState.value = current.copy(delayRemaining = next)
+  if (next <= 0) { startTimer(); break }
+  }
+  }
   }
 
   fun setTimerMode(mode: TimerMode) {
@@ -963,7 +995,7 @@ class SessionViewModel(app: Application, savedStateHandle: SavedStateHandle) : A
 
   fun pauseTimer() {
   timerJob?.cancel()
-  _timerState.value = _timerState.value.copy(isRunning = false)
+  _timerState.value = _timerState.value.copy(isRunning = false, delayRemaining = 0)
   }
 
   fun resetTimer() {
@@ -971,7 +1003,8 @@ class SessionViewModel(app: Application, savedStateHandle: SavedStateHandle) : A
   val s = _timerState.value
   _timerState.value = s.copy(
   currentSeconds = if (s.mode == TimerMode.REST) s.restDuration else 0,
-  isRunning = false
+  isRunning = false,
+  delayRemaining = 0
   )
   }
 
@@ -1025,27 +1058,8 @@ class SessionViewModel(app: Application, savedStateHandle: SavedStateHandle) : A
   }
   }
 
-  /**
-   * Working weight to prefill for an exercise that prescribes a %1RM target (e.g. "80%", "70-80%"),
-   * derived from the user's configured 1RM for the matching main lift. Null when the exercise has no
-   * %1RM target, doesn't map to a tracked lift, or that lift's 1RM isn't set. Rounded to 2.5 kg.
-   */
-  private fun pct1rmPrefillWeight(exerciseName: String, pctTarget: String, oneRms: Map<MainLift, Float>): Float? {
-  if (pctTarget.isBlank()) return null
-  val lift = MainLift.forExercise(exerciseName) ?: return null
-  val oneRm = oneRms[lift] ?: return null
-  if (oneRm <= 0f) return null
-  val frac = parsePctTarget(pctTarget) ?: return null
-  return ((oneRm * frac) / 2.5f).roundToInt() * 2.5f
-  }
-
-  /** "80%" → 0.80; "70-80%" → 0.75 (range midpoint). Null if no usable number. */
-  private fun parsePctTarget(s: String): Float? {
-  val nums = Regex("\\d+(?:\\.\\d+)?").findAll(s).map { it.value.toFloat() }.toList()
-  if (nums.isEmpty()) return null
-  val pct = if (nums.size >= 2) (nums[0] + nums[1]) / 2f else nums[0]
-  return (pct / 100f).takeIf { it in 0.2f..1.2f }
-  }
+  // (%1RM prefill parsing lives in data/profile/PctPrefill — pure and unit-tested, and shared
+  // with the Library's start-gating which asks for missing 1RMs.)
 
   private fun parseRpeTarget(s: String): Float? =
   Regex("\\d+(\\.\\d+)?").find(s)?.value?.toFloatOrNull()

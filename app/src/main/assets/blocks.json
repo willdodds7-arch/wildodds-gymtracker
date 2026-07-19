@@ -1,7 +1,7 @@
 {
  "library_version": "1.0",
  "author": "Wild Odds",
- "program_count": 2,
+ "program_count": 6,
  "programs": [
   {
    "name": "Strength Formula",
@@ -471,6 +471,2854 @@
        "percent_1rm": null,
        "rpe": null,
        "notes": null
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "name": "5/3/1 (Jim Wendler)",
+   "author": "Jim Wendler",
+   "split": "4-Day Main Lift Split",
+   "style": "Strength",
+   "specialisation": "None",
+   "description": "Wendler's classic strength template: one main lift per day, three waved work sets, and an all-out AMRAP top set to drive progress. Cycles 5s week → 3s week → 5/3/1 week → deload. All loads are prescribed as percentages and prefill from YOUR 1RMs (set them in Profile) — the book runs off a Training Max of 90% of your true 1RM, and the numbers here are already converted. After each cycle, add 2.5 kg to upper-body and 5 kg to lower-body maxes and run it again.",
+   "weeks": [
+    {
+     "name": "Week 1",
+     "days": [
+      {
+       "name": "Press Day",
+       "exercises": [
+        {
+         "name": "Overhead Press",
+         "sets": 3,
+         "target_reps": "5/5/5+",
+         "percent_1rm": "58.5/67.5/76.5%",
+         "rpe": null,
+         "notes": "Warm up, then 3 work sets. Last set: as many reps as possible (AMRAP). % shown are of your 1RM (= 65/75/85% of Training Max, TM = 90% of 1RM)."
+        },
+        {
+         "name": "Overhead Press (Boring But Big)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": "45%",
+         "rpe": null,
+         "notes": "Optional volume work: 5×10 at 50% of TM (= 45% of 1RM)."
+        },
+        {
+         "name": "Assistance — pull (rows or chins)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Wendler's template: 25-50 quality reps of pulling."
+        },
+        {
+         "name": "Assistance — core or single-leg",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "25-50 reps: ab wheel, hanging leg raises, lunges…"
+        }
+       ]
+      },
+      {
+       "name": "Deadlift Day",
+       "exercises": [
+        {
+         "name": "Deadlift",
+         "sets": 3,
+         "target_reps": "5/5/5+",
+         "percent_1rm": "58.5/67.5/76.5%",
+         "rpe": null,
+         "notes": "Warm up, then 3 work sets. Last set: as many reps as possible (AMRAP). % shown are of your 1RM (= 65/75/85% of Training Max, TM = 90% of 1RM)."
+        },
+        {
+         "name": "Deadlift (Boring But Big)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": "45%",
+         "rpe": null,
+         "notes": "Optional volume work: 5×10 at 50% of TM (= 45% of 1RM)."
+        },
+        {
+         "name": "Assistance — pull (rows or chins)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Wendler's template: 25-50 quality reps of pulling."
+        },
+        {
+         "name": "Assistance — core or single-leg",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "25-50 reps: ab wheel, hanging leg raises, lunges…"
+        }
+       ]
+      },
+      {
+       "name": "Bench Day",
+       "exercises": [
+        {
+         "name": "Bench Press",
+         "sets": 3,
+         "target_reps": "5/5/5+",
+         "percent_1rm": "58.5/67.5/76.5%",
+         "rpe": null,
+         "notes": "Warm up, then 3 work sets. Last set: as many reps as possible (AMRAP). % shown are of your 1RM (= 65/75/85% of Training Max, TM = 90% of 1RM)."
+        },
+        {
+         "name": "Bench Press (Boring But Big)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": "45%",
+         "rpe": null,
+         "notes": "Optional volume work: 5×10 at 50% of TM (= 45% of 1RM)."
+        },
+        {
+         "name": "Assistance — pull (rows or chins)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Wendler's template: 25-50 quality reps of pulling."
+        },
+        {
+         "name": "Assistance — core or single-leg",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "25-50 reps: ab wheel, hanging leg raises, lunges…"
+        }
+       ]
+      },
+      {
+       "name": "Squat Day",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 3,
+         "target_reps": "5/5/5+",
+         "percent_1rm": "58.5/67.5/76.5%",
+         "rpe": null,
+         "notes": "Warm up, then 3 work sets. Last set: as many reps as possible (AMRAP). % shown are of your 1RM (= 65/75/85% of Training Max, TM = 90% of 1RM)."
+        },
+        {
+         "name": "Back Squat (Boring But Big)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": "45%",
+         "rpe": null,
+         "notes": "Optional volume work: 5×10 at 50% of TM (= 45% of 1RM)."
+        },
+        {
+         "name": "Assistance — pull (rows or chins)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Wendler's template: 25-50 quality reps of pulling."
+        },
+        {
+         "name": "Assistance — core or single-leg",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "25-50 reps: ab wheel, hanging leg raises, lunges…"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "Week 2",
+     "days": [
+      {
+       "name": "Press Day",
+       "exercises": [
+        {
+         "name": "Overhead Press",
+         "sets": 3,
+         "target_reps": "3/3/3+",
+         "percent_1rm": "63/72/81%",
+         "rpe": null,
+         "notes": "3 work sets; last set AMRAP. (= 70/80/90% of TM.)"
+        },
+        {
+         "name": "Overhead Press (Boring But Big)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": "45%",
+         "rpe": null,
+         "notes": "Optional volume work: 5×10 at 50% of TM (= 45% of 1RM)."
+        },
+        {
+         "name": "Assistance — pull (rows or chins)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Wendler's template: 25-50 quality reps of pulling."
+        },
+        {
+         "name": "Assistance — core or single-leg",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "25-50 reps: ab wheel, hanging leg raises, lunges…"
+        }
+       ]
+      },
+      {
+       "name": "Deadlift Day",
+       "exercises": [
+        {
+         "name": "Deadlift",
+         "sets": 3,
+         "target_reps": "3/3/3+",
+         "percent_1rm": "63/72/81%",
+         "rpe": null,
+         "notes": "3 work sets; last set AMRAP. (= 70/80/90% of TM.)"
+        },
+        {
+         "name": "Deadlift (Boring But Big)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": "45%",
+         "rpe": null,
+         "notes": "Optional volume work: 5×10 at 50% of TM (= 45% of 1RM)."
+        },
+        {
+         "name": "Assistance — pull (rows or chins)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Wendler's template: 25-50 quality reps of pulling."
+        },
+        {
+         "name": "Assistance — core or single-leg",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "25-50 reps: ab wheel, hanging leg raises, lunges…"
+        }
+       ]
+      },
+      {
+       "name": "Bench Day",
+       "exercises": [
+        {
+         "name": "Bench Press",
+         "sets": 3,
+         "target_reps": "3/3/3+",
+         "percent_1rm": "63/72/81%",
+         "rpe": null,
+         "notes": "3 work sets; last set AMRAP. (= 70/80/90% of TM.)"
+        },
+        {
+         "name": "Bench Press (Boring But Big)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": "45%",
+         "rpe": null,
+         "notes": "Optional volume work: 5×10 at 50% of TM (= 45% of 1RM)."
+        },
+        {
+         "name": "Assistance — pull (rows or chins)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Wendler's template: 25-50 quality reps of pulling."
+        },
+        {
+         "name": "Assistance — core or single-leg",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "25-50 reps: ab wheel, hanging leg raises, lunges…"
+        }
+       ]
+      },
+      {
+       "name": "Squat Day",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 3,
+         "target_reps": "3/3/3+",
+         "percent_1rm": "63/72/81%",
+         "rpe": null,
+         "notes": "3 work sets; last set AMRAP. (= 70/80/90% of TM.)"
+        },
+        {
+         "name": "Back Squat (Boring But Big)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": "45%",
+         "rpe": null,
+         "notes": "Optional volume work: 5×10 at 50% of TM (= 45% of 1RM)."
+        },
+        {
+         "name": "Assistance — pull (rows or chins)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Wendler's template: 25-50 quality reps of pulling."
+        },
+        {
+         "name": "Assistance — core or single-leg",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "25-50 reps: ab wheel, hanging leg raises, lunges…"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "Week 3",
+     "days": [
+      {
+       "name": "Press Day",
+       "exercises": [
+        {
+         "name": "Overhead Press",
+         "sets": 3,
+         "target_reps": "5/3/1+",
+         "percent_1rm": "67.5/76.5/85.5%",
+         "rpe": null,
+         "notes": "The 5/3/1 week: last set AMRAP — this is the money set. (= 75/85/95% of TM.)"
+        },
+        {
+         "name": "Overhead Press (Boring But Big)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": "45%",
+         "rpe": null,
+         "notes": "Optional volume work: 5×10 at 50% of TM (= 45% of 1RM)."
+        },
+        {
+         "name": "Assistance — pull (rows or chins)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Wendler's template: 25-50 quality reps of pulling."
+        },
+        {
+         "name": "Assistance — core or single-leg",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "25-50 reps: ab wheel, hanging leg raises, lunges…"
+        }
+       ]
+      },
+      {
+       "name": "Deadlift Day",
+       "exercises": [
+        {
+         "name": "Deadlift",
+         "sets": 3,
+         "target_reps": "5/3/1+",
+         "percent_1rm": "67.5/76.5/85.5%",
+         "rpe": null,
+         "notes": "The 5/3/1 week: last set AMRAP — this is the money set. (= 75/85/95% of TM.)"
+        },
+        {
+         "name": "Deadlift (Boring But Big)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": "45%",
+         "rpe": null,
+         "notes": "Optional volume work: 5×10 at 50% of TM (= 45% of 1RM)."
+        },
+        {
+         "name": "Assistance — pull (rows or chins)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Wendler's template: 25-50 quality reps of pulling."
+        },
+        {
+         "name": "Assistance — core or single-leg",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "25-50 reps: ab wheel, hanging leg raises, lunges…"
+        }
+       ]
+      },
+      {
+       "name": "Bench Day",
+       "exercises": [
+        {
+         "name": "Bench Press",
+         "sets": 3,
+         "target_reps": "5/3/1+",
+         "percent_1rm": "67.5/76.5/85.5%",
+         "rpe": null,
+         "notes": "The 5/3/1 week: last set AMRAP — this is the money set. (= 75/85/95% of TM.)"
+        },
+        {
+         "name": "Bench Press (Boring But Big)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": "45%",
+         "rpe": null,
+         "notes": "Optional volume work: 5×10 at 50% of TM (= 45% of 1RM)."
+        },
+        {
+         "name": "Assistance — pull (rows or chins)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Wendler's template: 25-50 quality reps of pulling."
+        },
+        {
+         "name": "Assistance — core or single-leg",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "25-50 reps: ab wheel, hanging leg raises, lunges…"
+        }
+       ]
+      },
+      {
+       "name": "Squat Day",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 3,
+         "target_reps": "5/3/1+",
+         "percent_1rm": "67.5/76.5/85.5%",
+         "rpe": null,
+         "notes": "The 5/3/1 week: last set AMRAP — this is the money set. (= 75/85/95% of TM.)"
+        },
+        {
+         "name": "Back Squat (Boring But Big)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": "45%",
+         "rpe": null,
+         "notes": "Optional volume work: 5×10 at 50% of TM (= 45% of 1RM)."
+        },
+        {
+         "name": "Assistance — pull (rows or chins)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Wendler's template: 25-50 quality reps of pulling."
+        },
+        {
+         "name": "Assistance — core or single-leg",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "25-50 reps: ab wheel, hanging leg raises, lunges…"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "Week 4",
+     "days": [
+      {
+       "name": "Press Day",
+       "exercises": [
+        {
+         "name": "Overhead Press",
+         "sets": 3,
+         "target_reps": "5/5/5",
+         "percent_1rm": "36/45/54%",
+         "rpe": null,
+         "notes": "Deload — keep it crisp and easy, no AMRAP. (= 40/50/60% of TM.)"
+        },
+        {
+         "name": "Assistance — pull (rows or chins)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Wendler's template: 25-50 quality reps of pulling."
+        },
+        {
+         "name": "Assistance — core or single-leg",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "25-50 reps: ab wheel, hanging leg raises, lunges…"
+        }
+       ]
+      },
+      {
+       "name": "Deadlift Day",
+       "exercises": [
+        {
+         "name": "Deadlift",
+         "sets": 3,
+         "target_reps": "5/5/5",
+         "percent_1rm": "36/45/54%",
+         "rpe": null,
+         "notes": "Deload — keep it crisp and easy, no AMRAP. (= 40/50/60% of TM.)"
+        },
+        {
+         "name": "Assistance — pull (rows or chins)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Wendler's template: 25-50 quality reps of pulling."
+        },
+        {
+         "name": "Assistance — core or single-leg",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "25-50 reps: ab wheel, hanging leg raises, lunges…"
+        }
+       ]
+      },
+      {
+       "name": "Bench Day",
+       "exercises": [
+        {
+         "name": "Bench Press",
+         "sets": 3,
+         "target_reps": "5/5/5",
+         "percent_1rm": "36/45/54%",
+         "rpe": null,
+         "notes": "Deload — keep it crisp and easy, no AMRAP. (= 40/50/60% of TM.)"
+        },
+        {
+         "name": "Assistance — pull (rows or chins)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Wendler's template: 25-50 quality reps of pulling."
+        },
+        {
+         "name": "Assistance — core or single-leg",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "25-50 reps: ab wheel, hanging leg raises, lunges…"
+        }
+       ]
+      },
+      {
+       "name": "Squat Day",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 3,
+         "target_reps": "5/5/5",
+         "percent_1rm": "36/45/54%",
+         "rpe": null,
+         "notes": "Deload — keep it crisp and easy, no AMRAP. (= 40/50/60% of TM.)"
+        },
+        {
+         "name": "Assistance — pull (rows or chins)",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Wendler's template: 25-50 quality reps of pulling."
+        },
+        {
+         "name": "Assistance — core or single-leg",
+         "sets": 5,
+         "target_reps": "10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "25-50 reps: ab wheel, hanging leg raises, lunges…"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Candito 6-Week (Advanced Bench Hybrid)",
+   "author": "Jonnie Candito",
+   "split": "Candito Upper/Lower - Bench Focus",
+   "style": "Powerlifting",
+   "specialisation": "Bench Press",
+   "description": "Jonnie Candito's free 6-week linear program in the Advanced Bench Press Hybrid layout - extra bench frequency on top of the upper/lower structure. The block waves from muscular conditioning (wk1-2) through a linear max-OT phase (wk3), heavy acclimation (wk4), high-intensity strength (wk5) and a peak/test week (wk6). Main lifts are prescribed as a %1RM each week, so set your Squat / Bench / Deadlift 1RMs in Profile and the app fills your working weights. Per-set schemes and the MR / back-off protocols are in each exercise's notes. Loads are percent-based and prefill from your bench (and squat/deadlift) 1RMs — set them in Profile.",
+   "weeks": [
+    {
+     "days": [
+      {
+       "name": "Lower A",
+       "exercises": [
+        {
+         "name": "Squat",
+         "sets": 4,
+         "target_reps": "6",
+         "percent_1rm": "75%",
+         "notes": "4x6 @ ~75%. Controlled."
+        },
+        {
+         "name": "Deadlift",
+         "sets": 2,
+         "target_reps": "6",
+         "percent_1rm": "77%",
+         "notes": "2x6 @ ~77%."
+        },
+        {
+         "name": "Optional Accessory 1",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "Your choice - hypertrophy accessory."
+        },
+        {
+         "name": "Optional Accessory 2",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "Your choice - hypertrophy accessory."
+        }
+       ]
+      },
+      {
+       "name": "Upper A (Bench)",
+       "exercises": [
+        {
+         "name": "Bench Press",
+         "sets": 4,
+         "target_reps": "6-10",
+         "percent_1rm": "75%",
+         "notes": "Ramp 10,10,8,6 to a top ~75%. Hybrid extra volume."
+        },
+        {
+         "name": "Barbell Row",
+         "sets": 4,
+         "target_reps": "6-10",
+         "percent_1rm": null,
+         "notes": "Match bench: 10,10,8,6."
+        },
+        {
+         "name": "Military Press",
+         "sets": 4,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "12,12,10,8."
+        },
+        {
+         "name": "Weighted Pull-up",
+         "sets": 4,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "12,12,10,8."
+        },
+        {
+         "name": "Optional Accessory 1",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "Your choice - hypertrophy accessory."
+        },
+        {
+         "name": "Optional Accessory 2",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "Your choice - hypertrophy accessory."
+        }
+       ]
+      },
+      {
+       "name": "Upper B (Bench)",
+       "exercises": [
+        {
+         "name": "Bench Press",
+         "sets": 4,
+         "target_reps": "6-10",
+         "percent_1rm": "75%",
+         "notes": "Second bench day - same ramp as Upper A."
+        },
+        {
+         "name": "Barbell Row",
+         "sets": 4,
+         "target_reps": "6-10",
+         "percent_1rm": null,
+         "notes": "10,10,8,6."
+        },
+        {
+         "name": "Military Press",
+         "sets": 4,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "12,12,10,8."
+        },
+        {
+         "name": "Weighted Pull-up",
+         "sets": 4,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "12,12,10,8."
+        },
+        {
+         "name": "Optional Accessory 1",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "Your choice - hypertrophy accessory."
+        },
+        {
+         "name": "Optional Accessory 2",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "Your choice - hypertrophy accessory."
+        }
+       ]
+      },
+      {
+       "name": "Lower B",
+       "exercises": [
+        {
+         "name": "Squat",
+         "sets": 4,
+         "target_reps": "8",
+         "percent_1rm": "67%",
+         "notes": "4x8 @ ~67%. Lighter volume."
+        },
+        {
+         "name": "Deadlift",
+         "sets": 2,
+         "target_reps": "8",
+         "percent_1rm": "68%",
+         "notes": "2x8 @ ~68%."
+        }
+       ]
+      },
+      {
+       "name": "Upper C (Bench MR)",
+       "exercises": [
+        {
+         "name": "Bench Press",
+         "sets": 1,
+         "target_reps": "AMRAP",
+         "percent_1rm": "77%",
+         "notes": "One max-rep set @ ~77%. Stop ~1 shy of failure."
+        },
+        {
+         "name": "Barbell Row",
+         "sets": 4,
+         "target_reps": "6-10",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Military Press",
+         "sets": 4,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Weighted Pull-up",
+         "sets": 4,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Optional Accessory 1",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "Your choice - hypertrophy accessory."
+        },
+        {
+         "name": "Optional Accessory 2",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "Your choice - hypertrophy accessory."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "days": [
+      {
+       "name": "Lower A (Squat MR10)",
+       "exercises": [
+        {
+         "name": "Squat",
+         "sets": 1,
+         "target_reps": "AMRAP (~10)",
+         "percent_1rm": "78%",
+         "notes": "MR10 top set @ ~78%, then 5x3 @ +5 lb, 60s rest. If <8 reps, drop max 2.5%."
+        },
+        {
+         "name": "Deadlift Variation",
+         "sets": 3,
+         "target_reps": "8",
+         "percent_1rm": "70%",
+         "notes": "Deficit / paused / RDL - 3x8 @ ~70%."
+        },
+        {
+         "name": "Optional Accessory 1",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "Your choice - hypertrophy accessory."
+        },
+        {
+         "name": "Optional Accessory 2",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "Your choice - hypertrophy accessory."
+        }
+       ]
+      },
+      {
+       "name": "Upper A (Bench)",
+       "exercises": [
+        {
+         "name": "Bench Press",
+         "sets": 3,
+         "target_reps": "6-10",
+         "percent_1rm": "79%",
+         "notes": "165x10, 175x8, 185x6-8 style ramp to ~79%."
+        },
+        {
+         "name": "Barbell Row",
+         "sets": 3,
+         "target_reps": "8-10",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Military Press",
+         "sets": 3,
+         "target_reps": "6-10",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Weighted Pull-up",
+         "sets": 3,
+         "target_reps": "6-10",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Optional Accessory 1",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "Your choice - hypertrophy accessory."
+        },
+        {
+         "name": "Optional Accessory 2",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "Your choice - hypertrophy accessory."
+        }
+       ]
+      },
+      {
+       "name": "Lower B (Squat MR10)",
+       "exercises": [
+        {
+         "name": "Squat",
+         "sets": 1,
+         "target_reps": "AMRAP (~10)",
+         "percent_1rm": "80%",
+         "notes": "MR10 @ ~80%, then back-off triples: 10/8/5 sets of 3 by reps hit (Candito protocol)."
+        },
+        {
+         "name": "Deadlift Variation",
+         "sets": 3,
+         "target_reps": "8",
+         "percent_1rm": "70%",
+         "notes": "3x8 @ ~70%."
+        }
+       ]
+      },
+      {
+       "name": "Upper B (Bench)",
+       "exercises": [
+        {
+         "name": "Bench Press",
+         "sets": 3,
+         "target_reps": "6-10",
+         "percent_1rm": "79%",
+         "notes": "Second bench day - same ramp ~79%."
+        },
+        {
+         "name": "Barbell Row",
+         "sets": 3,
+         "target_reps": "8-10",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Military Press",
+         "sets": 3,
+         "target_reps": "6-10",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Weighted Pull-up",
+         "sets": 3,
+         "target_reps": "6-10",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Optional Accessory 1",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "Your choice - hypertrophy accessory."
+        },
+        {
+         "name": "Optional Accessory 2",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "Your choice - hypertrophy accessory."
+        }
+       ]
+      },
+      {
+       "name": "Upper C (Bench MR)",
+       "exercises": [
+        {
+         "name": "Bench Press",
+         "sets": 1,
+         "target_reps": "AMRAP",
+         "percent_1rm": "75%",
+         "notes": "175xMR style max-rep set @ ~75%."
+        },
+        {
+         "name": "Barbell Row",
+         "sets": 3,
+         "target_reps": "8-10",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Military Press",
+         "sets": 3,
+         "target_reps": "6-10",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Weighted Pull-up",
+         "sets": 3,
+         "target_reps": "6-10",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Optional Accessory 1",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "Your choice - hypertrophy accessory."
+        },
+        {
+         "name": "Optional Accessory 2",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "Your choice - hypertrophy accessory."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "days": [
+      {
+       "name": "Lower A",
+       "exercises": [
+        {
+         "name": "Squat",
+         "sets": 3,
+         "target_reps": "4-6",
+         "percent_1rm": "82%",
+         "notes": "3x4-6 @ ~82%."
+        },
+        {
+         "name": "Deadlift",
+         "sets": 2,
+         "target_reps": "3-6",
+         "percent_1rm": "85%",
+         "notes": "2x3-6 @ ~85%."
+        }
+       ]
+      },
+      {
+       "name": "Upper A (Bench)",
+       "exercises": [
+        {
+         "name": "Bench Press",
+         "sets": 3,
+         "target_reps": "4-6",
+         "percent_1rm": "82%",
+         "notes": "3x4-6 @ ~82%."
+        },
+        {
+         "name": "Barbell Row",
+         "sets": 3,
+         "target_reps": "6",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Military Press",
+         "sets": 3,
+         "target_reps": "6",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Weighted Pull-up",
+         "sets": 3,
+         "target_reps": "6",
+         "percent_1rm": null,
+         "notes": ""
+        }
+       ]
+      },
+      {
+       "name": "Lower B",
+       "exercises": [
+        {
+         "name": "Squat",
+         "sets": 1,
+         "target_reps": "4-6",
+         "percent_1rm": "83%",
+         "notes": "1 top set 4-6 @ ~83%."
+        },
+        {
+         "name": "Deadlift Variation",
+         "sets": 1,
+         "target_reps": "8",
+         "percent_1rm": "70%",
+         "notes": "1x8 variation."
+        }
+       ]
+      },
+      {
+       "name": "Upper B (Bench)",
+       "exercises": [
+        {
+         "name": "Bench Press",
+         "sets": 3,
+         "target_reps": "4-6",
+         "percent_1rm": "83%",
+         "notes": "3x4-6 @ ~83%."
+        },
+        {
+         "name": "Barbell Row",
+         "sets": 3,
+         "target_reps": "6",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Military Press",
+         "sets": 3,
+         "target_reps": "6",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Weighted Pull-up",
+         "sets": 3,
+         "target_reps": "6",
+         "percent_1rm": null,
+         "notes": ""
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "days": [
+      {
+       "name": "Lower A",
+       "exercises": [
+        {
+         "name": "Squat",
+         "sets": 3,
+         "target_reps": "3",
+         "percent_1rm": "87%",
+         "notes": "Ascending 200x3, 205x3, 210x3 style ~85-90%."
+        },
+        {
+         "name": "Deadlift Variation",
+         "sets": 2,
+         "target_reps": "6",
+         "percent_1rm": "80%",
+         "notes": "2x6 variation."
+        },
+        {
+         "name": "Optional Accessory 1",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "Your choice - hypertrophy accessory."
+        },
+        {
+         "name": "Optional Accessory 2",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "Your choice - hypertrophy accessory."
+        }
+       ]
+      },
+      {
+       "name": "Upper A (Bench)",
+       "exercises": [
+        {
+         "name": "Bench Press",
+         "sets": 3,
+         "target_reps": "3",
+         "percent_1rm": "87%",
+         "notes": "Ascending 190x3, 200x3, 205x3 ~85-90%."
+        },
+        {
+         "name": "Barbell Row",
+         "sets": 4,
+         "target_reps": "6-12",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Military Press",
+         "sets": 4,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Weighted Pull-up",
+         "sets": 4,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Optional Accessory 1",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "Your choice - hypertrophy accessory."
+        },
+        {
+         "name": "Optional Accessory 2",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "Your choice - hypertrophy accessory."
+        }
+       ]
+      },
+      {
+       "name": "Lower B",
+       "exercises": [
+        {
+         "name": "Squat",
+         "sets": 2,
+         "target_reps": "1-3",
+         "percent_1rm": "90%",
+         "notes": "210x3 then 215x1-2 ~88-90%."
+        },
+        {
+         "name": "Deadlift",
+         "sets": 2,
+         "target_reps": "1-3",
+         "percent_1rm": "90%",
+         "notes": "295x3 then 305x1-2 ~89-92%."
+        },
+        {
+         "name": "Optional Accessory 1",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "Your choice - hypertrophy accessory."
+        },
+        {
+         "name": "Optional Accessory 2",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "Your choice - hypertrophy accessory."
+        }
+       ]
+      },
+      {
+       "name": "Upper B (Bench)",
+       "exercises": [
+        {
+         "name": "Bench Press",
+         "sets": 3,
+         "target_reps": "1-4",
+         "percent_1rm": "90%",
+         "notes": "195x3, 205x2-4, 215x1-2 working to ~91%."
+        },
+        {
+         "name": "Barbell Row",
+         "sets": 4,
+         "target_reps": "6-12",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Military Press",
+         "sets": 4,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Weighted Pull-up",
+         "sets": 4,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Optional Accessory 1",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "Your choice - hypertrophy accessory."
+        },
+        {
+         "name": "Optional Accessory 2",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "Your choice - hypertrophy accessory."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "days": [
+      {
+       "name": "Lower A (Squat)",
+       "exercises": [
+        {
+         "name": "Squat",
+         "sets": 1,
+         "target_reps": "1-4",
+         "percent_1rm": "92%",
+         "notes": "Heavy top set 1-4 reps ~92%."
+        },
+        {
+         "name": "Deadlift",
+         "sets": 3,
+         "target_reps": "2-4",
+         "percent_1rm": "70%",
+         "notes": "Speed/volume pulls 215x4, 225x4, 230x2 ~65-72%."
+        },
+        {
+         "name": "Optional Lower 1",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Optional Lower 2",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": ""
+        }
+       ]
+      },
+      {
+       "name": "Upper A (Bench)",
+       "exercises": [
+        {
+         "name": "Bench Press",
+         "sets": 1,
+         "target_reps": "1-4",
+         "percent_1rm": "94%",
+         "notes": "Heavy top set 1-4 reps ~94%."
+        },
+        {
+         "name": "Barbell Row",
+         "sets": 3,
+         "target_reps": "6-8",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Military Press",
+         "sets": 3,
+         "target_reps": "6-8",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Weighted Pull-up",
+         "sets": 3,
+         "target_reps": "6-8",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Optional Accessory 1",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "Your choice - hypertrophy accessory."
+        },
+        {
+         "name": "Optional Accessory 2",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": "Your choice - hypertrophy accessory."
+        }
+       ]
+      },
+      {
+       "name": "Lower B (Deadlift)",
+       "exercises": [
+        {
+         "name": "Deadlift",
+         "sets": 1,
+         "target_reps": "1-4",
+         "percent_1rm": "94%",
+         "notes": "Heavy top pull 1-4 reps ~94% (e.g. 310x1-4)."
+        },
+        {
+         "name": "Optional Lower 1",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Optional Lower 2",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "notes": ""
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "days": [
+      {
+       "name": "Deload Upper",
+       "exercises": [
+        {
+         "name": "Bench Press",
+         "sets": 3,
+         "target_reps": "3",
+         "percent_1rm": "70%",
+         "notes": "Light, fast, crisp - prime the CNS. ~70%."
+        },
+        {
+         "name": "Barbell Row",
+         "sets": 3,
+         "target_reps": "8",
+         "percent_1rm": null,
+         "notes": ""
+        },
+        {
+         "name": "Military Press",
+         "sets": 2,
+         "target_reps": "8",
+         "percent_1rm": null,
+         "notes": ""
+        }
+       ]
+      },
+      {
+       "name": "Test Lower",
+       "exercises": [
+        {
+         "name": "Squat",
+         "sets": 1,
+         "target_reps": "1",
+         "percent_1rm": "100%",
+         "notes": "Work up to a new 1RM single (or heavy single at RPE 9-10)."
+        },
+        {
+         "name": "Deadlift",
+         "sets": 1,
+         "target_reps": "1",
+         "percent_1rm": "100%",
+         "notes": "Work up to a new 1RM single."
+        }
+       ]
+      },
+      {
+       "name": "Test Upper (Bench)",
+       "exercises": [
+        {
+         "name": "Bench Press",
+         "sets": 1,
+         "target_reps": "1",
+         "percent_1rm": "100%",
+         "notes": "Work up to a new bench 1RM single."
+        },
+        {
+         "name": "Military Press",
+         "sets": 3,
+         "target_reps": "5-8",
+         "percent_1rm": null,
+         "notes": "Optional back-off after testing."
+        },
+        {
+         "name": "Weighted Pull-up",
+         "sets": 3,
+         "target_reps": "6-8",
+         "percent_1rm": null,
+         "notes": ""
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Russian Squat Routine",
+   "author": "Classic Soviet template",
+   "split": "3x/week Single Lift",
+   "style": "Powerlifting",
+   "specialisation": "Squat (swappable)",
+   "lift_swappable": true,
+   "description": "The classic 6-week, 18-session Soviet peaking cycle: three weeks of brutal volume at 80%, then an intensity ladder — 85% 5×5, 90% 4×4, 95% 3×3, 100% 2×2 — ending in a new max attempt at 105%. Built for the squat, but when you start it you can run the whole cycle on another lift instead (bench, overhead press, or deadlift — deadlift only if you recover like a mutant). Loads prefill from your 1RM in Profile.",
+   "weeks": [
+    {
+     "name": "Week 1",
+     "days": [
+      {
+       "name": "Session 1",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 6,
+         "target_reps": "2",
+         "percent_1rm": "80%",
+         "rpe": null,
+         "notes": "Rest 3-5 min between sets."
+        },
+        {
+         "name": "Optional accessory (light)",
+         "sets": 2,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Keep accessories minimal — the volume here is the program."
+        }
+       ]
+      },
+      {
+       "name": "Session 2",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 6,
+         "target_reps": "3",
+         "percent_1rm": "80%",
+         "rpe": null,
+         "notes": "Rest 3-5 min between sets."
+        },
+        {
+         "name": "Optional accessory (light)",
+         "sets": 2,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Keep accessories minimal — the volume here is the program."
+        }
+       ]
+      },
+      {
+       "name": "Session 3",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 6,
+         "target_reps": "2",
+         "percent_1rm": "80%",
+         "rpe": null,
+         "notes": "Rest 3-5 min between sets."
+        },
+        {
+         "name": "Optional accessory (light)",
+         "sets": 2,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Keep accessories minimal — the volume here is the program."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "Week 2",
+     "days": [
+      {
+       "name": "Session 4",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 6,
+         "target_reps": "4",
+         "percent_1rm": "80%",
+         "rpe": null,
+         "notes": "Rest 3-5 min between sets."
+        },
+        {
+         "name": "Optional accessory (light)",
+         "sets": 2,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Keep accessories minimal — the volume here is the program."
+        }
+       ]
+      },
+      {
+       "name": "Session 5",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 6,
+         "target_reps": "2",
+         "percent_1rm": "80%",
+         "rpe": null,
+         "notes": "Rest 3-5 min between sets."
+        },
+        {
+         "name": "Optional accessory (light)",
+         "sets": 2,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Keep accessories minimal — the volume here is the program."
+        }
+       ]
+      },
+      {
+       "name": "Session 6",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 6,
+         "target_reps": "5",
+         "percent_1rm": "80%",
+         "rpe": null,
+         "notes": "Rest 3-5 min between sets."
+        },
+        {
+         "name": "Optional accessory (light)",
+         "sets": 2,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Keep accessories minimal — the volume here is the program."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "Week 3",
+     "days": [
+      {
+       "name": "Session 7",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 6,
+         "target_reps": "2",
+         "percent_1rm": "80%",
+         "rpe": null,
+         "notes": "Rest 3-5 min between sets."
+        },
+        {
+         "name": "Optional accessory (light)",
+         "sets": 2,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Keep accessories minimal — the volume here is the program."
+        }
+       ]
+      },
+      {
+       "name": "Session 8",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 6,
+         "target_reps": "6",
+         "percent_1rm": "80%",
+         "rpe": null,
+         "notes": "Rest 3-5 min between sets."
+        },
+        {
+         "name": "Optional accessory (light)",
+         "sets": 2,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Keep accessories minimal — the volume here is the program."
+        }
+       ]
+      },
+      {
+       "name": "Session 9",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 6,
+         "target_reps": "2",
+         "percent_1rm": "80%",
+         "rpe": null,
+         "notes": "Rest 3-5 min between sets."
+        },
+        {
+         "name": "Optional accessory (light)",
+         "sets": 2,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Keep accessories minimal — the volume here is the program."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "Week 4",
+     "days": [
+      {
+       "name": "Session 10",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 5,
+         "target_reps": "5",
+         "percent_1rm": "85%",
+         "rpe": null,
+         "notes": "Rest 3-5 min between sets."
+        },
+        {
+         "name": "Optional accessory (light)",
+         "sets": 2,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Keep accessories minimal — the volume here is the program."
+        }
+       ]
+      },
+      {
+       "name": "Session 11",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 6,
+         "target_reps": "2",
+         "percent_1rm": "80%",
+         "rpe": null,
+         "notes": "Rest 3-5 min between sets."
+        },
+        {
+         "name": "Optional accessory (light)",
+         "sets": 2,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Keep accessories minimal — the volume here is the program."
+        }
+       ]
+      },
+      {
+       "name": "Session 12",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 4,
+         "target_reps": "4",
+         "percent_1rm": "90%",
+         "rpe": null,
+         "notes": "Rest 3-5 min between sets."
+        },
+        {
+         "name": "Optional accessory (light)",
+         "sets": 2,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Keep accessories minimal — the volume here is the program."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "Week 5",
+     "days": [
+      {
+       "name": "Session 13",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 6,
+         "target_reps": "2",
+         "percent_1rm": "80%",
+         "rpe": null,
+         "notes": "Rest 3-5 min between sets."
+        },
+        {
+         "name": "Optional accessory (light)",
+         "sets": 2,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Keep accessories minimal — the volume here is the program."
+        }
+       ]
+      },
+      {
+       "name": "Session 14",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 3,
+         "target_reps": "3",
+         "percent_1rm": "95%",
+         "rpe": null,
+         "notes": "Rest 3-5 min between sets."
+        },
+        {
+         "name": "Optional accessory (light)",
+         "sets": 2,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Keep accessories minimal — the volume here is the program."
+        }
+       ]
+      },
+      {
+       "name": "Session 15",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 6,
+         "target_reps": "2",
+         "percent_1rm": "80%",
+         "rpe": null,
+         "notes": "Rest 3-5 min between sets."
+        },
+        {
+         "name": "Optional accessory (light)",
+         "sets": 2,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Keep accessories minimal — the volume here is the program."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "Week 6",
+     "days": [
+      {
+       "name": "Session 16",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 2,
+         "target_reps": "2",
+         "percent_1rm": "100%",
+         "rpe": null,
+         "notes": "Current max for a double. Rest as needed — this is heavy."
+        },
+        {
+         "name": "Optional accessory (light)",
+         "sets": 2,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Keep accessories minimal — the volume here is the program."
+        }
+       ]
+      },
+      {
+       "name": "Session 17",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 6,
+         "target_reps": "2",
+         "percent_1rm": "80%",
+         "rpe": null,
+         "notes": "Rest 3-5 min between sets."
+        },
+        {
+         "name": "Optional accessory (light)",
+         "sets": 2,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Keep accessories minimal — the volume here is the program."
+        }
+       ]
+      },
+      {
+       "name": "Session 18",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 1,
+         "target_reps": "1",
+         "percent_1rm": "105%",
+         "rpe": null,
+         "notes": "New max attempt: 105% of your old 1RM (go higher if it moves well). Update your 1RM in Profile afterwards!"
+        },
+        {
+         "name": "Optional accessory (light)",
+         "sets": 2,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Keep accessories minimal — the volume here is the program."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Calgary Barbell 8-Week (adapted)",
+   "author": "Adapted from Calgary Barbell",
+   "split": "4-Day Powerlifting",
+   "style": "Powerlifting",
+   "specialisation": "None",
+   "description": "An adaptation of Calgary Barbell's free 8-week block: four days a week with squat ×3, bench ×4 and deadlift ×3 weekly across competition lifts and paused variations. Percent-based with RPE caps — weeks 1-4 build volume, 5-7 push intensity, week 8 tapers to openers. Loads prefill from your 1RMs in Profile. This is an adaptation of the spreadsheet's structure, not a copy — for Calgary Barbell's exact programming get their original sheet.",
+   "weeks": [
+    {
+     "name": "Week 1",
+     "days": [
+      {
+       "name": "Day 1 — Squat + Bench",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 4,
+         "target_reps": "6",
+         "percent_1rm": "70%",
+         "rpe": "7",
+         "notes": "Competition style. Cap the effort at the RPE — cut a set if bar speed dies."
+        },
+        {
+         "name": "Bench Press",
+         "sets": 4,
+         "target_reps": "6",
+         "percent_1rm": "72%",
+         "rpe": "7",
+         "notes": "Competition pause on every first rep."
+        },
+        {
+         "name": "Barbell Row",
+         "sets": 3,
+         "target_reps": "8-10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Upper-back balance work."
+        }
+       ]
+      },
+      {
+       "name": "Day 2 — Deadlift + Bench volume",
+       "exercises": [
+        {
+         "name": "Deadlift",
+         "sets": 4,
+         "target_reps": "5",
+         "percent_1rm": "72%",
+         "rpe": "7",
+         "notes": "Competition stance."
+        },
+        {
+         "name": "Close Grip Bench Press",
+         "sets": 4,
+         "target_reps": "8",
+         "percent_1rm": "63%",
+         "rpe": null,
+         "notes": "% of your bench 1RM."
+        },
+        {
+         "name": "Lat Pulldown or Chins",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": null
+        }
+       ]
+      },
+      {
+       "name": "Day 3 — Squat variation + Bench",
+       "exercises": [
+        {
+         "name": "Pause Squat",
+         "sets": 3,
+         "target_reps": "6",
+         "percent_1rm": "62%",
+         "rpe": null,
+         "notes": "2-count pause in the hole. % of your squat 1RM."
+        },
+        {
+         "name": "Bench Press",
+         "sets": 3,
+         "target_reps": "8",
+         "percent_1rm": "60%",
+         "rpe": null,
+         "notes": "Second bench slot — tighter technique focus, leave 2-3 reps in reserve."
+        },
+        {
+         "name": "Dumbbell Shoulder Press",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": null
+        }
+       ]
+      },
+      {
+       "name": "Day 4 — Deadlift variation + Bench",
+       "exercises": [
+        {
+         "name": "Pause Deadlift",
+         "sets": 3,
+         "target_reps": "5",
+         "percent_1rm": "64%",
+         "rpe": null,
+         "notes": "Pause at the knee. % of your deadlift 1RM."
+        },
+        {
+         "name": "Bench Press (feet up)",
+         "sets": 3,
+         "target_reps": "6-8",
+         "percent_1rm": "57%",
+         "rpe": null,
+         "notes": "Larsen-style: feet off the floor, strict."
+        },
+        {
+         "name": "Face Pulls + Triceps",
+         "sets": 3,
+         "target_reps": "12-15",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Shoulder health superset."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "Week 2",
+     "days": [
+      {
+       "name": "Day 1 — Squat + Bench",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 4,
+         "target_reps": "5",
+         "percent_1rm": "74%",
+         "rpe": "7",
+         "notes": "Competition style. Cap the effort at the RPE — cut a set if bar speed dies."
+        },
+        {
+         "name": "Bench Press",
+         "sets": 4,
+         "target_reps": "5",
+         "percent_1rm": "75%",
+         "rpe": "7",
+         "notes": "Competition pause on every first rep."
+        },
+        {
+         "name": "Barbell Row",
+         "sets": 3,
+         "target_reps": "8-10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Upper-back balance work."
+        }
+       ]
+      },
+      {
+       "name": "Day 2 — Deadlift + Bench volume",
+       "exercises": [
+        {
+         "name": "Deadlift",
+         "sets": 4,
+         "target_reps": "4",
+         "percent_1rm": "76%",
+         "rpe": "7",
+         "notes": "Competition stance."
+        },
+        {
+         "name": "Close Grip Bench Press",
+         "sets": 4,
+         "target_reps": "7",
+         "percent_1rm": "66%",
+         "rpe": null,
+         "notes": "% of your bench 1RM."
+        },
+        {
+         "name": "Lat Pulldown or Chins",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": null
+        }
+       ]
+      },
+      {
+       "name": "Day 3 — Squat variation + Bench",
+       "exercises": [
+        {
+         "name": "Pause Squat",
+         "sets": 3,
+         "target_reps": "6",
+         "percent_1rm": "64%",
+         "rpe": null,
+         "notes": "2-count pause in the hole. % of your squat 1RM."
+        },
+        {
+         "name": "Bench Press",
+         "sets": 3,
+         "target_reps": "8",
+         "percent_1rm": "62%",
+         "rpe": null,
+         "notes": "Second bench slot — tighter technique focus, leave 2-3 reps in reserve."
+        },
+        {
+         "name": "Dumbbell Shoulder Press",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": null
+        }
+       ]
+      },
+      {
+       "name": "Day 4 — Deadlift variation + Bench",
+       "exercises": [
+        {
+         "name": "Pause Deadlift",
+         "sets": 3,
+         "target_reps": "5",
+         "percent_1rm": "66%",
+         "rpe": null,
+         "notes": "Pause at the knee. % of your deadlift 1RM."
+        },
+        {
+         "name": "Bench Press (feet up)",
+         "sets": 3,
+         "target_reps": "6-8",
+         "percent_1rm": "59%",
+         "rpe": null,
+         "notes": "Larsen-style: feet off the floor, strict."
+        },
+        {
+         "name": "Face Pulls + Triceps",
+         "sets": 3,
+         "target_reps": "12-15",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Shoulder health superset."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "Week 3",
+     "days": [
+      {
+       "name": "Day 1 — Squat + Bench",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 5,
+         "target_reps": "4",
+         "percent_1rm": "77%",
+         "rpe": "7",
+         "notes": "Competition style. Cap the effort at the RPE — cut a set if bar speed dies."
+        },
+        {
+         "name": "Bench Press",
+         "sets": 5,
+         "target_reps": "4",
+         "percent_1rm": "78%",
+         "rpe": "7",
+         "notes": "Competition pause on every first rep."
+        },
+        {
+         "name": "Barbell Row",
+         "sets": 3,
+         "target_reps": "8-10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Upper-back balance work."
+        }
+       ]
+      },
+      {
+       "name": "Day 2 — Deadlift + Bench volume",
+       "exercises": [
+        {
+         "name": "Deadlift",
+         "sets": 4,
+         "target_reps": "4",
+         "percent_1rm": "78%",
+         "rpe": "7",
+         "notes": "Competition stance."
+        },
+        {
+         "name": "Close Grip Bench Press",
+         "sets": 4,
+         "target_reps": "6",
+         "percent_1rm": "68%",
+         "rpe": null,
+         "notes": "% of your bench 1RM."
+        },
+        {
+         "name": "Lat Pulldown or Chins",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": null
+        }
+       ]
+      },
+      {
+       "name": "Day 3 — Squat variation + Bench",
+       "exercises": [
+        {
+         "name": "Pause Squat",
+         "sets": 3,
+         "target_reps": "5",
+         "percent_1rm": "66%",
+         "rpe": null,
+         "notes": "2-count pause in the hole. % of your squat 1RM."
+        },
+        {
+         "name": "Bench Press",
+         "sets": 3,
+         "target_reps": "7",
+         "percent_1rm": "64%",
+         "rpe": null,
+         "notes": "Second bench slot — tighter technique focus, leave 2-3 reps in reserve."
+        },
+        {
+         "name": "Dumbbell Shoulder Press",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": null
+        }
+       ]
+      },
+      {
+       "name": "Day 4 — Deadlift variation + Bench",
+       "exercises": [
+        {
+         "name": "Pause Deadlift",
+         "sets": 3,
+         "target_reps": "4",
+         "percent_1rm": "68%",
+         "rpe": null,
+         "notes": "Pause at the knee. % of your deadlift 1RM."
+        },
+        {
+         "name": "Bench Press (feet up)",
+         "sets": 3,
+         "target_reps": "6-8",
+         "percent_1rm": "61%",
+         "rpe": null,
+         "notes": "Larsen-style: feet off the floor, strict."
+        },
+        {
+         "name": "Face Pulls + Triceps",
+         "sets": 3,
+         "target_reps": "12-15",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Shoulder health superset."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "Week 4",
+     "days": [
+      {
+       "name": "Day 1 — Squat + Bench",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 4,
+         "target_reps": "4",
+         "percent_1rm": "79%",
+         "rpe": "7",
+         "notes": "Competition style. Cap the effort at the RPE — cut a set if bar speed dies."
+        },
+        {
+         "name": "Bench Press",
+         "sets": 4,
+         "target_reps": "4",
+         "percent_1rm": "80%",
+         "rpe": "7",
+         "notes": "Competition pause on every first rep."
+        },
+        {
+         "name": "Barbell Row",
+         "sets": 3,
+         "target_reps": "8-10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Upper-back balance work."
+        }
+       ]
+      },
+      {
+       "name": "Day 2 — Deadlift + Bench volume",
+       "exercises": [
+        {
+         "name": "Deadlift",
+         "sets": 3,
+         "target_reps": "3",
+         "percent_1rm": "81%",
+         "rpe": "7",
+         "notes": "Competition stance."
+        },
+        {
+         "name": "Close Grip Bench Press",
+         "sets": 3,
+         "target_reps": "6",
+         "percent_1rm": "70%",
+         "rpe": null,
+         "notes": "% of your bench 1RM."
+        },
+        {
+         "name": "Lat Pulldown or Chins",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": null
+        }
+       ]
+      },
+      {
+       "name": "Day 3 — Squat variation + Bench",
+       "exercises": [
+        {
+         "name": "Pause Squat",
+         "sets": 3,
+         "target_reps": "5",
+         "percent_1rm": "68%",
+         "rpe": null,
+         "notes": "2-count pause in the hole. % of your squat 1RM."
+        },
+        {
+         "name": "Bench Press",
+         "sets": 3,
+         "target_reps": "6",
+         "percent_1rm": "67%",
+         "rpe": null,
+         "notes": "Second bench slot — tighter technique focus, leave 2-3 reps in reserve."
+        },
+        {
+         "name": "Dumbbell Shoulder Press",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": null
+        }
+       ]
+      },
+      {
+       "name": "Day 4 — Deadlift variation + Bench",
+       "exercises": [
+        {
+         "name": "Pause Deadlift",
+         "sets": 3,
+         "target_reps": "4",
+         "percent_1rm": "70%",
+         "rpe": null,
+         "notes": "Pause at the knee. % of your deadlift 1RM."
+        },
+        {
+         "name": "Bench Press (feet up)",
+         "sets": 3,
+         "target_reps": "6-8",
+         "percent_1rm": "64%",
+         "rpe": null,
+         "notes": "Larsen-style: feet off the floor, strict."
+        },
+        {
+         "name": "Face Pulls + Triceps",
+         "sets": 3,
+         "target_reps": "12-15",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Shoulder health superset."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "Week 5",
+     "days": [
+      {
+       "name": "Day 1 — Squat + Bench",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 3,
+         "target_reps": "3",
+         "percent_1rm": "84%",
+         "rpe": "8",
+         "notes": "Competition style. Cap the effort at the RPE — cut a set if bar speed dies."
+        },
+        {
+         "name": "Bench Press",
+         "sets": 4,
+         "target_reps": "3",
+         "percent_1rm": "84%",
+         "rpe": "8",
+         "notes": "Competition pause on every first rep."
+        },
+        {
+         "name": "Barbell Row",
+         "sets": 3,
+         "target_reps": "8-10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Upper-back balance work."
+        }
+       ]
+      },
+      {
+       "name": "Day 2 — Deadlift + Bench volume",
+       "exercises": [
+        {
+         "name": "Deadlift",
+         "sets": 3,
+         "target_reps": "3",
+         "percent_1rm": "85%",
+         "rpe": "8",
+         "notes": "Competition stance."
+        },
+        {
+         "name": "Close Grip Bench Press",
+         "sets": 3,
+         "target_reps": "5",
+         "percent_1rm": "73%",
+         "rpe": null,
+         "notes": "% of your bench 1RM."
+        },
+        {
+         "name": "Lat Pulldown or Chins",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": null
+        }
+       ]
+      },
+      {
+       "name": "Day 3 — Squat variation + Bench",
+       "exercises": [
+        {
+         "name": "Pause Squat",
+         "sets": 3,
+         "target_reps": "4",
+         "percent_1rm": "72%",
+         "rpe": null,
+         "notes": "2-count pause in the hole. % of your squat 1RM."
+        },
+        {
+         "name": "Bench Press",
+         "sets": 3,
+         "target_reps": "5",
+         "percent_1rm": "70%",
+         "rpe": null,
+         "notes": "Second bench slot — tighter technique focus, leave 2-3 reps in reserve."
+        },
+        {
+         "name": "Dumbbell Shoulder Press",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": null
+        }
+       ]
+      },
+      {
+       "name": "Day 4 — Deadlift variation + Bench",
+       "exercises": [
+        {
+         "name": "Pause Deadlift",
+         "sets": 2,
+         "target_reps": "3",
+         "percent_1rm": "74%",
+         "rpe": null,
+         "notes": "Pause at the knee. % of your deadlift 1RM."
+        },
+        {
+         "name": "Bench Press (feet up)",
+         "sets": 3,
+         "target_reps": "6-8",
+         "percent_1rm": "67%",
+         "rpe": null,
+         "notes": "Larsen-style: feet off the floor, strict."
+        },
+        {
+         "name": "Face Pulls + Triceps",
+         "sets": 3,
+         "target_reps": "12-15",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Shoulder health superset."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "Week 6",
+     "days": [
+      {
+       "name": "Day 1 — Squat + Bench",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 4,
+         "target_reps": "2",
+         "percent_1rm": "87%",
+         "rpe": "8",
+         "notes": "Competition style. Cap the effort at the RPE — cut a set if bar speed dies."
+        },
+        {
+         "name": "Bench Press",
+         "sets": 4,
+         "target_reps": "2",
+         "percent_1rm": "88%",
+         "rpe": "8",
+         "notes": "Competition pause on every first rep."
+        },
+        {
+         "name": "Barbell Row",
+         "sets": 3,
+         "target_reps": "8-10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Upper-back balance work."
+        }
+       ]
+      },
+      {
+       "name": "Day 2 — Deadlift + Bench volume",
+       "exercises": [
+        {
+         "name": "Deadlift",
+         "sets": 3,
+         "target_reps": "2",
+         "percent_1rm": "88%",
+         "rpe": "8",
+         "notes": "Competition stance."
+        },
+        {
+         "name": "Close Grip Bench Press",
+         "sets": 3,
+         "target_reps": "4",
+         "percent_1rm": "76%",
+         "rpe": null,
+         "notes": "% of your bench 1RM."
+        },
+        {
+         "name": "Lat Pulldown or Chins",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": null
+        }
+       ]
+      },
+      {
+       "name": "Day 3 — Squat variation + Bench",
+       "exercises": [
+        {
+         "name": "Pause Squat",
+         "sets": 2,
+         "target_reps": "3",
+         "percent_1rm": "75%",
+         "rpe": null,
+         "notes": "2-count pause in the hole. % of your squat 1RM."
+        },
+        {
+         "name": "Bench Press",
+         "sets": 3,
+         "target_reps": "4",
+         "percent_1rm": "73%",
+         "rpe": null,
+         "notes": "Second bench slot — tighter technique focus, leave 2-3 reps in reserve."
+        },
+        {
+         "name": "Dumbbell Shoulder Press",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": null
+        }
+       ]
+      },
+      {
+       "name": "Day 4 — Deadlift variation + Bench",
+       "exercises": [
+        {
+         "name": "Pause Deadlift",
+         "sets": 2,
+         "target_reps": "3",
+         "percent_1rm": "76%",
+         "rpe": null,
+         "notes": "Pause at the knee. % of your deadlift 1RM."
+        },
+        {
+         "name": "Bench Press (feet up)",
+         "sets": 3,
+         "target_reps": "6-8",
+         "percent_1rm": "70%",
+         "rpe": null,
+         "notes": "Larsen-style: feet off the floor, strict."
+        },
+        {
+         "name": "Face Pulls + Triceps",
+         "sets": 3,
+         "target_reps": "12-15",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Shoulder health superset."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "Week 7",
+     "days": [
+      {
+       "name": "Day 1 — Squat + Bench",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 2,
+         "target_reps": "2",
+         "percent_1rm": "90%",
+         "rpe": "8",
+         "notes": "Competition style. Cap the effort at the RPE — cut a set if bar speed dies."
+        },
+        {
+         "name": "Bench Press",
+         "sets": 2,
+         "target_reps": "2",
+         "percent_1rm": "91%",
+         "rpe": "8",
+         "notes": "Competition pause on every first rep."
+        },
+        {
+         "name": "Barbell Row",
+         "sets": 3,
+         "target_reps": "8-10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Upper-back balance work."
+        }
+       ]
+      },
+      {
+       "name": "Day 2 — Deadlift + Bench volume",
+       "exercises": [
+        {
+         "name": "Deadlift",
+         "sets": 2,
+         "target_reps": "2",
+         "percent_1rm": "91%",
+         "rpe": "8",
+         "notes": "Competition stance."
+        },
+        {
+         "name": "Close Grip Bench Press",
+         "sets": 2,
+         "target_reps": "3",
+         "percent_1rm": "79%",
+         "rpe": null,
+         "notes": "% of your bench 1RM."
+        },
+        {
+         "name": "Lat Pulldown or Chins",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": null
+        }
+       ]
+      },
+      {
+       "name": "Day 3 — Squat variation + Bench",
+       "exercises": [
+        {
+         "name": "Pause Squat",
+         "sets": 2,
+         "target_reps": "2",
+         "percent_1rm": "78%",
+         "rpe": null,
+         "notes": "2-count pause in the hole. % of your squat 1RM."
+        },
+        {
+         "name": "Bench Press",
+         "sets": 2,
+         "target_reps": "3",
+         "percent_1rm": "76%",
+         "rpe": null,
+         "notes": "Second bench slot — tighter technique focus, leave 2-3 reps in reserve."
+        },
+        {
+         "name": "Dumbbell Shoulder Press",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": null
+        }
+       ]
+      },
+      {
+       "name": "Day 4 — Deadlift variation + Bench",
+       "exercises": [
+        {
+         "name": "Pause Deadlift",
+         "sets": 2,
+         "target_reps": "2",
+         "percent_1rm": "79%",
+         "rpe": null,
+         "notes": "Pause at the knee. % of your deadlift 1RM."
+        },
+        {
+         "name": "Bench Press (feet up)",
+         "sets": 3,
+         "target_reps": "6-8",
+         "percent_1rm": "73%",
+         "rpe": null,
+         "notes": "Larsen-style: feet off the floor, strict."
+        },
+        {
+         "name": "Face Pulls + Triceps",
+         "sets": 3,
+         "target_reps": "12-15",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Shoulder health superset."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "Week 8",
+     "days": [
+      {
+       "name": "Day 1 — Squat + Bench",
+       "exercises": [
+        {
+         "name": "Back Squat",
+         "sets": 1,
+         "target_reps": "1",
+         "percent_1rm": "92%",
+         "rpe": "6",
+         "notes": "Openers only — crisp and fast."
+        },
+        {
+         "name": "Bench Press",
+         "sets": 1,
+         "target_reps": "1",
+         "percent_1rm": "93%",
+         "rpe": "6",
+         "notes": "Competition pause on every first rep."
+        },
+        {
+         "name": "Barbell Row",
+         "sets": 3,
+         "target_reps": "8-10",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Upper-back balance work."
+        }
+       ]
+      },
+      {
+       "name": "Day 2 — Deadlift + Bench volume",
+       "exercises": [
+        {
+         "name": "Deadlift",
+         "sets": 1,
+         "target_reps": "1",
+         "percent_1rm": "93%",
+         "rpe": "6",
+         "notes": "Openers only."
+        },
+        {
+         "name": "Close Grip Bench Press",
+         "sets": 1,
+         "target_reps": "5",
+         "percent_1rm": "60%",
+         "rpe": null,
+         "notes": "% of your bench 1RM."
+        },
+        {
+         "name": "Lat Pulldown or Chins",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": null
+        }
+       ]
+      },
+      {
+       "name": "Day 3 — Squat variation + Bench",
+       "exercises": [
+        {
+         "name": "Pause Squat",
+         "sets": 1,
+         "target_reps": "3",
+         "percent_1rm": "60%",
+         "rpe": null,
+         "notes": "2-count pause in the hole. % of your squat 1RM."
+        },
+        {
+         "name": "Bench Press",
+         "sets": 1,
+         "target_reps": "5",
+         "percent_1rm": "58%",
+         "rpe": null,
+         "notes": "Second bench slot — tighter technique focus, leave 2-3 reps in reserve."
+        },
+        {
+         "name": "Dumbbell Shoulder Press",
+         "sets": 3,
+         "target_reps": "8-12",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": null
+        }
+       ]
+      },
+      {
+       "name": "Day 4 — Deadlift variation + Bench",
+       "exercises": [
+        {
+         "name": "Pause Deadlift",
+         "sets": 1,
+         "target_reps": "3",
+         "percent_1rm": "62%",
+         "rpe": null,
+         "notes": "Pause at the knee. % of your deadlift 1RM."
+        },
+        {
+         "name": "Bench Press (feet up)",
+         "sets": 3,
+         "target_reps": "6-8",
+         "percent_1rm": "55%",
+         "rpe": null,
+         "notes": "Larsen-style: feet off the floor, strict."
+        },
+        {
+         "name": "Face Pulls + Triceps",
+         "sets": 3,
+         "target_reps": "12-15",
+         "percent_1rm": null,
+         "rpe": null,
+         "notes": "Shoulder health superset."
+        }
+       ]
       }
      ]
     }

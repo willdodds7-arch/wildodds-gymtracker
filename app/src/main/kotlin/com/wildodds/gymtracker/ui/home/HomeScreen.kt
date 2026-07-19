@@ -227,13 +227,24 @@ fun HomeScreen(
     )
   }
 
+  // %1RM programs pass through the start gate (lift picker + missing-1RM prompt) before import.
+  var pendingStart by remember { mutableStateOf<com.wildodds.gymtracker.ui.library.PendingProgramStart?>(null) }
+  com.wildodds.gymtracker.ui.library.ProgramStartGate(
+    pending = pendingStart,
+    onDismiss = { pendingStart = null },
+    onProceed = { prog, activate ->
+      pendingStart = null
+      if (activate) vm.loadDefaultProgram(prog) else vm.addDefaultToLibrary(prog)
+    }
+  )
+
   if (showDefaultSheet) {
     DefaultProgramSheet(
       programs              = defaultPrograms,
       userPrograms          = userPrograms,
       favourites            = favourites,
-      onAddToLibrary        = { prog -> showDefaultSheet = false; vm.addDefaultToLibrary(prog) },
-      onSetAsActive         = { prog -> showDefaultSheet = false; vm.loadDefaultProgram(prog) },
+      onAddToLibrary        = { prog -> showDefaultSheet = false; pendingStart = com.wildodds.gymtracker.ui.library.PendingProgramStart(prog, activate = false) },
+      onSetAsActive         = { prog -> showDefaultSheet = false; pendingStart = com.wildodds.gymtracker.ui.library.PendingProgramStart(prog, activate = true) },
       onActivateUserProgram = { prog -> showDefaultSheet = false; vm.activateUserProgram(prog.id) },
       onToggleFavourite     = { name -> vm.toggleFavourite(name) },
       onDismiss             = { showDefaultSheet = false }
