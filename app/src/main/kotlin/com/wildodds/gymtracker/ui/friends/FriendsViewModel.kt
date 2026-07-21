@@ -160,19 +160,6 @@ class FriendsViewModel(app: Application) : AndroidViewModel(app) {
     viewModelScope.launch(Dispatchers.IO) { repo.flexBack(event) }
   }
 
-  /** Fan out "started a session" — throttled to once per session per process so re-opening the
-   *  screen can't spam friends. */
-  fun notifySessionStart(sessionId: Long, weekNumber: Int, sessionName: String) {
-    val key = "$sessionId-$weekNumber"
-    if (!notifiedSessions.add(key)) return
-    viewModelScope.launch(Dispatchers.IO) { repo.notifySessionStart(sessionName) }
-  }
-
-  fun publishSnapshot() {
-    viewModelScope.launch(Dispatchers.IO) { repo.publishSnapshot() }
-  }
-
-  private companion object {
-    val notifiedSessions = java.util.Collections.synchronizedSet(mutableSetOf<String>())
-  }
+  // Session-start fan-out and snapshot publishing live in SessionViewModel — they're tied to the
+  // moment the first set is logged / the session completes, not to this screen.
 }
