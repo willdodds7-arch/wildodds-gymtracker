@@ -53,6 +53,25 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="wildodds" android:host="auth" />
             </intent-filter>
+            <!-- Friend invites: wildodds://friend?code=XXXXXXXX (opened from the public
+                 add-friend page, or any app that lets the link through). -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="wildodds" android:host="friend" />
+            </intent-filter>
+            <!-- The share-channel invite URL itself (shows the app in the opener chooser; the
+                 web page also offers a wildodds:// button for browsers that swallow this). -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="willdodds7-arch.github.io"
+                    android:pathPrefix="/wildodds-gymtracker/add-friend" />
+            </intent-filter>
         </activity>
 
         <provider

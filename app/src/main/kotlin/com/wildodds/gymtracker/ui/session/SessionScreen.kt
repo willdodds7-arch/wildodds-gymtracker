@@ -172,6 +172,15 @@ fun SessionScreen(
   val fatigue          by vm.fatigue.collectAsStateWithLifecycle()
   val fatigueDismissed by vm.fatigueSuggestionDismissed.collectAsStateWithLifecycle()
 
+  // Friends: unacknowledged motivation messages surface on this screen; the 💪 reply unlocks
+  // once a set is logged this visit (the "only respond after training" rule).
+  val friendsEnabled = FeatureFlags.isEnabled(SettingsRegistry.FRIENDS)
+  val friendsVm: com.wildodds.gymtracker.ui.friends.FriendsViewModel = viewModel()
+  val pendingMotivations by friendsVm.pendingMotivations.collectAsStateWithLifecycle()
+  if (friendsEnabled) {
+  LaunchedEffect(Unit) { friendsVm.loadPendingMotivations() }
+  }
+
   // Live heart rate (next to the pager dots). Null = no wearable data / HR off → indicator hidden.
   val liveHeartRate by vm.liveHeartRate.collectAsStateWithLifecycle()
 
@@ -454,6 +463,37 @@ fun SessionScreen(
   Text("• ${ph.name} — ${ph.sets} × ${ph.reps}",
   style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onBackground)
   }
+  }
+  }
+  }
+  }
+
+  // ── Friend motivation (pops up here; flex back once you've logged a set) ──
+  if (friendsEnabled) {
+  pendingMotivations.take(2).forEach { (event, who) ->
+  val canFlex = hasLoggedThisVisit || state.isCompleted
+  Surface(
+  color = LocalAccentColor.current.copy(alpha = 0.12f),
+  modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+  shape = RoundedCornerShape(10.dp)
+  ) {
+  Row(
+  Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+  verticalAlignment = Alignment.CenterVertically
+  ) {
+  Column(Modifier.weight(1f)) {
+  Text("💬 $who: ${event.body.ifBlank { "Get back in there! 💪" }}",
+  style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onBackground)
+  if (!canFlex) {
+  Text("Log a set to flex back",
+  style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+  }
+  }
+  TextButton(
+  onClick = { friendsVm.flexBack(event) },
+  enabled = canFlex,
+  modifier = Modifier.testTag("flex_back_${event.id}")
+  ) { Text("💪 Flex", color = if (canFlex) LocalAccentColor.current else MaterialTheme.colorScheme.onSurfaceVariant) }
   }
   }
   }

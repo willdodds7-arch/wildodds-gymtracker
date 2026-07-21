@@ -47,6 +47,21 @@ Rules for every new table (non-negotiable, from the v2 spec):
 2. Owner-only policies for each of select/insert/update/delete (`auth.uid() = user_id`).
 3. A test proving cross-user access fails (see `ProfilesRlsIntegrationTest` as the template).
 
+**⚠️ PENDING — not yet applied to the live project:** `20260720000001_friends.sql` (friends,
+friend_events, profile snapshot columns, redeem/unfriend/notify RPCs). Paste it into the SQL
+Editor and run it, then verify by removing the `@Ignore` on `FriendsRlsIntegrationTest` and
+running that one test (it needs the two RLS throwaway accounts from `local.properties`; it
+befriends and then unfriends them, so it leaves no lasting state). Until the migration is
+applied, the app's Friends screen shows a friendly error on every network call but breaks
+nothing else.
+
+Note the friends policies deliberately deviate from rule 2's owner-only shape: friends may read
+each other's *profile snapshot* and friends list — that IS the feature. Cross-friend checks go
+through `public.are_friends()` (security definer) because a policy that subqueries its own
+table recurses (42P17), and a policy on another table subquerying `friends` would be filtered
+by the caller's own `friends` RLS. Direct `insert`/`update` on `friends` stays impossible for
+everyone; rows are only created inside `redeem_friend_code()`.
+
 ## Auth configuration (dashboard state, as of 2026-07-11)
 
 - Email/password provider: **enabled**. Minimum password length 6 (raise to 8+ before launch).

@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
@@ -31,6 +32,8 @@ import com.wildodds.gymtracker.data.profile.MainLift
 import com.wildodds.gymtracker.data.tools.PlateMath
 import com.wildodds.gymtracker.ui.achievements.AchievementsViewModel
 import com.wildodds.gymtracker.ui.components.GlassCard
+import com.wildodds.gymtracker.ui.settings.FeatureFlags
+import com.wildodds.gymtracker.ui.settings.SettingsRegistry
 import com.wildodds.gymtracker.ui.theme.LocalAccentColor
 import com.wildodds.gymtracker.ui.tools.BarbellVisual
 import com.wildodds.gymtracker.data.gamification.AchievementProgress
@@ -48,6 +51,7 @@ fun ProfileScreen(
   val state by vm.state.collectAsStateWithLifecycle()
   val achState by achievementsVm.state.collectAsStateWithLifecycle()
   val accent = LocalAccentColor.current
+  val friendsEnabled = FeatureFlags.isEnabled(SettingsRegistry.FRIENDS)
   LaunchedEffect(Unit) { vm.refresh(); achievementsVm.refresh() }
 
   var editing by remember { mutableStateOf<MaxRow?>(null) }
@@ -95,6 +99,26 @@ fun ProfileScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Icon(Icons.Default.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+          }
+        }
+      }
+      if (friendsEnabled) {
+        item {
+          GlassCard(modifier = Modifier.fillMaxWidth()
+            .clickable { navController.navigate("friends") }
+            .testTag("profile_friends_row")
+          ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              Icon(Icons.Default.Group, null, tint = MaterialTheme.colorScheme.onBackground)
+              Spacer(Modifier.width(12.dp))
+              Column(Modifier.weight(1f)) {
+                Text("Friends", style = MaterialTheme.typography.titleMedium,
+                  fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground)
+                Text("Add friends, share programs, send motivation", style = MaterialTheme.typography.labelSmall,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant)
+              }
+              Icon(Icons.Default.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
           }
         }
       }

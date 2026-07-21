@@ -106,6 +106,10 @@ object SettingsRegistry {
   // Phase 3H feature key.
   const val ON_DEMAND_LIBRARY = "feat_ondemand_library"
 
+  // Friends (social layer). ON shows the Friends area + enables session-start fan-out to friends
+  // who opted in; OFF hides every entry point (nothing is ever sent).
+  const val FRIENDS = "feat_friends"
+
   private val _entries: MutableList<SettingsEntry> = mutableListOf(
   SettingsEntry(
   key = ACCOUNT, title = "Account",
@@ -287,6 +291,14 @@ object SettingsRegistry {
   group = "Display",
   keywords = listOf("achievement", "achievements", "streak", "streaks", "badge", "badges", "milestone",
   "gamification", "progress", "trophy", "profile", "rewards"),
+  default = true
+  ),
+  SettingsEntry(
+  key = FRIENDS, title = "Friends",
+  summary = "Add friends, see their training, share programs and send motivation. Needs an account.",
+  group = "Display",
+  keywords = listOf("friend", "friends", "social", "invite", "share", "motivation", "flex",
+  "code", "add friend", "programs", "notification"),
   default = true
   ),
   SettingsEntry(

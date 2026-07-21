@@ -16,6 +16,7 @@ import com.wildodds.gymtracker.data.backend.SupabaseModule
 import com.wildodds.gymtracker.data.datastore.ThemePreferences
 import com.wildodds.gymtracker.ui.auth.AuthGate
 import com.wildodds.gymtracker.ui.auth.RecoveryFlow
+import com.wildodds.gymtracker.ui.friends.PendingFriendInvite
 import com.wildodds.gymtracker.ui.navigation.AppNavigation
 import com.wildodds.gymtracker.ui.theme.AppTheme
 import com.wildodds.gymtracker.ui.theme.accentPalette
@@ -33,6 +34,7 @@ class MainActivity : ComponentActivity() {
   enableEdgeToEdge()
   themePrefs = ThemePreferences(applicationContext)
   consumeAuthDeeplink(intent)
+  consumeFriendInvite(intent)
 
   setContent {
   val isDarkMode  by themePrefs.isDarkMode.collectAsStateWithLifecycle(initialValue = false)
@@ -63,6 +65,22 @@ class MainActivity : ComponentActivity() {
   override fun onNewIntent(intent: Intent) {
   super.onNewIntent(intent)
   consumeAuthDeeplink(intent)
+  consumeFriendInvite(intent)
+  }
+
+  /**
+   * Friend-invite links (wildodds://friend?code=… or the public add-friend page URL) surface an
+   * add-friend dialog via [PendingFriendInvite] once the main UI is up — never handled inline
+   * here because the user may still be signed out at this point.
+   */
+  private fun consumeFriendInvite(intent: Intent?) {
+  val uri = intent?.data ?: return
+  val isCustom = uri.scheme == SupabaseModule.DEEPLINK_SCHEME && uri.host == "friend"
+  val isWeb  = uri.scheme == "https" && uri.path?.contains("add-friend") == true
+  if (!isCustom && !isWeb) return
+  val code = uri.getQueryParameter("code")
+    ?.let { com.wildodds.gymtracker.data.friends.FriendsLogic.parseInvite(it) } ?: return
+  PendingFriendInvite.code.value = code
   }
 
   /**

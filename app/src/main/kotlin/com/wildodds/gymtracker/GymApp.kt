@@ -5,6 +5,7 @@ import androidx.multidex.MultiDex
 import android.content.Context
 import com.wildodds.gymtracker.data.analytics.AnalyticsEvent
 import com.wildodds.gymtracker.data.analytics.AnalyticsGate
+import com.wildodds.gymtracker.data.friends.FriendEventsScheduler
 import com.wildodds.gymtracker.data.sync.SyncScheduler
 
 class GymApp : Application() {
@@ -21,6 +22,12 @@ class GymApp : Application() {
   runCatching {
   SyncScheduler.ensurePeriodic(this)
   SyncScheduler.syncNow(this)
+  }
+  // Friends: poll for motivation/flex/session-start events (periodic + once now). Same
+  // degrade-to-nothing contract as sync — signed out or offline is a silent no-op.
+  runCatching {
+  FriendEventsScheduler.schedule(this)
+  FriendEventsScheduler.pollNow(this)
   }
   // Consent-gated: dropped entirely if the user hasn't opted in (AnalyticsGate enforces it).
   AnalyticsGate.log(AnalyticsEvent.AppOpen)
