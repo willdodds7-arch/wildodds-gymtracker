@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Program Marketplace — Wild Odds Gym Tracker</title>
+  <script src="config.js"></script>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      max-width: 720px; margin: 0 auto; padding: 40px 20px; line-height: 1.6; }
+    a { color: #2f6fb0; }
+    h1 { font-size: 1.9rem; }
+    .tick { display:inline-block; width:1em; height:1em; vertical-align:-0.14em;
+      border-radius:50%; background:#1d9bf0; position:relative; }
+    .tick::after { content:""; position:absolute; left:29%; top:16%; width:28%; height:48%;
+      border:solid #fff; border-width:0 0.14em 0.14em 0; transform:rotate(45deg); }
+    .card { border:1px solid #8883; border-radius:12px; padding:18px 20px; margin:16px 0; }
+    .row { display:flex; align-items:center; gap:12px; }
+    .grow { flex:1; }
+    .price { font-weight:700; white-space:nowrap; }
+    .btn { padding:9px 16px; border-radius:10px; border:0; background:#2f6fb0; color:#fff;
+      font-weight:600; cursor:pointer; }
+    .muted { color:#8a8a8a; font-size:.9rem; }
+    input { padding:9px 12px; border-radius:8px; border:1px solid #8886; font-size:1rem;
+      width:100%; box-sizing:border-box; margin:4px 0; background:transparent; color:inherit; }
+  </style>
+</head>
+<body>
+  <h1>Program Marketplace</h1>
+  <p>Training programs made by Verified Creators. Buy one here and it appears in the app under
+    Profile → Marketplace purchases, ready to add to your library. Creators keep 90% of each sale.</p>
+
+  <div class="card" id="auth-card" hidden>
+    <strong>Sign in to buy</strong>
+    <p class="muted">Use your Wild Odds account (same as the app).</p>
+    <input id="email" type="email" placeholder="Email" autocomplete="email" />
+    <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
+    <p><button class="btn" id="signin">Sign in</button> <span id="auth-msg" class="muted"></span></p>
+  </div>
+  <p class="muted" id="whoami"></p>
+
+  <div id="listings"><p class="muted">Loading programs…</p></div>
+
+  <p class="muted">Purchases are processed by Stripe. See the <a href="refunds-policy.html">Refunds
+    Policy</a> and <a href="terms.html">Terms of Service</a>. Creators set their own prices.</p>
+  <p><a href="index.html">← Home</a> · <a href="creator.html">Become a Verified Creator</a></p>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+    const cfg = window.WO_CONFIG;
+    const sb = createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+    const $ = (id) => document.getElementById(id);
+
+    let pendingBuy = null;   // program id clicked while signed out
+
+    async function callFn(name, body) {
+      const { data: { session } } = await sb.auth.getSession();
+      const res = await fetch(`${cfg.SUPABASE_URL}/functions/v1/${name}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": cfg.SUPABASE_ANON_KEY,
+          "Authorization": `Bearer ${session?.access_token ?? ""}`,
+        },
+        body: JSON.stringify(body ?? {}),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? `request failed (${res.status})`);
+      return json;
+    }
+
+    function money(cents, currency) {
+      return `A$${(cents / 100).toFixed(2)}${currency && currency !== "aud" ? " " + currency.toUpperCase() : ""}`;
+    }
+
+    async function buy(programId, statusEl) {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) { pendingBuy = programId; $("auth-card").hidden = false; $("auth-card").scrollIntoView(); return; }
+      statusEl.textContent = "Opening checkout…";
+      try { const { url } = await callFn("program-checkout", { program_id: programId }); location.href = url; }
+      catch (e) { statusEl.textContent = e.message; }
+    }
+
+    async function load() {
+      const { data: { session } } = await sb.auth.getSession();
+      $("whoami").textContent = session ? `Signed in as ${session.user.email}` : "";
+      const [{ data: programs }, { data: creators }, owned] = await Promise.all([
+        sb.from("marketplace_programs")
+          .select("id, creator_id, title, description, price_cents, currency, days_per_week, total_weeks")
+          .eq("status", "published").order("created_at", { ascending: false }),
+        sb.from("creator_public").select("id, username, is_verified_creator"),
+        session
+          ? sb.from("purchases").select("program_id").eq("buyer_id", session.user.id).eq("status", "paid")
+              .then(r => new Set((r.data ?? []).map(p => p.program_id)))
+          : Promise.resolve(new Set()),
+      ]);
+      const byId = Object.fromEntries((creators ?? []).map(c => [c.id, c]));
+      const root = $("listings");
+      root.innerHTML = "";
+      if (!programs || programs.length === 0) {
+        root.innerHTML = '<p class="muted">No programs published yet — check back soon.</p>';
+        return;
+      }
+      for (const p of programs) {
+        const c = byId[p.creator_id];
+        const card = document.createElement("div");
+        card.className = "card";
+        const specs = [
+          p.days_per_week ? `${p.days_per_week} days/week` : null,
+          p.total_weeks ? `${p.total_weeks} weeks` : null,
+        ].filter(Boolean).join(" · ");
+        card.innerHTML = `
+          <div class="row">
+            <div class="grow">
+              <strong></strong>
+              <div class="muted by-line"></div>
+              <div class="desc"></div>
+              <div class="muted">${specs}</div>
+            </div>
+            <div style="text-align:right">
+              <div class="price">${money(p.price_cents, p.currency)}</div>
+              <button class="btn buy">Buy</button>
+              <div class="muted status"></div>
+            </div>
+          </div>`;
+        card.querySelector("strong").textContent = p.title;
+        const by = card.querySelector(".by-line");
+        by.textContent = `by ${c?.username ?? "a creator"} `;
+        if (c?.is_verified_creator) {
+          const t = document.createElement("span");
+          t.className = "tick"; t.setAttribute("role", "img");
+          t.setAttribute("aria-label", "Verified Creator"); t.title = "Verified Creator";
+          by.appendChild(t);
+        }
+        card.querySelector(".desc").textContent = p.description ?? "";
+        const btn = card.querySelector(".buy");
+        if (owned.has(p.id)) {
+          btn.textContent = "Purchased ✓"; btn.disabled = true;
+          card.querySelector(".status").textContent = "Open the app to add it to your library";
+        } else {
+          btn.addEventListener("click", () => buy(p.id, card.querySelector(".status")));
+        }
+        root.appendChild(card);
+      }
+    }
+
+    $("signin").addEventListener("click", async () => {
+      $("auth-msg").textContent = "Signing in…";
+      const { error } = await sb.auth.signInWithPassword({
+        email: $("email").value.trim(), password: $("password").value,
+      });
+      $("auth-msg").textContent = error ? error.message : "";
+      if (!error) {
+        $("auth-card").hidden = true;
+        await load();
+        if (pendingBuy != null) { const id = pendingBuy; pendingBuy = null; buy(id, $("whoami")); }
+      }
+    });
+
+    load();
+  </script>
+  <script>
+    if (!window.WO_CONFIG) document.body.innerHTML =
+      "<p>Site configuration missing — config.js not generated. See site/config.example.js.</p>";
+  </script>
+</body>
+</html>

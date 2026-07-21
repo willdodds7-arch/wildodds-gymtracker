@@ -107,6 +107,12 @@ fun AppNavigation() {
         composable("friends") {
             com.wildodds.gymtracker.ui.friends.FriendsScreen(navController = navController)
         }
+        composable("creator_hub") {
+            com.wildodds.gymtracker.ui.creator.CreatorHubScreen(navController = navController)
+        }
+        composable("marketplace") {
+            com.wildodds.gymtracker.ui.marketplace.MarketplaceScreen(navController = navController)
+        }
         composable(
             route = "friend/{friendId}",
             arguments = listOf(navArgument("friendId") { type = NavType.StringType })

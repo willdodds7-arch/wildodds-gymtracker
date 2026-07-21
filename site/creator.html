@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Verified Creator — Wild Odds Gym Tracker</title>
+  <script src="config.js"></script>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      max-width: 720px; margin: 0 auto; padding: 40px 20px; line-height: 1.6; }
+    a { color: #2f6fb0; }
+    h1 { font-size: 1.9rem; }
+    .tick { display:inline-block; width:1.1em; height:1.1em; vertical-align:-0.18em;
+      border-radius:50%; background:#1d9bf0; position:relative; }
+    .tick::after { content:""; position:absolute; left:29%; top:16%; width:28%; height:48%;
+      border:solid #fff; border-width:0 0.16em 0.16em 0; transform:rotate(45deg); }
+    .card { border: 1px solid #8883; border-radius: 12px; padding: 20px; margin: 20px 0; }
+    .btn { display:inline-block; padding: 10px 18px; border-radius: 10px; border: 0;
+      background:#2f6fb0; color:#fff; font-weight:600; font-size:1rem; cursor:pointer; }
+    .btn.secondary { background:transparent; color:#2f6fb0; border:1px solid #2f6fb0; }
+    .btn[disabled] { opacity:.5; cursor:not-allowed; }
+    .disclosure { font-size:.92rem; border-left:3px solid #2f6fb0; padding:8px 14px; margin:14px 0;
+      background:#2f6fb01a; }
+    .muted { color:#8a8a8a; font-size:.9rem; }
+    input { padding:9px 12px; border-radius:8px; border:1px solid #8886; font-size:1rem; width:100%;
+      box-sizing:border-box; margin:4px 0; background:transparent; color:inherit; }
+    .ok { color:#2e9e5b; } .warn { color:#c8722a; }
+    label.agree { display:flex; gap:8px; align-items:flex-start; font-size:.95rem; }
+    #status-msg { min-height:1.4em; }
+  </style>
+</head>
+<body>
+  <h1><span class="tick" role="img" aria-label="Verified"></span> Become a Verified Creator</h1>
+  <p id="headline">For <strong>less than 7¢ a day</strong>, get the blue verified badge and sell
+    your training programs in the Wild Odds marketplace — <strong>you keep 90%</strong> of every sale.</p>
+  <ul>
+    <li><span class="tick" role="img" aria-label="Verified"></span> Blue verified badge next to your name across the app</li>
+    <li>Publish and price your own training programs in the marketplace</li>
+    <li>Keep 90% of every sale — the platform takes a 10% fee; Stripe pays you out directly</li>
+  </ul>
+
+  <div class="disclosure" id="disclosure">
+    <!-- Filled from config: true recurring price + auto-renewal + cancellation, per Australian
+         Consumer Law. Never show only the daily figure near a purchase button. -->
+  </div>
+
+  <div class="card" id="auth-card">
+    <strong>Sign in with your Wild Odds account</strong>
+    <p class="muted">Use the same email and password as in the app.</p>
+    <input id="email" type="email" placeholder="Email" autocomplete="email" />
+    <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
+    <p><button class="btn" id="signin">Sign in</button></p>
+    <p class="muted" id="auth-msg"></p>
+  </div>
+
+  <div class="card" id="creator-card" hidden>
+    <p id="status-msg"></p>
+    <p id="renewal-line" class="muted"></p>
+
+    <p><button class="btn" id="subscribe" hidden>Subscribe — <span id="price-btn"></span>/month</button></p>
+    <p><button class="btn secondary" id="manage" hidden>Manage subscription (cancel any time)</button></p>
+
+    <div id="seller-setup" hidden>
+      <hr style="border:0;border-top:1px solid #8883;margin:16px 0" />
+      <strong>Sell your programs</strong>
+      <p class="muted">Two steps before you can publish: accept the Creator Agreement, then set up
+        payouts with Stripe (identity checks are handled by Stripe).</p>
+      <label class="agree" id="agreement-row">
+        <input type="checkbox" id="agree-box" style="width:auto" />
+        <span>I have read and accept the <a href="creator-agreement.html" target="_blank">Creator
+        Agreement</a>, including the 10% platform fee (I keep 90% of each sale, minus payment
+        processing) and that I'm responsible for my own tax, including GST.</span>
+      </label>
+      <p><button class="btn secondary" id="accept-agreement">Accept Creator Agreement</button>
+         <span id="agreement-status" class="muted"></span></p>
+      <p><button class="btn secondary" id="connect">Set up payouts with Stripe</button>
+         <span id="connect-status" class="muted"></span></p>
+      <p class="muted">Once both are done, publish programs from the app: Profile → Creator hub.</p>
+    </div>
+  </div>
+
+  <p class="muted">Subscriptions are billed by Stripe. See the
+    <a href="subscription-billing-terms.html">Subscription &amp; Billing Terms</a>,
+    <a href="refunds-policy.html">Refunds Policy</a> and
+    <a href="privacy.html">Privacy Policy</a>.</p>
+  <p><a href="index.html">← Home</a></p>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+    const cfg = window.WO_CONFIG;
+    const sb = createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+
+    document.getElementById("disclosure").textContent = cfg.SUB_DISCLOSURE;
+    document.getElementById("price-btn").textContent = cfg.SUB_PRICE_MONTHLY;
+    document.getElementById("headline").innerHTML =
+      `For <strong>${cfg.SUB_DAILY_COPY}</strong> (${cfg.SUB_PRICE_MONTHLY}/month), get the blue verified badge and sell your training programs — <strong>you keep ${100 - cfg.PLATFORM_FEE_PERCENT}%</strong> of every sale.`;
+
+    const $ = (id) => document.getElementById(id);
+
+    async function callFn(name, body) {
+      const { data: { session } } = await sb.auth.getSession();
+      const res = await fetch(`${cfg.SUPABASE_URL}/functions/v1/${name}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": cfg.SUPABASE_ANON_KEY,
+          "Authorization": `Bearer ${session?.access_token ?? ""}`,
+        },
+        body: JSON.stringify(body ?? {}),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? `request failed (${res.status})`);
+      return json;
+    }
+
+    async function refresh() {
+      const { data: { session } } = await sb.auth.getSession();
+      $("auth-card").hidden = !!session;
+      $("creator-card").hidden = !session;
+      if (!session) return;
+
+      const uid = session.user.id;
+      const [{ data: sub }, { data: profile }] = await Promise.all([
+        sb.from("creator_subscriptions").select("*").eq("user_id", uid).maybeSingle(),
+        sb.from("profiles").select("is_verified_creator, connect_onboarding_complete, creator_agreement_accepted_at").eq("id", uid).maybeSingle(),
+      ]);
+      const active = sub && ["active", "trialing"].includes(sub.status);
+      $("status-msg").innerHTML = active
+        ? `<span class="tick" role="img" aria-label="Verified"></span> <strong class="ok">You're a Verified Creator.</strong>`
+        : `<strong>You're not a Verified Creator yet.</strong>`;
+      if (active && sub.current_period_end) {
+        const d = new Date(sub.current_period_end).toLocaleDateString();
+        $("renewal-line").textContent = sub.cancel_at_period_end
+          ? `Cancelled — access continues until ${d}.`
+          : `Renews automatically on ${d} at ${cfg.SUB_PRICE_MONTHLY}. Cancel any time below.`;
+      } else {
+        $("renewal-line").textContent = "";
+      }
+      $("subscribe").hidden = !!active;
+      $("manage").hidden = !sub;   // portal also useful for lapsed/past-due states
+      $("seller-setup").hidden = !active;
+      if (active) {
+        const accepted = !!profile?.creator_agreement_accepted_at;
+        $("agreement-status").textContent = accepted ? "✓ accepted" : "";
+        $("agreement-status").className = accepted ? "ok" : "muted";
+        $("accept-agreement").disabled = accepted;
+        $("agree-box").disabled = accepted;
+        if (accepted) $("agree-box").checked = true;
+        const connected = !!profile?.connect_onboarding_complete;
+        $("connect-status").textContent = connected ? "✓ payouts ready" : "not set up yet";
+        $("connect-status").className = connected ? "ok" : "warn";
+        $("connect").disabled = connected;
+      }
+    }
+
+    $("signin").addEventListener("click", async () => {
+      $("auth-msg").textContent = "Signing in…";
+      const { error } = await sb.auth.signInWithPassword({
+        email: $("email").value.trim(), password: $("password").value,
+      });
+      $("auth-msg").textContent = error ? error.message : "";
+      refresh();
+    });
+
+    $("subscribe").addEventListener("click", async () => {
+      try { const { url } = await callFn("creator-checkout"); location.href = url; }
+      catch (e) { $("status-msg").textContent = e.message; }
+    });
+    $("manage").addEventListener("click", async () => {
+      try { const { url } = await callFn("billing-portal"); location.href = url; }
+      catch (e) { $("status-msg").textContent = e.message; }
+    });
+    $("accept-agreement").addEventListener("click", async () => {
+      if (!$("agree-box").checked) { $("agreement-status").textContent = "tick the box first"; return; }
+      try {
+        await callFn("accept-creator-agreement", { version: cfg.CREATOR_AGREEMENT_VERSION });
+        refresh();
+      } catch (e) { $("agreement-status").textContent = e.message; }
+    });
+    $("connect").addEventListener("click", async () => {
+      try { const { url } = await callFn("connect-onboarding"); location.href = url; }
+      catch (e) { $("connect-status").textContent = e.message; }
+    });
+
+    refresh();
+  </script>
+  <script>
+    if (!window.WO_CONFIG) document.body.innerHTML =
+      "<p>Site configuration missing — config.js not generated. See site/config.example.js.</p>";
+  </script>
+</body>
+</html>

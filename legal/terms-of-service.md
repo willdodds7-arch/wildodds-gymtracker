@@ -1,6 +1,9 @@
 # Terms of Service
 
-**Version 1.0 — Last updated 19 July 2026**
+**Version 1.1 — Last updated 22 July 2026**
+
+> **TODO (before launch):** the marketplace/subscription additions in v1.1 must be reviewed by a
+> qualified lawyer before the Verified Creator tier goes live.
 
 These Terms govern your use of Wild Odds Gym Tracker ("the app"). By creating an account and using
 the app, you agree to them.
@@ -27,6 +30,20 @@ professional fitness advice.** Any programs, suggestions, 1RM estimates, progres
 other guidance are informational only. Resistance training carries inherent risks. Consult a
 qualified professional before starting or changing an exercise program, and stop if you feel unwell
 or in pain. You use the app and train at your own risk.
+
+## Subscriptions and the creator marketplace
+
+The optional **Verified Creator** subscription and the **program marketplace** are purchased and
+managed on our website (not inside the Android app); their detailed terms are in the
+Subscription & Billing Terms, the Creator Agreement (for sellers) and the Refunds Policy, which
+form part of these Terms when you use those features.
+
+**The platform is an intermediary.** When you buy a program from a Verified Creator, the sale
+contract is between **you and that creator** — we host the marketplace, process the transaction
+through Stripe, retain a 10% platform fee, and deliver the content, but we are not the seller
+and don't author creators' programs. Program content is the creator's responsibility (and the
+"Not medical advice" section above applies to it doubly). Nothing in this section limits your
+consumer-guarantee rights under the Australian Consumer Law.
 
 ## The software is open source
 

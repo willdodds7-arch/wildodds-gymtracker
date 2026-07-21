@@ -228,8 +228,15 @@ fun FriendsScreen(navController: NavController, vm: FriendsViewModel = viewModel
           ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
               Column(Modifier.weight(1f)) {
-                Text(friend.username ?: "Friend", fontWeight = FontWeight.SemiBold,
-                  color = MaterialTheme.colorScheme.onBackground)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                  Text(friend.username ?: "Friend", fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onBackground)
+                  if (friend.isVerifiedCreator) {
+                    Spacer(Modifier.width(5.dp))
+                    com.wildodds.gymtracker.ui.components.VerifiedBadge(
+                      com.wildodds.gymtracker.ui.components.BadgeSize.SM)
+                  }
+                }
                 Text(
                   "Last gym visit: ${FriendsLogic.lastGymLabel(friend.lastSessionAt, now)}",
                   style = MaterialTheme.typography.labelSmall,

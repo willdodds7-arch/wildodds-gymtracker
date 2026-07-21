@@ -16,7 +16,8 @@ data class FriendProfile(
   val prs: JsonElement? = null,
   val achievements: JsonElement? = null,
   @SerialName("public_programs") val publicPrograms: JsonElement? = null,
-  @SerialName("notify_on_friend_session") val notifyOnFriendSession: Boolean = false
+  @SerialName("notify_on_friend_session") val notifyOnFriendSession: Boolean = false,
+  @SerialName("is_verified_creator") val isVerifiedCreator: Boolean = false
 )
 
 @Serializable
@@ -43,9 +44,13 @@ data class FriendEvent(
   }
 }
 
-/** Minimal (id, username) pair returned by the friends_of RPC. */
+/** Minimal row returned by the friends_of RPC (id, username, verified badge flag). */
 @Serializable
-data class FriendOfFriend(val id: String, val username: String? = null)
+data class FriendOfFriend(
+  val id: String,
+  val username: String? = null,
+  @SerialName("is_verified_creator") val isVerifiedCreator: Boolean = false
+)
 
 /** Pure display helpers — unit-tested. */
 object FriendsLogic {

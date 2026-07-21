@@ -28,6 +28,11 @@ jobs:
           python-version: "3.12"
       - name: Render /legal → HTML and assemble _site
         run: python site/build_site.py
+        env:
+          # Public-by-design anon key (RLS is the access control) — used by the creator/
+          # marketplace pages to talk to Supabase. Same repo secrets ci.yml already uses.
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
       - name: Link-check the built site
         run: |
           python - <<'PY'

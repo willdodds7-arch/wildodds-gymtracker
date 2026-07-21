@@ -110,6 +110,11 @@ object SettingsRegistry {
   // who opted in; OFF hides every entry point (nothing is ever sent).
   const val FRIENDS = "feat_friends"
 
+  // Creator marketplace (Verified Creator tier). OFF hides the Creator hub + Marketplace entry
+  // points and all badges. Purchasing happens on the website only (Google Play policy) — the
+  // app never links to checkout.
+  const val CREATOR_MARKETPLACE = "feat_creator_marketplace"
+
   private val _entries: MutableList<SettingsEntry> = mutableListOf(
   SettingsEntry(
   key = ACCOUNT, title = "Account",
@@ -294,6 +299,14 @@ object SettingsRegistry {
   default = true
   ),
   SettingsEntry(
+  key = CREATOR_MARKETPLACE, title = "Creator marketplace",
+  summary = "Browse programs by Verified Creators and, as a creator, manage your listings and earnings",
+  group = "Display",
+  keywords = listOf("creator", "marketplace", "verified", "badge", "sell", "programs", "earnings",
+  "store", "buy", "purchases"),
+  default = true
+  ),
+  SettingsEntry(
   key = FRIENDS, title = "Friends",
   summary = "Add friends, see their training, share programs and send motivation. Needs an account.",
   group = "Display",
@@ -398,6 +411,30 @@ object SettingsRegistry {
   summary = "Get help and find answers to common questions",
   group = "Legal & privacy",
   keywords = listOf("support", "help", "contact", "email", "faq", "questions", "problem", "issue"),
+  control = SettingControl.LEGAL_DOC
+  ),
+  SettingsEntry(
+  key = "creator_agreement", title = "Creator Agreement",
+  summary = "Terms for selling programs: the 10% platform fee, payouts, content ownership, tax",
+  group = "Legal & privacy",
+  keywords = listOf("creator", "agreement", "sell", "marketplace", "fee", "commission", "payout",
+  "stripe", "tax", "gst", "licence", "content"),
+  control = SettingControl.LEGAL_DOC
+  ),
+  SettingsEntry(
+  key = "billing", title = "Subscription & Billing Terms",
+  summary = "Verified Creator pricing, auto-renewal, cancellation and price-change notice",
+  group = "Legal & privacy",
+  keywords = listOf("subscription", "billing", "price", "renewal", "auto-renew", "cancel",
+  "verified", "creator", "monthly", "stripe"),
+  control = SettingControl.LEGAL_DOC
+  ),
+  SettingsEntry(
+  key = "refunds", title = "Refunds Policy",
+  summary = "Refunds for subscriptions and program purchases, and your consumer-law rights",
+  group = "Legal & privacy",
+  keywords = listOf("refund", "refunds", "money back", "consumer", "guarantee", "acl", "return",
+  "purchase", "cancel"),
   control = SettingControl.LEGAL_DOC
   ),
   SettingsEntry(

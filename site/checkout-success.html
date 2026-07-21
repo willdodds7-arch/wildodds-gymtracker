@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Payment complete — Wild Odds Gym Tracker</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      max-width: 720px; margin: 0 auto; padding: 40px 20px; line-height: 1.6; }
+    a { color: #2f6fb0; }
+  </style>
+</head>
+<body>
+  <h1>🎉 Payment complete</h1>
+  <p id="msg">Thanks! Your payment went through.</p>
+  <p class="sub" id="sub-extra" hidden>Your verified badge appears in the app within a minute or
+    two (pull to refresh your Profile). Next step for selling: finish payout setup on the
+    <a href="creator.html">Verified Creator page</a>.</p>
+  <p id="prog-extra" hidden>Open the app → Profile → Marketplace purchases to add the program to
+    your library.</p>
+  <p>A receipt has been emailed to you by Stripe.</p>
+  <p><a href="index.html">← Home</a> · <a href="marketplace.html">Marketplace</a></p>
+  <script>
+    var kind = new URLSearchParams(location.search).get("kind");
+    if (kind === "subscription") {
+      document.getElementById("msg").textContent = "Welcome, Verified Creator!";
+      document.getElementById("sub-extra").hidden = false;
+    } else if (kind === "program") {
+      document.getElementById("prog-extra").hidden = false;
+    }
+  </script>
+</body>
+</html>

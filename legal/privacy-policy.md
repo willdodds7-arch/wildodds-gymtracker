@@ -1,6 +1,9 @@
 # Privacy Policy
 
-**Version 1.0 — Last updated 19 July 2026**
+**Version 1.1 — Last updated 22 July 2026**
+
+> **TODO (before launch):** the payments/marketplace additions in v1.1 must be reviewed by a
+> qualified lawyer before the Verified Creator tier goes live.
 
 This Privacy Policy explains what Wild Odds Gym Tracker ("the app", "we") collects, why, and the
 control you have over it. It describes what the app actually does today — not aspirations.
@@ -40,9 +43,29 @@ backend. That backend is provided by **Supabase**, which acts as our data proces
 database (currently in the ap-south-1 / Mumbai region). Data in transit is encrypted (HTTPS).
 Access to your rows is enforced by row-level security so that only your account can read them.
 
+## Payments, subscriptions and the creator marketplace
+
+If you buy a Verified Creator subscription or a marketplace program (both happen on our website,
+not in the app), payment is processed by **Stripe**, a third-party payment processor. **We never
+see or store your card number.** What we store is: your Stripe customer reference, your
+subscription status and renewal date, and — for each purchase — what was bought, the price, and
+the 10%/90% fee split, so we can show you your entitlements and (for creators) earnings.
+
+If you sell programs as a creator, Stripe collects **identity (KYC) and payout details** —
+name, date of birth, bank account — directly, as required by financial-services law. That data
+goes to Stripe, not to us; we only learn whether your payout account is ready. Stripe is a
+global company and **your payment/identity data may be stored and processed overseas**
+(including the United States) under Stripe's own privacy policy.
+
+Collection purpose (Australian Privacy Principles): to process the payments you ask for, show
+you what you own, pay creators their share, and meet our record-keeping obligations. Payment
+records are kept as long as tax and accounting law requires, even after account deletion.
+
 ## How we use it
 
 - To provide the app: authenticate you, and sync your training data across your devices.
+- If you subscribed or bought/sold programs: to provide those entitlements and payouts (via
+  Stripe), and to keep required financial records.
 - If you opted in: to understand which features are used, so we can improve the app.
 
 We do **not** sell your data, share it for advertising, or use it to build advertising profiles.
@@ -51,6 +74,8 @@ We do **not** sell your data, share it for advertising, or use it to build adver
 
 - **Account and training data:** kept until you delete it or delete your account.
 - **Analytics events:** automatically deleted after **18 months**.
+- **Payment and sale records:** kept for as long as tax/accounting law requires (typically 5
+  years in Australia), even if you delete your account.
 
 ## Your rights and controls
 

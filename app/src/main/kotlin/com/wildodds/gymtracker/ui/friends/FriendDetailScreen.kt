@@ -109,7 +109,16 @@ fun FriendDetailScreen(
     containerColor = MaterialTheme.colorScheme.background,
     topBar = {
       TopAppBar(
-        title = { Text(name, fontWeight = FontWeight.Bold) },
+        title = {
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(name, fontWeight = FontWeight.Bold)
+            if (profile?.isVerifiedCreator == true) {
+              Spacer(Modifier.width(6.dp))
+              com.wildodds.gymtracker.ui.components.VerifiedBadge(
+                com.wildodds.gymtracker.ui.components.BadgeSize.MD)
+            }
+          }
+        },
         navigationIcon = {
           IconButton(onClick = { navController.popBackStack() }) {
             Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
@@ -249,8 +258,15 @@ fun FriendDetailScreen(
               Text("No friends to show", style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
             } else detail.theirFriends.forEach { f ->
-              Text("• ${f.username ?: "Anonymous"}", style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(vertical = 1.dp))
+              Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 1.dp)) {
+                Text("• ${f.username ?: "Anonymous"}", style = MaterialTheme.typography.bodySmall,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (f.isVerifiedCreator) {
+                  Spacer(Modifier.width(4.dp))
+                  com.wildodds.gymtracker.ui.components.VerifiedBadge(
+                    com.wildodds.gymtracker.ui.components.BadgeSize.SM)
+                }
+              }
             }
           }
         }

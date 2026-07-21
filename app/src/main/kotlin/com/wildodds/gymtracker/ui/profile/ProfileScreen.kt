@@ -16,6 +16,8 @@ import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Storefront
+import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -52,6 +54,7 @@ fun ProfileScreen(
   val achState by achievementsVm.state.collectAsStateWithLifecycle()
   val accent = LocalAccentColor.current
   val friendsEnabled = FeatureFlags.isEnabled(SettingsRegistry.FRIENDS)
+  val marketplaceEnabled = FeatureFlags.isEnabled(SettingsRegistry.CREATOR_MARKETPLACE)
   LaunchedEffect(Unit) { vm.refresh(); achievementsVm.refresh() }
 
   var editing by remember { mutableStateOf<MaxRow?>(null) }
@@ -67,12 +70,29 @@ fun ProfileScreen(
     Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).statusBarsPadding()
   ) {
     Spacer(Modifier.height(20.dp))
+    // Own verified badge — server-derived (profiles.is_verified_creator via CreatorRepository),
+    // never client-asserted. Shown only while the subscription is active.
+    var ownVerified by remember { mutableStateOf(false) }
+    if (marketplaceEnabled) {
+      val ctx = androidx.compose.ui.platform.LocalContext.current.applicationContext
+      LaunchedEffect(Unit) {
+        ownVerified = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+          (com.wildodds.gymtracker.data.creator.CreatorRepository(ctx).myStatus()
+            as? com.wildodds.gymtracker.data.backend.RemoteResult.Success)?.value?.isVerified ?: false
+        }
+      }
+    }
     Row(
       verticalAlignment = Alignment.CenterVertically,
       modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)
     ) {
       Text("Profile", fontWeight = FontWeight.Bold, fontSize = 22.sp,
-        color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.weight(1f))
+        color = MaterialTheme.colorScheme.onBackground)
+      if (marketplaceEnabled && ownVerified) {
+        Spacer(Modifier.width(8.dp))
+        com.wildodds.gymtracker.ui.components.VerifiedBadge(com.wildodds.gymtracker.ui.components.BadgeSize.LG)
+      }
+      Spacer(Modifier.weight(1f))
       IconButton(
         onClick = { navController.navigate("settings") },
         modifier = Modifier.testTag("profile_settings_gear")
@@ -99,6 +119,44 @@ fun ProfileScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Icon(Icons.Default.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+          }
+        }
+      }
+      if (marketplaceEnabled) {
+        item {
+          GlassCard(modifier = Modifier.fillMaxWidth()
+            .clickable { navController.navigate("creator_hub") }
+            .testTag("profile_creator_row")
+          ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              Icon(Icons.Default.WorkspacePremium, null, tint = MaterialTheme.colorScheme.onBackground)
+              Spacer(Modifier.width(12.dp))
+              Column(Modifier.weight(1f)) {
+                Text("Creator hub", style = MaterialTheme.typography.titleMedium,
+                  fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground)
+                Text("Verified Creator status, your listings, earnings", style = MaterialTheme.typography.labelSmall,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant)
+              }
+              Icon(Icons.Default.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+          }
+        }
+        item {
+          GlassCard(modifier = Modifier.fillMaxWidth()
+            .clickable { navController.navigate("marketplace") }
+            .testTag("profile_marketplace_row")
+          ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              Icon(Icons.Default.Storefront, null, tint = MaterialTheme.colorScheme.onBackground)
+              Spacer(Modifier.width(12.dp))
+              Column(Modifier.weight(1f)) {
+                Text("Marketplace", style = MaterialTheme.typography.titleMedium,
+                  fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground)
+                Text("Programs by Verified Creators · your purchases", style = MaterialTheme.typography.labelSmall,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant)
+              }
+              Icon(Icons.Default.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
           }
         }
       }
