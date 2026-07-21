@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.wildodds.gymtracker.data.friends.FriendsLogic
+import com.wildodds.gymtracker.data.gamification.AchievementCatalog
 import com.wildodds.gymtracker.data.profile.MainLift
 import com.wildodds.gymtracker.ui.components.GlassCard
 import com.wildodds.gymtracker.ui.theme.LocalAccentColor
@@ -185,16 +186,27 @@ fun FriendDetailScreen(
         }
       }
 
-      // Achievements
+      // Achievements — published as stable ids; titles come from the shared local catalog.
       item {
         GlassCard(Modifier.fillMaxWidth()) {
           Column {
             Text("Achievements", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
             Spacer(Modifier.height(4.dp))
-            val count = runCatching { profile?.achievements?.jsonArray?.size ?: 0 }.getOrDefault(0)
-            Text(if (count == 0) "None unlocked yet" else "$count unlocked 🏆",
-              color = if (count == 0) MaterialTheme.colorScheme.onSurfaceVariant else accent,
-              style = MaterialTheme.typography.bodyMedium)
+            val ids = runCatching {
+              profile?.achievements?.jsonArray?.mapNotNull { it.jsonPrimitive.content } ?: emptyList()
+            }.getOrDefault(emptyList())
+            val unlocked = AchievementCatalog.ALL.filter { it.id in ids.toSet() }
+            if (unlocked.isEmpty()) {
+              Text("None unlocked yet", color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium)
+            } else {
+              Text("${unlocked.size} unlocked 🏆", color = accent, style = MaterialTheme.typography.bodyMedium)
+              Spacer(Modifier.height(4.dp))
+              unlocked.forEach { a ->
+                Text("• ${a.title} — ${a.description}", style = MaterialTheme.typography.labelSmall,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(vertical = 1.dp))
+              }
+            }
           }
         }
       }
