@@ -8,7 +8,6 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <!-- Phase 7A — opt-in re-engagement reminders (requested at runtime on Android 13+). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
@@ -44,33 +43,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            <!-- Auth deep links (password reset, email confirmation): wildodds://auth.
-                 singleTask so an already-running app receives them via onNewIntent. -->
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="wildodds" android:host="auth" />
-            </intent-filter>
-            <!-- Friend invites: wildodds://friend?code=XXXXXXXX (opened from the public
-                 add-friend page, or any app that lets the link through). -->
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="wildodds" android:host="friend" />
-            </intent-filter>
-            <!-- The share-channel invite URL itself (shows the app in the opener chooser; the
-                 web page also offers a wildodds:// button for browsers that swallow this). -->
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:scheme="https"
-                    android:host="willdodds7-arch.github.io"
-                    android:pathPrefix="/wildodds-gymtracker/add-friend" />
             </intent-filter>
         </activity>
 

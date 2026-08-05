@@ -34,8 +34,6 @@ import com.wildodds.gymtracker.data.profile.MainLift
 import com.wildodds.gymtracker.data.tools.PlateMath
 import com.wildodds.gymtracker.ui.achievements.AchievementsViewModel
 import com.wildodds.gymtracker.ui.components.GlassCard
-import com.wildodds.gymtracker.ui.settings.FeatureFlags
-import com.wildodds.gymtracker.ui.settings.SettingsRegistry
 import com.wildodds.gymtracker.ui.theme.LocalAccentColor
 import com.wildodds.gymtracker.ui.tools.BarbellVisual
 import com.wildodds.gymtracker.data.gamification.AchievementProgress
@@ -53,8 +51,6 @@ fun ProfileScreen(
   val state by vm.state.collectAsStateWithLifecycle()
   val achState by achievementsVm.state.collectAsStateWithLifecycle()
   val accent = LocalAccentColor.current
-  val friendsEnabled = FeatureFlags.isEnabled(SettingsRegistry.FRIENDS)
-  val marketplaceEnabled = FeatureFlags.isEnabled(SettingsRegistry.CREATOR_MARKETPLACE)
   LaunchedEffect(Unit) { vm.refresh(); achievementsVm.refresh() }
 
   var editing by remember { mutableStateOf<MaxRow?>(null) }
@@ -70,28 +66,12 @@ fun ProfileScreen(
     Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).statusBarsPadding()
   ) {
     Spacer(Modifier.height(20.dp))
-    // Own verified badge — server-derived (profiles.is_verified_creator via CreatorRepository),
-    // never client-asserted. Shown only while the subscription is active.
-    var ownVerified by remember { mutableStateOf(false) }
-    if (marketplaceEnabled) {
-      val ctx = androidx.compose.ui.platform.LocalContext.current.applicationContext
-      LaunchedEffect(Unit) {
-        ownVerified = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-          (com.wildodds.gymtracker.data.creator.CreatorRepository(ctx).myStatus()
-            as? com.wildodds.gymtracker.data.backend.RemoteResult.Success)?.value?.isVerified ?: false
-        }
-      }
-    }
     Row(
       verticalAlignment = Alignment.CenterVertically,
       modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)
     ) {
       Text("Profile", fontWeight = FontWeight.Bold, fontSize = 22.sp,
         color = MaterialTheme.colorScheme.onBackground)
-      if (marketplaceEnabled && ownVerified) {
-        Spacer(Modifier.width(8.dp))
-        com.wildodds.gymtracker.ui.components.VerifiedBadge(com.wildodds.gymtracker.ui.components.BadgeSize.LG)
-      }
       Spacer(Modifier.weight(1f))
       IconButton(
         onClick = { navController.navigate("settings") },
@@ -119,64 +99,6 @@ fun ProfileScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Icon(Icons.Default.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-          }
-        }
-      }
-      if (marketplaceEnabled) {
-        item {
-          GlassCard(modifier = Modifier.fillMaxWidth()
-            .clickable { navController.navigate("creator_hub") }
-            .testTag("profile_creator_row")
-          ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-              Icon(Icons.Default.WorkspacePremium, null, tint = MaterialTheme.colorScheme.onBackground)
-              Spacer(Modifier.width(12.dp))
-              Column(Modifier.weight(1f)) {
-                Text("Creator hub", style = MaterialTheme.typography.titleMedium,
-                  fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground)
-                Text("Verified Creator status, your listings, earnings", style = MaterialTheme.typography.labelSmall,
-                  color = MaterialTheme.colorScheme.onSurfaceVariant)
-              }
-              Icon(Icons.Default.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-          }
-        }
-        item {
-          GlassCard(modifier = Modifier.fillMaxWidth()
-            .clickable { navController.navigate("marketplace") }
-            .testTag("profile_marketplace_row")
-          ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-              Icon(Icons.Default.Storefront, null, tint = MaterialTheme.colorScheme.onBackground)
-              Spacer(Modifier.width(12.dp))
-              Column(Modifier.weight(1f)) {
-                Text("Marketplace", style = MaterialTheme.typography.titleMedium,
-                  fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground)
-                Text("Programs by Verified Creators · your purchases", style = MaterialTheme.typography.labelSmall,
-                  color = MaterialTheme.colorScheme.onSurfaceVariant)
-              }
-              Icon(Icons.Default.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-          }
-        }
-      }
-      if (friendsEnabled) {
-        item {
-          GlassCard(modifier = Modifier.fillMaxWidth()
-            .clickable { navController.navigate("friends") }
-            .testTag("profile_friends_row")
-          ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-              Icon(Icons.Default.Group, null, tint = MaterialTheme.colorScheme.onBackground)
-              Spacer(Modifier.width(12.dp))
-              Column(Modifier.weight(1f)) {
-                Text("Friends", style = MaterialTheme.typography.titleMedium,
-                  fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground)
-                Text("Add friends, share programs, send motivation", style = MaterialTheme.typography.labelSmall,
-                  color = MaterialTheme.colorScheme.onSurfaceVariant)
-              }
-              Icon(Icons.Default.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
           }
         }
       }

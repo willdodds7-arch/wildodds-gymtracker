@@ -40,8 +40,9 @@ object AnalyticsGate {
   fun log(event: AnalyticsEvent) {
     val ctx = appContext ?: return
     scope.launch {
-      val queued = runCatching { persistIfConsented(ctx, event) }.getOrDefault(false)
-      if (queued) runCatching { AnalyticsScheduler.uploadNow(ctx) } // nudge the uploader
+      // Local-only build: consent-gated events are persisted to the on-device outbox but never
+      // uploaded (the cloud uploader was removed with the online stack).
+      runCatching { persistIfConsented(ctx, event) }
     }
   }
 

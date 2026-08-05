@@ -129,47 +129,8 @@ fun SettingsScreen(
   val expandedState   = remember { mutableStateMapOf<String, Boolean>() }
   var showClearDialog by remember { mutableStateOf(false) }
 
-  // Account (Phase 2) + sync (Phase 3)
+  // Local, on-device analytics-consent state (drives the "Share usage statistics" toggle).
   val analyticsConsent by vm.analyticsConsent.collectAsStateWithLifecycle()
-  val syncState by vm.syncState.collectAsStateWithLifecycle()
-  val signedInEmail by vm.signedInEmail.collectAsStateWithLifecycle()
-  // Refresh when returning here (e.g. straight after signing in via the account_auth flow).
-  LaunchedEffect(Unit) { vm.refreshAccountState() }
-  var showAccountInfo by remember { mutableStateOf(false) }
-  if (showAccountInfo) {
-  AlertDialog(
-  onDismissRequest = { showAccountInfo = false },
-  title = { Text("Account") },
-  text = { Text("Signed in as ${signedInEmail ?: "…"}.\n\nYour training data syncs to this account. Sign out or delete the account from the rows below; export a copy anytime.") },
-  confirmButton = { TextButton(onClick = { showAccountInfo = false }) { Text("OK") } }
-  )
-  }
-
-  // Account lifecycle (Phase 5): export via SAF create-document.
-  val accountVm: com.wildodds.gymtracker.ui.account.AccountViewModel = viewModel()
-  val exportState by accountVm.export.collectAsStateWithLifecycle()
-  val exportLauncher = rememberLauncherForActivityResult(
-  ActivityResultContracts.CreateDocument("application/zip")
-  ) { uri -> if (uri != null) accountVm.exportTo(uri) }
-  LaunchedEffect(exportState.done, exportState.error) {
-  if (exportState.done) { Toast.makeText(context, "Data exported", Toast.LENGTH_SHORT).show(); accountVm.resetExport() }
-  exportState.error?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show(); accountVm.resetExport() }
-  }
-  var showSignOutDialog by remember { mutableStateOf(false) }
-  if (showSignOutDialog) {
-  AlertDialog(
-  onDismissRequest = { showSignOutDialog = false },
-  title  = { Text("Sign out?") },
-  text  = { Text("You'll be signed out on this device. Your training data stays on the phone, and everything already synced stays in your account.") },
-  confirmButton = {
-  TextButton(
-  onClick = { showSignOutDialog = false; vm.signOut() },
-  colors  = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
-  ) { Text("Sign out") }
-  },
-  dismissButton = { TextButton(onClick = { showSignOutDialog = false }) { Text("Cancel") } }
-  )
-  }
 
   if (showClearDialog) {
   AlertDialog(
@@ -245,11 +206,6 @@ fun SettingsScreen(
   }
   if (isExpanded) {
   items(groupEntries, key = { it.key }) { entry ->
-  // Account-scoped rows would be dead controls with no session — hide rather than disable.
-  val needsAccount = entry.control == SettingControl.SIGN_OUT ||
-  entry.control == SettingControl.DELETE_ACCOUNT ||
-  entry.control == SettingControl.SYNC_NOW
-  if (needsAccount && signedInEmail == null) return@items
   when (entry.control) {
   SettingControl.TOGGLE -> ToggleRow(
   title    = entry.title,
@@ -304,15 +260,6 @@ fun SettingsScreen(
   title = entry.title, summary = entry.summary,
   tint = accent, onClick = { showReminderSheet = true }
   )
-  SettingControl.ACCOUNT -> ActionRow(
-  title = if (signedInEmail == null) "Sign in / Create account" else entry.title,
-  summary = signedInEmail?.let { "Signed in as $it" }
-  ?: "Optional — adds cross-device sync. Your data stays on this phone either way.",
-  tint = accent,
-  onClick = {
-  if (signedInEmail == null) navController?.navigate("account_auth") else showAccountInfo = true
-  }
-  )
   SettingControl.SHARE_USAGE_STATS -> ToggleRow(
   title    = entry.title,
   summary  = entry.summary,
@@ -320,34 +267,6 @@ fun SettingsScreen(
   accent   = accent,
   onToggle = { vm.setAnalyticsConsent(it) },
   testTag  = "toggle_${entry.key}"
-  )
-  SettingControl.SYNC_NOW -> ActionRow(
-  title = when (syncState.phase) {
-  com.wildodds.gymtracker.data.sync.SyncPhase.RUNNING -> "Syncing…"
-  else -> entry.title
-  },
-  summary = when {
-  syncState.phase == com.wildodds.gymtracker.data.sync.SyncPhase.FAILED ->
-  "Last attempt failed — tap to retry"
-  syncState.lastSyncAt > 0L ->
-  "Last synced ${android.text.format.DateUtils.getRelativeTimeSpanString(syncState.lastSyncAt)}"
-  else -> "Never synced yet"
-  },
-  tint = accent, onClick = { vm.syncNow() }
-  )
-  SettingControl.EXPORT_ACCOUNT -> ActionRow(
-  title = if (exportState.inProgress) "Exporting…" else entry.title,
-  summary = entry.summary,
-  tint = accent,
-  onClick = { if (!exportState.inProgress) exportLauncher.launch("wildodds-export.zip") }
-  )
-  SettingControl.SIGN_OUT -> ActionRow(
-  title = entry.title, summary = entry.summary,
-  tint = MaterialTheme.colorScheme.error, onClick = { showSignOutDialog = true }
-  )
-  SettingControl.DELETE_ACCOUNT -> ActionRow(
-  title = entry.title, summary = entry.summary,
-  tint = MaterialTheme.colorScheme.error, onClick = { navController?.navigate("delete_account") }
   )
   SettingControl.LEGAL_DOC -> ActionRow(
   title = entry.title, summary = entry.summary,

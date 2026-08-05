@@ -18,17 +18,6 @@ licenseReport {
     generateTextReport = false
 }
 
-// Supabase project URL + anon (publishable) key. Local dev reads local.properties (gitignored);
-// CI supplies the same two values as repo/action secrets via environment variables. Only the
-// anon key ever reaches this file/BuildConfig — the secret/service_role key must never appear here.
-val localProperties = Properties().apply {
-    val f = rootProject.file("local.properties")
-    if (f.exists()) f.inputStream().use { load(it) }
-}
-fun secretOrEnv(propertyKey: String, envKey: String): String =
-    (localProperties.getProperty(propertyKey)?.takeIf { it.isNotBlank() })
-        ?: System.getenv(envKey).orEmpty()
-
 android {
     namespace = "com.wildodds.gymtracker"
     compileSdk = 36
@@ -40,20 +29,6 @@ android {
         versionCode = 2
         versionName = "2.0.0"
         multiDexEnabled = true
-
-        buildConfigField("String", "SUPABASE_URL", "\"${secretOrEnv("supabase.url", "SUPABASE_URL")}\"")
-        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${secretOrEnv("supabase.anonKey", "SUPABASE_ANON_KEY")}\"")
-
-        // Google OAuth *Web* client id (not the Android one) for Credential Manager sign-in.
-        // Blank until the Google Cloud OAuth client exists — the Google button hides itself.
-        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${secretOrEnv("google.webClientId", "GOOGLE_WEB_CLIENT_ID")}\"")
-
-        // Only consumed by ProfilesRlsIntegrationTest (a manual, @Ignore'd-by-default live-network
-        // test) — never referenced by app code. Blank for anyone who hasn't set up test accounts.
-        buildConfigField("String", "RLS_TEST_EMAIL_A", "\"${secretOrEnv("supabase.rlsTestEmailA", "SUPABASE_RLS_TEST_EMAIL_A")}\"")
-        buildConfigField("String", "RLS_TEST_PASSWORD_A", "\"${secretOrEnv("supabase.rlsTestPasswordA", "SUPABASE_RLS_TEST_PASSWORD_A")}\"")
-        buildConfigField("String", "RLS_TEST_EMAIL_B", "\"${secretOrEnv("supabase.rlsTestEmailB", "SUPABASE_RLS_TEST_EMAIL_B")}\"")
-        buildConfigField("String", "RLS_TEST_PASSWORD_B", "\"${secretOrEnv("supabase.rlsTestPasswordB", "SUPABASE_RLS_TEST_PASSWORD_B")}\"")
     }
 
     // Release signing (Phase 7). Credentials come from keystore.properties (gitignored) or CI env
@@ -95,10 +70,13 @@ android {
         }
     }
 
-    // ── Edition (single offline product) ────────────────────────────────────────
-    // Wild Odds Offline: no accounts/cloud/social; runs offline forever, never touches the network.
-    // A single `offline` flavor keeps the `.offline` applicationId (so existing installs upgrade) and
-    // supplies the app_name string.
+    // ── Edition (single product) ────────────────────────────────────────────────
+    // Wild Odds Gym Tracker is local-first: all training data lives on-device and the app works
+    // fully offline. An account is OPTIONAL and used only for the Friends (social) layer — there are
+    // no ads and no in-app purchases. The paid Creator/Marketplace tier is built but parked behind
+    // the `feat_creator_marketplace` feature flag (default off) for the free launch.
+    // The flavor is still named `offline` to keep the `.offline` applicationId (so existing installs
+    // upgrade); it also supplies the app_name string.
     flavorDimensions += "edition"
     productFlavors {
         create("offline") {
@@ -217,19 +195,6 @@ dependencies {
     // Local JSON (de)serialization for retention/export models + WorkManager for opt-in reminders.
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.work.runtime.ktx)
-
-    // Supabase backend (v2 online-first: Auth, Postgrest, Functions). BOM pins module versions.
-    implementation(platform(libs.supabase.bom))
-    implementation(libs.supabase.auth)
-    implementation(libs.supabase.postgrest)
-    implementation(libs.supabase.functions)
-    implementation(libs.ktor.client.okhttp)
-
-    // Google sign-in via Credential Manager (Phase 2) — exchanges the Google ID token with
-    // supabase.auth.signInWith(IDToken). Inert until GOOGLE_WEB_CLIENT_ID is configured.
-    implementation(libs.androidx.credentials)
-    implementation(libs.androidx.credentials.play.services)
-    implementation(libs.googleid)
 
     // ── Local unit tests (src/test) — run on the JVM via Robolectric ──────────────
     testImplementation(libs.junit)

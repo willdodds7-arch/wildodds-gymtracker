@@ -104,29 +104,6 @@ fun AppNavigation() {
         composable("settings") {
             SettingsScreen(navController = navController)
         }
-        composable("friends") {
-            com.wildodds.gymtracker.ui.friends.FriendsScreen(navController = navController)
-        }
-        composable("creator_hub") {
-            com.wildodds.gymtracker.ui.creator.CreatorHubScreen(navController = navController)
-        }
-        composable("marketplace") {
-            com.wildodds.gymtracker.ui.marketplace.MarketplaceScreen(navController = navController)
-        }
-        composable(
-            route = "friend/{friendId}",
-            arguments = listOf(navArgument("friendId") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val fid = backStackEntry.arguments?.getString("friendId")
-            if (fid != null) com.wildodds.gymtracker.ui.friends.FriendDetailScreen(navController, fid)
-            else navController.popBackStack()
-        }
-        composable("account_auth") {
-            com.wildodds.gymtracker.ui.auth.AccountAuthFlow(onDone = { navController.popBackStack() })
-        }
-        composable("delete_account") {
-            com.wildodds.gymtracker.ui.account.DeleteAccountScreen(navController = navController)
-        }
         composable(
             route = "legal/{docKey}",
             arguments = listOf(navArgument("docKey") { type = NavType.StringType })
@@ -163,21 +140,6 @@ private fun MainPagerScreen(
     navController: androidx.navigation.NavController
 ) {
     val items = remember { listOf(homeTab, libraryTab, profileTab) }
-
-    // A friend-invite link opened the app: offer to add the friend from anywhere.
-    val pendingInvite by com.wildodds.gymtracker.ui.friends.PendingFriendInvite.code.collectAsState()
-    pendingInvite?.let { code ->
-        val friendsVm: com.wildodds.gymtracker.ui.friends.FriendsViewModel = viewModel()
-        com.wildodds.gymtracker.ui.friends.RedeemCodeDialog(
-            initial = code,
-            onRedeem = { c ->
-                friendsVm.redeem(c)
-                com.wildodds.gymtracker.ui.friends.PendingFriendInvite.code.value = null
-                navController.navigate("friends")
-            },
-            onDismiss = { com.wildodds.gymtracker.ui.friends.PendingFriendInvite.code.value = null }
-        )
-    }
 
     val pagerState = rememberPagerState(initialPage = 0) { items.size }
     val scope      = rememberCoroutineScope()

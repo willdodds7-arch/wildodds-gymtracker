@@ -1,35 +1,22 @@
-﻿package com.wildodds.gymtracker
+package com.wildodds.gymtracker
 
 import android.app.Application
 import androidx.multidex.MultiDex
 import android.content.Context
 import com.wildodds.gymtracker.data.analytics.AnalyticsEvent
 import com.wildodds.gymtracker.data.analytics.AnalyticsGate
-import com.wildodds.gymtracker.data.friends.FriendEventsScheduler
-import com.wildodds.gymtracker.data.sync.SyncScheduler
 
 class GymApp : Application() {
   override fun attachBaseContext(base: Context) {
-  super.attachBaseContext(base)
-  MultiDex.install(this)
+    super.attachBaseContext(base)
+    MultiDex.install(this)
   }
 
   override fun onCreate() {
-  super.onCreate()
-  AnalyticsGate.init(this)
-  // Offline-first sync (Phase 3): a periodic background reconcile plus one attempt on every
-  // app open. Both no-op instantly when signed out or offline — never blocks anything.
-  runCatching {
-  SyncScheduler.ensurePeriodic(this)
-  SyncScheduler.syncNow(this)
-  }
-  // Friends: poll for motivation/flex/session-start events (periodic + once now). Same
-  // degrade-to-nothing contract as sync — signed out or offline is a silent no-op.
-  runCatching {
-  FriendEventsScheduler.schedule(this)
-  FriendEventsScheduler.pollNow(this)
-  }
-  // Consent-gated: dropped entirely if the user hasn't opted in (AnalyticsGate enforces it).
-  AnalyticsGate.log(AnalyticsEvent.AppOpen)
+    super.onCreate()
+    AnalyticsGate.init(this)
+    // Local-only build: no cloud sync and no social layer. Analytics stays consent-gated and
+    // on-device (dropped entirely if the user hasn't opted in — AnalyticsGate enforces it).
+    AnalyticsGate.log(AnalyticsEvent.AppOpen)
   }
 }

@@ -7,8 +7,7 @@ package com.wildodds.gymtracker.ui.settings
  */
 enum class SettingControl {
   TOGGLE, ACCENT, TIMER_SOUND, API_KEY, CLEAR_DATA, DOWNLOAD_TEMPLATE, WEARABLE_CONNECT,
-  EXPORT_DATA, REMINDER_SETTINGS, HABITS, ACCOUNT, SIGN_OUT, SHARE_USAGE_STATS,
-  SYNC_NOW, EXPORT_ACCOUNT, DELETE_ACCOUNT, LEGAL_DOC
+  EXPORT_DATA, REMINDER_SETTINGS, HABITS, SHARE_USAGE_STATS, LEGAL_DOC
 }
 
 /**
@@ -39,18 +38,8 @@ object SettingsRegistry {
   val groupOrder: List<String> =
   listOf("Account", "Appearance", "Session", "Wearables", "Tools", "Display", "AI Import", "Data", "Legal & privacy")
 
-  // Phase 2 (online-first) — account controls.
-  const val ACCOUNT = "action_account"
-  const val SIGN_OUT = "action_sign_out"
+  // Local, on-device analytics-consent toggle (no account required).
   const val SHARE_USAGE_STATS = "action_share_usage_stats"
-
-  // Phase 3 (online-first) — sync controls.
-  const val SYNC_NOW = "action_sync_now"
-  const val SYNC_WIFI_ONLY = "feat_sync_wifi_only"
-
-  // Phase 5 (online-first) — account lifecycle.
-  const val EXPORT_ACCOUNT = "action_export_account"
-  const val DELETE_ACCOUNT = "action_delete_account"
 
   /** Flag key for the session exit-confirmation guard (a safety feature, default ON). */
   const val SESSION_EXIT_GUARD = "feat_session_exit_guard"
@@ -106,63 +95,13 @@ object SettingsRegistry {
   // Phase 3H feature key.
   const val ON_DEMAND_LIBRARY = "feat_ondemand_library"
 
-  // Friends (social layer). ON shows the Friends area + enables session-start fan-out to friends
-  // who opted in; OFF hides every entry point (nothing is ever sent).
-  const val FRIENDS = "feat_friends"
-
-  // Creator marketplace (Verified Creator tier). OFF hides the Creator hub + Marketplace entry
-  // points and all badges. Purchasing happens on the website only (Google Play policy) — the
-  // app never links to checkout.
-  const val CREATOR_MARKETPLACE = "feat_creator_marketplace"
-
   private val _entries: MutableList<SettingsEntry> = mutableListOf(
-  SettingsEntry(
-  key = ACCOUNT, title = "Account",
-  summary = "The account this app is signed in to", group = "Account",
-  keywords = listOf("account", "email", "profile", "login", "signed in", "user"),
-  control = SettingControl.ACCOUNT
-  ),
   SettingsEntry(
   key = SHARE_USAGE_STATS, title = "Share usage statistics",
   summary = "Send anonymous feature-usage events (which screens get used — never workout data, names or location). Off keeps everything local.",
   group = "Account",
   keywords = listOf("analytics", "usage", "statistics", "diagnostics", "telemetry", "consent", "privacy", "tracking", "opt out"),
   control = SettingControl.SHARE_USAGE_STATS
-  ),
-  SettingsEntry(
-  key = SYNC_NOW, title = "Sync now",
-  summary = "Back up and reconcile your training data with your account",
-  group = "Account",
-  keywords = listOf("sync", "backup", "upload", "cloud", "reconcile", "refresh", "last synced"),
-  control = SettingControl.SYNC_NOW
-  ),
-  SettingsEntry(
-  key = SYNC_WIFI_ONLY, title = "Sync over Wi-Fi only",
-  summary = "Skip background sync on mobile data",
-  group = "Account",
-  keywords = listOf("wifi", "wi-fi", "sync", "data", "mobile", "metered", "cellular"),
-  default = false
-  ),
-  SettingsEntry(
-  key = EXPORT_ACCOUNT, title = "Export my data",
-  summary = "Download a copy of your account and training data as a JSON file",
-  group = "Account",
-  keywords = listOf("export", "download", "my data", "gdpr", "ccpa", "portability", "copy", "json", "backup"),
-  control = SettingControl.EXPORT_ACCOUNT
-  ),
-  SettingsEntry(
-  key = SIGN_OUT, title = "Sign out",
-  summary = "Sign out of your account on this device — your local training data stays",
-  group = "Account",
-  keywords = listOf("sign out", "log out", "logout", "signout", "account", "switch"),
-  control = SettingControl.SIGN_OUT
-  ),
-  SettingsEntry(
-  key = DELETE_ACCOUNT, title = "Delete account",
-  summary = "Permanently delete your account and all its data — immediate and irreversible",
-  group = "Account",
-  keywords = listOf("delete", "account", "remove", "erase", "close", "gdpr", "right to be forgotten", "deletion"),
-  control = SettingControl.DELETE_ACCOUNT
   ),
   SettingsEntry(
   key = "dark_mode", title = "Dark Mode",
@@ -299,22 +238,6 @@ object SettingsRegistry {
   default = true
   ),
   SettingsEntry(
-  key = CREATOR_MARKETPLACE, title = "Creator marketplace",
-  summary = "Browse programs by Verified Creators and, as a creator, manage your listings and earnings",
-  group = "Display",
-  keywords = listOf("creator", "marketplace", "verified", "badge", "sell", "programs", "earnings",
-  "store", "buy", "purchases"),
-  default = true
-  ),
-  SettingsEntry(
-  key = FRIENDS, title = "Friends",
-  summary = "Add friends, see their training, share programs and send motivation. Needs an account.",
-  group = "Display",
-  keywords = listOf("friend", "friends", "social", "invite", "share", "motivation", "flex",
-  "code", "add friend", "programs", "notification"),
-  default = true
-  ),
-  SettingsEntry(
   key = HABITS, title = "Habit tracker",
   summary = "Open your daily habits — build streaks alongside your training",
   group = "Display",
@@ -413,30 +336,9 @@ object SettingsRegistry {
   keywords = listOf("support", "help", "contact", "email", "faq", "questions", "problem", "issue"),
   control = SettingControl.LEGAL_DOC
   ),
-  SettingsEntry(
-  key = "creator_agreement", title = "Creator Agreement",
-  summary = "Terms for selling programs: the 10% platform fee, payouts, content ownership, tax",
-  group = "Legal & privacy",
-  keywords = listOf("creator", "agreement", "sell", "marketplace", "fee", "commission", "payout",
-  "stripe", "tax", "gst", "licence", "content"),
-  control = SettingControl.LEGAL_DOC
-  ),
-  SettingsEntry(
-  key = "billing", title = "Subscription & Billing Terms",
-  summary = "Verified Creator pricing, auto-renewal, cancellation and price-change notice",
-  group = "Legal & privacy",
-  keywords = listOf("subscription", "billing", "price", "renewal", "auto-renew", "cancel",
-  "verified", "creator", "monthly", "stripe"),
-  control = SettingControl.LEGAL_DOC
-  ),
-  SettingsEntry(
-  key = "refunds", title = "Refunds Policy",
-  summary = "Refunds for subscriptions and program purchases, and your consumer-law rights",
-  group = "Legal & privacy",
-  keywords = listOf("refund", "refunds", "money back", "consumer", "guarantee", "acl", "return",
-  "purchase", "cancel"),
-  control = SettingControl.LEGAL_DOC
-  ),
+  // Paid-tier legal docs (Creator Agreement, Subscription & Billing, Refunds) are parked for the
+  // free launch, alongside feat_creator_marketplace. The .md files and LegalDoc enum entries are
+  // kept in the codebase — re-add these three Settings rows when the paid tier ships.
   SettingsEntry(
   key = "action_download_template", title = "Download Template",
   summary = "Save a blank Excel program template", group = "Data",

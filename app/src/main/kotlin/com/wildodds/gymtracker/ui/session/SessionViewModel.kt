@@ -28,7 +28,6 @@ import com.wildodds.gymtracker.data.intelligence.TravelTranslator
 import com.wildodds.gymtracker.data.intelligence.ProgressionStyle
 import com.wildodds.gymtracker.data.intelligence.SetRecord
 import com.wildodds.gymtracker.data.intelligence.TrackingMode
-import com.wildodds.gymtracker.data.friends.FriendsRepository
 import com.wildodds.gymtracker.data.profile.MainLift
 import com.wildodds.gymtracker.data.intelligence.WeekRecord
 import com.wildodds.gymtracker.data.repository.GymRepository
@@ -137,26 +136,6 @@ class SessionViewModel(app: Application, savedStateHandle: SavedStateHandle) : A
   _hasLoggedThisVisit.value = true
   if (sessionStartMillis == null) {
   sessionStartMillis = System.currentTimeMillis()
-  notifyFriendsSessionStart()
-  }
-  }
-
-  /**
-   * Friends fan-out: "X just started a <session> session" to friends who opted in. Fires when the
-   * active session actually starts (first set logged — same moment the duration clock starts), not
-   * on screen open, so browsing never pings anyone. Throttled once per session+week per process;
-   * signed-out / offline / feature-off are all silent no-ops.
-   */
-  private fun notifyFriendsSessionStart() {
-  if (_state.value.isCompleted) return
-  val name = _state.value.session?.name ?: return
-  if (!notifiedFriendSessions.add("$sessionId-$weekNumber")) return
-  viewModelScope.launch(Dispatchers.IO) {
-  runCatching {
-  if (themePrefs.flag(SettingsRegistry.FRIENDS, true).first()) {
-  FriendsRepository(getApplication()).notifySessionStart(name)
-  }
-  }
   }
   }
 
@@ -849,16 +828,6 @@ class SessionViewModel(app: Application, savedStateHandle: SavedStateHandle) : A
   }
   }
 
-  // Friends: refresh the snapshot friends are allowed to see (last session, program, PRs,
-  // achievements). Fire-and-forget — completing a session never waits on the network.
-  launch(Dispatchers.IO) {
-  runCatching {
-  if (themePrefs.flag(SettingsRegistry.FRIENDS, true).first()) {
-  FriendsRepository(getApplication()).publishSnapshot()
-  }
-  }
-  }
-
   if (showSummary) {
   val logs = withContext(Dispatchers.IO) {
   repo.getSessionSetLogs(sessionId, weekNumber).values.flatten()
@@ -1127,12 +1096,6 @@ class SessionViewModel(app: Application, savedStateHandle: SavedStateHandle) : A
   recomputeFatigue()
   }
 
-  private companion object {
-  // Session-start fan-out throttle: survives VM recreation (screen re-entry) within a process,
-  // so re-opening the same day never re-pings friends.
-  val notifiedFriendSessions: MutableSet<String> =
-  java.util.Collections.synchronizedSet(mutableSetOf<String>())
-  }
 }
 
 /**
