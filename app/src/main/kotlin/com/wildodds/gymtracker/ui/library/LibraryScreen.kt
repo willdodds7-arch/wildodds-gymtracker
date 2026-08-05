@@ -89,6 +89,7 @@ fun LibraryScreen(
   homeVm: HomeViewModel = viewModel()
 ) {
   val programs    by vm.programs.collectAsStateWithLifecycle()
+  val programsLoaded by vm.programsLoaded.collectAsStateWithLifecycle()
   val pausedPrograms  by vm.pausedPrograms.collectAsStateWithLifecycle()
   val programDays  by vm.programDays.collectAsStateWithLifecycle()
   val analysis    by vm.analysis.collectAsStateWithLifecycle()
@@ -190,13 +191,13 @@ fun LibraryScreen(
   }
 
   if (analysing || progressing) {
-  Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-  Column(horizontalAlignment = Alignment.CenterHorizontally) {
-  CircularProgressIndicator(color = accent)
-  Spacer(Modifier.height(12.dp))
+  Column(
+  Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 12.dp)
+  ) {
   Text(if (analysing) "Analysing program..." else "Loading progression...",
   color = MaterialTheme.colorScheme.onSurfaceVariant)
-  }
+  Spacer(Modifier.height(16.dp))
+  com.wildodds.gymtracker.ui.components.SkeletonList(rows = 6)
   }
   return
   }
@@ -345,7 +346,13 @@ fun LibraryScreen(
   }
 
   // Library programs (non-active)
-  if (libraryPrograms.isEmpty() && activeProgram == null) {
+  if (!programsLoaded && activeProgram == null && libraryPrograms.isEmpty()) {
+  // DB hasn't answered yet — hold a skeleton so "No programs yet" never flashes before the
+  // real list arrives (flash-then-replace fix).
+  item(key = "library_loading") {
+  com.wildodds.gymtracker.ui.components.SkeletonList(rows = 6)
+  }
+  } else if (libraryPrograms.isEmpty() && activeProgram == null) {
   item {
   Box(Modifier.fillMaxWidth().padding(vertical = 64.dp), Alignment.Center) {
   Column(horizontalAlignment = Alignment.CenterHorizontally) {

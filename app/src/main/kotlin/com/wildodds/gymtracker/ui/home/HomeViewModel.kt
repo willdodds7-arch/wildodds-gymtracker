@@ -66,8 +66,25 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
   private val repo = GymRepository(db)
   private val prefs = app.getSharedPreferences("gym_prefs", Context.MODE_PRIVATE)
 
-  val program: StateFlow<Program?> = repo.currentProgram()
-  .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+  // `program` seeds to null, which is AMBIGUOUS: it means both "the DB hasn't answered yet" and
+  // "there genuinely is no active program". Rendering the empty-state on a bare null therefore
+  // flashes "NO ACTIVE PROGRAM" for a frame before the real program arrives (flash-then-replace).
+  // [programLoaded] flips true once the DB has answered, so the UI can hold a skeleton until then.
+  // Both are updated in one collector — program FIRST, then loaded — so a real-program user never
+  // sees a (loaded=true, program=null) frame.
+  private val _program = MutableStateFlow<Program?>(null)
+  val program: StateFlow<Program?> = _program.asStateFlow()
+  private val _programLoaded = MutableStateFlow(false)
+  val programLoaded: StateFlow<Boolean> = _programLoaded.asStateFlow()
+
+  init {
+  viewModelScope.launch {
+  repo.currentProgram().collect { p ->
+  _program.value = p
+  _programLoaded.value = true
+  }
+  }
+  }
 
   val userPrograms: StateFlow<List<Program>> = repo.userPrograms()
   .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())

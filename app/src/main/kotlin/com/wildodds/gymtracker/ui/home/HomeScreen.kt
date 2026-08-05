@@ -57,6 +57,7 @@ fun HomeScreen(
   insightsVm: ActivityInsightsViewModel = viewModel()
 ) {
   val program           by vm.program.collectAsStateWithLifecycle()
+  val programLoaded     by vm.programLoaded.collectAsStateWithLifecycle()
   val weekSections      by vm.weekSections.collectAsStateWithLifecycle()
   val exercisesBySession by vm.exercisesBySession.collectAsStateWithLifecycle()
   val phases            by vm.phases.collectAsStateWithLifecycle()
@@ -283,7 +284,21 @@ fun HomeScreen(
         }
       }
 
-      if (program == null) {
+      if (program == null && !programLoaded) {
+        // ── Loading placeholder ───────────────────────────────────────────
+        // The DB hasn't answered yet. Hold a skeleton (instead of the empty-state) so we never
+        // flash "NO ACTIVE PROGRAM" and then replace it with the real program a frame later.
+        item(key = "home_loading") {
+          Column(
+            modifier = Modifier.padding(horizontal = Space.screenEdge, vertical = Space.lg),
+            verticalArrangement = Arrangement.spacedBy(Space.md)
+          ) {
+            com.wildodds.gymtracker.ui.components.SkeletonLine(widthFraction = 0.6f, height = 28.dp)
+            Spacer(Modifier.height(Space.sm))
+            com.wildodds.gymtracker.ui.components.SkeletonList(rows = 3)
+          }
+        }
+      } else if (program == null) {
         // ── Empty state ───────────────────────────────────────────────────
         item(key = "empty_cta") {
           Column(

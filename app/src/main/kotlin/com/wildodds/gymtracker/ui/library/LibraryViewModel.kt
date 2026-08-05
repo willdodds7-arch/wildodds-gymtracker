@@ -116,8 +116,23 @@ class LibraryViewModel(app: Application) : AndroidViewModel(app) {
 
   private val repo = GymRepository(AppDatabase.getInstance(app))
 
-  val programs: StateFlow<List<Program>> = repo.allPrograms()
-  .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+  // Seeds to emptyList(), which is ambiguous: "DB not answered yet" vs "genuinely no programs".
+  // [programsLoaded] flips true once the DB has answered so the screen holds a skeleton instead of
+  // flashing the "No programs yet" empty-state. Updated after `programs` in one collector so the
+  // (loaded=true, empty) frame only ever means a genuinely empty library.
+  private val _programs = MutableStateFlow<List<Program>>(emptyList())
+  val programs: StateFlow<List<Program>> = _programs.asStateFlow()
+  private val _programsLoaded = MutableStateFlow(false)
+  val programsLoaded: StateFlow<Boolean> = _programsLoaded.asStateFlow()
+
+  init {
+  viewModelScope.launch {
+  repo.allPrograms().collect { list ->
+  _programs.value = list
+  _programsLoaded.value = true
+  }
+  }
+  }
 
   val pausedPrograms: StateFlow<List<Program>> = repo.pausedPrograms()
   .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
