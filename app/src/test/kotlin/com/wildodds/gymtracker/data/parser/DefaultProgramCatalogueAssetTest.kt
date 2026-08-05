@@ -23,7 +23,33 @@ class DefaultProgramCatalogueAssetTest {
     assertTrue("Candito bench present", "Candito 6-Week (Advanced Bench Hybrid)" in names)
     assertTrue("Russian present", "Russian Squat Routine" in names)
     assertTrue("Calgary present", "Calgary Barbell 8-Week (adapted)" in names)
-    assertEquals(6, all.size)
+    assertTrue("Aaron's Oly split present", "Aaron's 5 Day Oly Split" in names)
+    assertTrue("Ed Coen Program present", "Ed Coen Program" in names)
+    assertTrue("5x Upper Lower present", "5x Upper Lower" in names)
+    assertTrue("5x Bro Split 2.0 present", "5x Bro Split 2.0" in names)
+    assertEquals(10, all.size)
+  }
+
+  @Test
+  fun fiveXUpperLower_isFiveDaysOfTwoBySixToTwelve() {
+    val p = DefaultProgramCatalogue.load(context).first { it.name == "5x Upper Lower" }
+    assertEquals(5, p.daysPerWeek)
+    val week1 = p.sessions.filter { it.weekNumber == 1 }
+    assertEquals(5, week1.size)
+    val everyExercise = week1.flatMap { it.exercises }
+    assertTrue("all sets are 2", everyExercise.all { it.sets == 2 })
+    assertTrue("all reps are 6-12", everyExercise.all { it.repsTarget == "6-12" })
+  }
+
+  @Test
+  fun fiveXBroSplit_isFiveDaysOfTwoBySixToTwelve() {
+    val p = DefaultProgramCatalogue.load(context).first { it.name == "5x Bro Split 2.0" }
+    assertEquals(5, p.daysPerWeek)
+    val week1 = p.sessions.filter { it.weekNumber == 1 }
+    assertEquals(5, week1.size)
+    val everyExercise = week1.flatMap { it.exercises }
+    assertTrue("all sets are 2", everyExercise.all { it.sets == 2 })
+    assertTrue("all reps are 6-12", everyExercise.all { it.repsTarget == "6-12" })
   }
 
   // ── The %1RM, week-varying programs ────────────────────────────────────────
