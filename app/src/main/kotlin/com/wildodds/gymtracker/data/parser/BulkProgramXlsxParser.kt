@@ -239,7 +239,7 @@ class BulkProgramXlsxParser {
   return "$first$second"
   }
 
-  // ── XLSX reading (mirrors DefaultProgramXlsxParser) ───────────────────────
+  // ── XLSX reading (folded onto SheetGrid in Phase 6) ────────────────────────
 
   private fun loadSheets(stream: InputStream): Map<String, Map<String, String>> {
   val entries = mutableMapOf<String, ByteArray>()
