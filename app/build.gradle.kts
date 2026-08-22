@@ -204,6 +204,10 @@ dependencies {
     implementation(libs.glance.material3)
     implementation(libs.okhttp)
     implementation(libs.pdfbox.android)
+    // On-device OCR for scanned PDFs and photos of printed programs. BUNDLED model (see the
+    // version catalog): no download, no Play Services dependency, works in airplane mode on first
+    // launch. This is the only way to satisfy "fully offline" for the image path.
+    implementation(libs.mlkit.text.recognition)
     implementation(libs.health.connect.client)
 
     // Local JSON (de)serialization for retention/export models + WorkManager for opt-in reminders.

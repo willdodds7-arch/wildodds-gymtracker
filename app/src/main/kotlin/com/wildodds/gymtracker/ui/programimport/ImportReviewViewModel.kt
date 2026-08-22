@@ -2,10 +2,11 @@ package com.wildodds.gymtracker.ui.programimport
 
 import android.app.Application
 import android.net.Uri
-import android.provider.OpenableColumns
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.wildodds.gymtracker.data.ai.AiFileExtractor
+import com.wildodds.gymtracker.data.reader.android.AndroidReader
+import com.wildodds.gymtracker.data.reader.ingest.IngestError
+import com.wildodds.gymtracker.data.reader.ingest.IngestProgress
 import com.wildodds.gymtracker.data.db.AppDatabase
 import com.wildodds.gymtracker.data.importer.ImportFlag
 import com.wildodds.gymtracker.data.importer.PrefsAliasStore
@@ -66,7 +67,11 @@ data class ImportReviewState(
   val weeksToRun: Int = 4,
   val committing: Boolean = false,
   val committedProgramId: Long? = null,
-  val error: String? = null
+  val error: String? = null,
+  /** Live extraction progress ("Reading page 3 of 12"). Empty when nothing long is running. */
+  val progress: String = "",
+  /** Which route read this: an adapter id, a layout id, or "text". Shown in the review header. */
+  val route: String = ""
 )
 
 /**
@@ -93,68 +98,90 @@ class ImportReviewViewModel(app: Application) : AndroidViewModel(app) {
     // Parsing is deterministic but can be non-trivial for a long program, and resolution touches the
     // alias store — keep it off the main thread so the UI never stutters.
     viewModelScope.launch(Dispatchers.Default) {
-      val result = UniversalProgramImporter.import(
-        name = s.programName.ifBlank { "Imported Program" },
-        raw = s.rawInput,
-        aliasLookup = alias.asLookup
-      )
-      val multiWeek = result.program.sessions.map { it.weekNumber }.distinct().size > 1
-      _state.value = _state.value.copy(
-        parsing = false,
-        parsed = true,
-        programName = _state.value.programName.ifBlank { result.program.name },
-        sessions = result.program.sessions.groupBy { it.weekNumber to it.dayNumber }.entries
-          .sortedWith(compareBy({ it.key.first }, { it.key.second }))
-          .map { (key, group) ->
-            val ps = group.first()
-            EditSession(ps.name, key.first, key.second, ps.exercises.map(::toEdit), ps.sessionType)
-          },
-        flags = result.flags,
-        overallConfidence = result.overallConfidence,
-        exerciseCount = result.exerciseCount,
-        multiWeek = multiWeek,
-        // A single written week defaults to a 4-week block (the app's default length) rather than a
-        // 1-week program, which is almost never what the user wants; they can adjust in the stepper.
-        weeksToRun = if (multiWeek) result.program.totalWeeks else result.program.repeatWeeks.takeIf { it > 1 } ?: 4
+      // Pasted text takes the SAME route as a picked file, app-export adapters included —
+      // people paste a Strong CSV into the box as often as they attach it.
+      applyResult(
+        AndroidReader.reader(getApplication()).readText(
+          raw = s.rawInput,
+          name = s.programName,
+          aliasLookup = alias.asLookup
+        )
       )
     }
   }
 
   /**
-   * Load a picked file (.txt/.csv/.tsv/.md/.pdf/.xlsx) via the shared [AiFileExtractor], drop its
-   * text into the paste box, and parse. Extraction (esp. PDF) runs off the main thread.
+   * Load a picked file through the full ingest pipeline — any of the formats listed in
+   * `docs/reader/` — and show the result.
+   *
+   * Extraction can be slow (a 12-page PDF, OCR of a photo), so it runs on IO with live progress and
+   * cooperative cancellation rather than freezing behind an indeterminate spinner.
    */
   fun loadFromFile(uri: Uri) {
-    _state.value = _state.value.copy(parsing = true, error = null)
+    _state.value = _state.value.copy(parsing = true, error = null, progress = "Reading the file")
+    cancelled = false
     viewModelScope.launch(Dispatchers.IO) {
       try {
-        val text = AiFileExtractor.extract(getApplication(), uri)
-        if (text.isBlank()) {
-          _state.value = _state.value.copy(parsing = false,
-            error = "No readable text in that file. Scanned PDFs and images aren’t supported yet — paste the text instead.")
-          return@launch
-        }
-        val nameFromFile = fileDisplayName(uri)?.substringBeforeLast('.')?.trim().orEmpty()
-        _state.value = _state.value.copy(
-          rawInput = text,
-          programName = _state.value.programName.ifBlank { nameFromFile }
+        val app = getApplication<Application>()
+        val result = AndroidReader.reader(app).read(
+          bytes = AndroidReader.readBytes(app, uri),
+          fileName = AndroidReader.displayName(app, uri),
+          mimeType = AndroidReader.mimeType(app, uri),
+          aliasLookup = alias.asLookup,
+          progress = progressSink
         )
-        parse()
+        applyResult(result)
+      } catch (e: IngestError) {
+        // A typed ingest error already carries a message the user can act on; wrapping it in
+        // "Couldn’t read that file" would bury the actionable half.
+        _state.value = _state.value.copy(parsing = false, progress = "", error = e.message)
       } catch (e: Exception) {
-        _state.value = _state.value.copy(parsing = false, error = "Couldn’t read that file: ${e.message}")
+        _state.value = _state.value.copy(parsing = false, progress = "",
+          error = "Couldn’t read that file: ${e.message}")
       }
     }
   }
 
-  private fun fileDisplayName(uri: Uri): String? {
-    val ctx = getApplication<Application>()
-    if (uri.scheme == "content") {
-      ctx.contentResolver.query(uri, null, null, null, null)?.use { cur ->
-        val idx = cur.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-        if (idx >= 0 && cur.moveToFirst()) return cur.getString(idx)
-      }
+  @Volatile private var cancelled = false
+
+  /** Stops a long extraction between units of work. The pipeline checks this and unwinds cleanly. */
+  fun cancelParsing() {
+    cancelled = true
+    _state.value = _state.value.copy(parsing = false, progress = "")
+  }
+
+  private val progressSink = object : IngestProgress {
+    override fun report(stage: String, current: Int, total: Int) {
+      _state.value = _state.value.copy(progress = stage)
     }
-    return uri.path?.substringAfterLast('/')
+    override fun isCancelled(): Boolean = cancelled
+  }
+
+  private fun applyResult(r: com.wildodds.gymtracker.data.reader.ProgramReader.Result) {
+    val result = r.importResult
+    val multiWeek = result.program.sessions.map { it.weekNumber }.distinct().size > 1
+    _state.value = _state.value.copy(
+      parsing = false,
+      parsed = true,
+      progress = "",
+      rawInput = r.document.text,
+      route = r.route,
+      programName = _state.value.programName.ifBlank { result.program.name },
+      sessions = result.program.sessions.groupBy { it.weekNumber to it.dayNumber }.entries
+        .sortedWith(compareBy({ it.key.first }, { it.key.second }))
+        .map { (key, group) ->
+          val ps = group.first()
+          EditSession(ps.name, key.first, key.second, ps.exercises.map(::toEdit), ps.sessionType)
+        },
+      flags = result.flags,
+      overallConfidence = result.overallConfidence,
+      exerciseCount = result.exerciseCount,
+      multiWeek = multiWeek,
+      // A single written week defaults to a 4-week block (the app default length) rather than a
+      // 1-week program, which is almost never what the user wants; the stepper adjusts it.
+      weeksToRun = if (multiWeek) result.program.totalWeeks
+                   else result.program.repeatWeeks.takeIf { it > 1 } ?: 4
+    )
   }
 
   private fun toEdit(pe: ParsedExercise): EditExercise {

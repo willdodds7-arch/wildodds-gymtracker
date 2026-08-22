@@ -13,8 +13,8 @@ import com.wildodds.gymtracker.data.db.entity.SessionCompletion
 import com.wildodds.gymtracker.data.parser.ParsedExercise
 import com.wildodds.gymtracker.data.parser.ParsedProgram
 import com.wildodds.gymtracker.data.parser.ParsedSession
-import com.wildodds.gymtracker.data.ai.AiFileExtractor
 import com.wildodds.gymtracker.data.ai.AiParsedProgram
+import com.wildodds.gymtracker.data.reader.android.AndroidReader
 import com.wildodds.gymtracker.data.ai.ClaudeApiClient
 import com.wildodds.gymtracker.data.parser.smart.SmartParsedProgram
 import com.wildodds.gymtracker.data.parser.smart.SmartXlsxParser
@@ -262,7 +262,11 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         try {
           val apiKey = prefs.getString("claude_api_key", "") ?: ""
           if (apiKey.isBlank()) throw Exception("No API key set. Go to Settings → AI Import and add your Anthropic API key.")
-          val text = AiFileExtractor.extract(getApplication(), uri)
+          // The AI path reads the file with the SAME offline ingest pipeline as everything else;
+          // only the parsing step differs. It gets the improved extraction for free, and there is
+          // still exactly one place that turns a Uri into text.
+          val app = getApplication<Application>()
+          val text = AndroidReader.extractText(app, uri)
           if (text.isBlank()) throw Exception("No readable text found in this file")
           val parsed = ClaudeApiClient.parseProgram(apiKey, text)
           if (parsed.days.isEmpty()) throw Exception("No workout days could be found in the file")
