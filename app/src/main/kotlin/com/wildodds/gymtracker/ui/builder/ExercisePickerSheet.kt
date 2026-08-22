@@ -273,11 +273,9 @@ internal object ExerciseCatalogue {
 
   private val cache: List<Entry> by lazy {
     ExerciseLibrary.LIBRARY.entries
-      .flatMap { (key, info) ->
-        // Keys can be alternation patterns ("bench press|bench"); the first form is the canonical one.
-        val canonical = key.split("|").first().trim()
-        if (canonical.isEmpty()) emptyList()
-        else listOf(Entry(titleCase(canonical), info.primary, EquipmentGuessAccess.of(canonical)))
+      .mapNotNull { (canonical, info) ->
+        if (canonical.isBlank()) null
+        else Entry(titleCase(canonical), info.primary, EquipmentGuessAccess.of(canonical))
       }
       .distinctBy { it.name.lowercase() }
       .sortedBy { it.name }

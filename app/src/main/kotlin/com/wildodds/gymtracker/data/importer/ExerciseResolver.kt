@@ -1,6 +1,5 @@
 package com.wildodds.gymtracker.data.importer
 
-import com.wildodds.gymtracker.data.ExerciseLibrary
 import com.wildodds.gymtracker.data.importer.resolve.ExerciseIndex
 import com.wildodds.gymtracker.data.importer.resolve.Fuzzy
 import com.wildodds.gymtracker.data.importer.resolve.Metaphone
@@ -68,13 +67,12 @@ object ExerciseResolver {
     val best = scored.firstOrNull()
 
     if (best == null || best.score < FLOOR) {
-      // Nothing in the index. Fall back to the legacy muscle map, which knows a handful of names the
-      // index does not, and otherwise report honestly that we do not know this movement.
-      val legacy = ExerciseLibrary.lookup(norm) ?: ExerciseLibrary.lookup(original)
-      return if (legacy != null)
-        ExerciseRef(original, titleCase(norm), ResolutionStatus.INFERRED, 0.55, top, "muscle_map")
-      else
-        ExerciseRef(original, titleCase(norm), ResolutionStatus.UNRESOLVED, 0.30, top, "none")
+      // Nothing in the index above the floor. There used to be a ninth layer here that consulted the
+      // legacy muscle map; that map is now a view over this same index, so the layer was asking the
+      // same question twice and answering INFERRED to whatever the eight layers above had already
+      // declined. Saying we do not know is the honest answer, and it is the one that puts the name
+      // in front of the user instead of guessing at it.
+      return ExerciseRef(original, titleCase(norm), ResolutionStatus.UNRESOLVED, 0.30, top, "none")
     }
 
     val status = when {

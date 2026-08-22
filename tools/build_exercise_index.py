@@ -13,7 +13,10 @@ in the reader with no allocation per field, and it stays readable in a diff — 
 this file IS the review surface when someone adds exercises.
 
 Columns:
-  canonical | pattern | primary muscle | equipment | unilateral (0/1) | aliases (comma-separated)
+  canonical | pattern | primary muscles | equipment | unilateral (0/1) | aliases | secondary muscles
+
+`primary` and `secondary` are comma-separated. The FIRST primary is the main mover and never
+changes when the list grows, so a consumer wanting one muscle can keep taking it.
 
 Run:  python tools/build_exercise_index.py
 """
@@ -40,6 +43,162 @@ POSITIONS = ["Seated", "Standing", "Lying", "Kneeling", "Half Kneeling"]
 BB, DB, KB, MACHINE, CABLE, BW, SMITH, BAND, SLED, SANDBAG = (
     "BARBELL", "DUMBBELL", "KETTLEBELL", "MACHINE", "CABLE", "BODYWEIGHT",
     "SMITH_MACHINE", "BAND", "SLED", "SANDBAG")
+
+# ─── muscles ─────────────────────────────────────────────────────────────────
+# base movement -> (further PRIMARY muscles, SECONDARY muscles)
+#
+# The primary column of the TSV already carries the movement's main mover; this adds the muscles
+# that make it a compound. It lives HERE, per base movement, rather than being derived from the
+# pattern, because pattern alone cannot tell a Back Squat from a Leg Extension: both are
+# (SQUAT, QUADS), and giving the leg extension a squat's glutes and hamstrings would inflate every
+# weekly volume number that touches it.
+#
+# Every base movement must appear. main() fails if one does not, so a movement added later cannot
+# quietly ship with no muscles at all.
+#
+# Primary counts fully toward weekly sets; secondary counts at 0.5x. A stretch trains nothing and
+# is listed with empty lists rather than omitted, so 'missing' always means 'someone forgot'.
+
+MUSCLES = {
+ # horizontal push
+ "Bench Press": (["FRONT_DELT"], ["TRICEPS"]),
+ "Push Up": (["FRONT_DELT"], ["TRICEPS", "ABS"]),
+ "Chest Fly": ([], ["FRONT_DELT"]),
+ "Chest Press": (["FRONT_DELT"], ["TRICEPS"]),
+ "Dip": (["TRICEPS"], ["FRONT_DELT"]),
+ # vertical push
+ "Overhead Press": (["SIDE_DELT"], ["TRICEPS", "TRAPS", "ABS"]),
+ "Push Press": (["SIDE_DELT"], ["TRICEPS", "TRAPS", "QUADS"]),
+ "Push Jerk": (["SIDE_DELT"], ["TRICEPS", "TRAPS", "QUADS"]),
+ "Handstand Push Up": (["SIDE_DELT"], ["TRICEPS", "TRAPS", "ABS"]),
+ "Arnold Press": (["SIDE_DELT"], ["TRICEPS"]),
+ "Lateral Raise": ([], []),
+ "Front Raise": ([], []),
+ "Log Press": (["SIDE_DELT"], ["TRICEPS", "TRAPS", "ABS"]),
+ "Landmine Press": (["SIDE_DELT"], ["TRICEPS", "ABS"]),
+ # vertical pull
+ "Upright Row": (["TRAPS"], ["BICEPS", "REAR_DELT"]),
+ "Pull Up": (["UPPER_BACK"], ["BICEPS", "REAR_DELT", "FOREARMS"]),
+ "Chin Up": (["BICEPS"], ["UPPER_BACK", "FOREARMS"]),
+ "Lat Pulldown": (["UPPER_BACK"], ["BICEPS", "REAR_DELT", "FOREARMS"]),
+ "Straight Arm Pulldown": ([], ["TRICEPS", "ABS"]),
+ "Pullover": ([], ["CHEST", "TRICEPS"]),
+ "Muscle Up": (["UPPER_BACK", "TRICEPS"], ["BICEPS", "CHEST", "ABS"]),
+ # horizontal pull
+ "Barbell Row": (["LATS"], ["BICEPS", "REAR_DELT", "LOWER_BACK", "FOREARMS"]),
+ "Dumbbell Row": (["LATS"], ["BICEPS", "REAR_DELT", "FOREARMS"]),
+ "Cable Row": (["LATS"], ["BICEPS", "REAR_DELT", "FOREARMS"]),
+ "T Bar Row": (["LATS"], ["BICEPS", "REAR_DELT", "LOWER_BACK", "FOREARMS"]),
+ "Inverted Row": (["LATS"], ["BICEPS", "REAR_DELT", "ABS"]),
+ "Face Pull": (["UPPER_BACK"], ["TRAPS", "BICEPS"]),
+ "Rear Delt Fly": ([], ["UPPER_BACK"]),
+ "Shrug": ([], ["FOREARMS", "UPPER_BACK"]),
+ "Face Pull Apart": ([], ["UPPER_BACK"]),
+ "Cuban Rotation": ([], ["UPPER_BACK", "TRAPS"]),
+ "External Rotation": ([], []),
+ # squat
+ "Back Squat": (["GLUTES"], ["HAMSTRINGS", "ADDUCTORS", "LOWER_BACK", "ABS"]),
+ "Front Squat": (["GLUTES"], ["ABS", "UPPER_BACK", "ADDUCTORS"]),
+ "Goblet Squat": (["GLUTES"], ["ABS", "ADDUCTORS"]),
+ "Overhead Squat": (["GLUTES"], ["ABS", "FRONT_DELT", "UPPER_BACK", "ADDUCTORS"]),
+ "Hack Squat": (["GLUTES"], ["ADDUCTORS"]),
+ "Leg Press": (["GLUTES"], ["HAMSTRINGS", "ADDUCTORS"]),
+ "Sissy Squat": ([], []),
+ "Pistol Squat": (["GLUTES"], ["ABS", "ADDUCTORS"]),
+ "Wall Sit": ([], ["GLUTES"]),
+ "Leg Extension": ([], []),
+ "Zercher Squat": (["GLUTES"], ["ABS", "UPPER_BACK", "BICEPS"]),
+ # lunge
+ "Bulgarian Split Squat": (["GLUTES"], ["HAMSTRINGS", "ADDUCTORS", "ABS"]),
+ "Split Squat": (["GLUTES"], ["HAMSTRINGS", "ADDUCTORS"]),
+ "Lunge": (["GLUTES"], ["HAMSTRINGS", "ADDUCTORS", "ABS"]),
+ "Step Up": (["GLUTES"], ["HAMSTRINGS", "CALVES"]),
+ # hinge
+ "Deadlift": (["GLUTES", "LOWER_BACK"], ["TRAPS", "UPPER_BACK", "FOREARMS", "QUADS"]),
+ "Romanian Deadlift": (["GLUTES"], ["LOWER_BACK", "TRAPS", "FOREARMS"]),
+ "Stiff Leg Deadlift": (["GLUTES"], ["LOWER_BACK", "TRAPS", "FOREARMS"]),
+ "Good Morning": (["GLUTES"], ["LOWER_BACK", "UPPER_BACK"]),
+ "Hip Thrust": ([], ["HAMSTRINGS", "QUADS"]),
+ "Glute Bridge": ([], ["HAMSTRINGS"]),
+ "Back Extension": (["GLUTES"], ["HAMSTRINGS"]),
+ "Back Extension Machine": (["GLUTES"], ["HAMSTRINGS"]),
+ "Glute Ham Raise": (["GLUTES"], ["LOWER_BACK", "CALVES"]),
+ "Nordic Curl": (["GLUTES"], ["CALVES"]),
+ "Leg Curl": ([], ["CALVES"]),
+ "Kettlebell Swing": (["HAMSTRINGS"], ["LOWER_BACK", "ABS", "FOREARMS"]),
+ "Hip Abduction": ([], ["GLUTES"]),
+ "Hip Adduction": ([], []),
+ "Atlas Stone": (["GLUTES", "HAMSTRINGS"], ["BICEPS", "ABS", "UPPER_BACK", "QUADS"]),
+ "Tire Flip": (["QUADS", "HAMSTRINGS"], ["LOWER_BACK", "UPPER_BACK", "BICEPS"]),
+ # olympic
+ "Clean": (["GLUTES", "TRAPS"], ["HAMSTRINGS", "UPPER_BACK", "LOWER_BACK", "CALVES", "FRONT_DELT"]),
+ "Snatch": (["GLUTES", "TRAPS"], ["HAMSTRINGS", "UPPER_BACK", "LOWER_BACK", "CALVES", "FRONT_DELT"]),
+ "Clean and Jerk": (["GLUTES", "TRAPS", "FRONT_DELT"], ["HAMSTRINGS", "UPPER_BACK", "LOWER_BACK", "TRICEPS", "CALVES"]),
+ "High Pull": (["REAR_DELT"], ["HAMSTRINGS", "GLUTES", "UPPER_BACK", "BICEPS"]),
+ "Thruster": (["GLUTES", "FRONT_DELT"], ["TRICEPS", "ABS", "UPPER_BACK"]),
+ # elbow flexion / extension
+ "Barbell Curl": ([], ["FOREARMS"]),
+ "Dumbbell Curl": ([], ["FOREARMS"]),
+ "Hammer Curl": (["FOREARMS"], []),
+ "Preacher Curl": ([], ["FOREARMS"]),
+ "Concentration Curl": ([], ["FOREARMS"]),
+ "Spider Curl": ([], ["FOREARMS"]),
+ "Reverse Curl": (["BICEPS"], []),
+ "Wrist Curl": ([], []),
+ "Tricep Pushdown": ([], []),
+ "Overhead Tricep Extension": ([], []),
+ "Skull Crusher": ([], []),
+ "Close Grip Bench Press": (["CHEST"], ["FRONT_DELT"]),
+ "JM Press": ([], ["CHEST", "FRONT_DELT"]),
+ "Tricep Kickback": ([], []),
+ # carry
+ "Farmer Carry": (["TRAPS"], ["ABS", "UPPER_BACK", "QUADS"]),
+ "Suitcase Carry": (["FOREARMS"], ["TRAPS", "ABS"]),
+ "Yoke Walk": (["TRAPS", "ABS"], ["LOWER_BACK", "UPPER_BACK", "CALVES"]),
+ "Sandbag Carry": (["ABS", "TRAPS"], ["UPPER_BACK", "QUADS", "FOREARMS"]),
+ # core
+ "Plank": ([], ["OBLIQUES", "FRONT_DELT"]),
+ "Side Plank": ([], ["ABS", "ABDUCTORS"]),
+ "Hanging Leg Raise": (["HIP_FLEXORS"], ["OBLIQUES", "FOREARMS"]),
+ "Toes to Bar": (["HIP_FLEXORS"], ["LATS", "OBLIQUES", "FOREARMS"]),
+ "Ab Wheel": ([], ["OBLIQUES", "LATS"]),
+ "Cable Crunch": ([], ["OBLIQUES"]),
+ "Crunch": ([], ["OBLIQUES"]),
+ "Russian Twist": ([], ["ABS"]),
+ "Pallof Press": ([], ["ABS"]),
+ "Dead Bug": ([], ["OBLIQUES", "HIP_FLEXORS"]),
+ "Bird Dog": ([], ["LOWER_BACK", "GLUTES"]),
+ "Hollow Hold": ([], ["HIP_FLEXORS", "OBLIQUES"]),
+ "L Sit": (["HIP_FLEXORS"], ["TRICEPS", "OBLIQUES"]),
+ "Copenhagen Plank": ([], ["OBLIQUES", "ABS"]),
+ "Neck Curl": ([], []),
+ # calf
+ "Calf Raise": ([], []),
+ "Tibialis Raise": ([], []),
+ # conditioning
+ "Row": (["LATS"], ["BICEPS", "QUADS", "HAMSTRINGS"]),
+ "Assault Bike": ([], ["HAMSTRINGS", "CALVES", "FRONT_DELT"]),
+ "Ski Erg": (["TRICEPS"], ["ABS", "UPPER_BACK"]),
+ "Treadmill Run": (["HAMSTRINGS"], ["GLUTES", "CALVES"]),
+ "Sled Push": (["GLUTES"], ["CALVES", "HAMSTRINGS"]),
+ "Sled Drag": (["GLUTES"], ["QUADS", "CALVES", "UPPER_BACK"]),
+ "Burpee": (["CHEST"], ["TRICEPS", "ABS", "CALVES"]),
+ "Box Jump": (["GLUTES"], ["CALVES", "HAMSTRINGS"]),
+ "Jump Rope": ([], ["FOREARMS"]),
+ "Battle Rope": ([], ["ABS", "UPPER_BACK", "FOREARMS"]),
+ "Wall Ball": (["GLUTES", "FRONT_DELT"], ["TRICEPS", "ABS"]),
+ "Mountain Climber": (["HIP_FLEXORS"], ["OBLIQUES", "FRONT_DELT"]),
+ "Broad Jump": (["GLUTES"], ["HAMSTRINGS", "CALVES"]),
+ "Sprint": (["GLUTES"], ["QUADS", "CALVES"]),
+ # mobility — a stretch trains nothing; it is listed so the generator does not warn.
+ "Couch Stretch": ([], []),
+ "90 90 Hip Stretch": ([], []),
+ "Cat Cow": ([], []),
+ "Thoracic Extension": ([], []),
+ "Hip Airplane": ([], []),
+ "World's Greatest Stretch": ([], []),
+}
+
 
 BASE = [
     # ── horizontal push ──
@@ -130,7 +289,8 @@ BASE = [
 
     # ── squat ──
     ("Back Squat", "SQUAT", "QUADS", BB, 0,
-     ["bs", "squat", "hbbs", "lbbs", "high bar squat", "low bar squat", "barbell squat"],
+     ["bs", "squat", "hbbs", "lbbs", "high bar squat", "low bar squat", "barbell squat",
+      "bodyweight squat", "air squat"],
      STANCES + TEMPOS + ["High Bar", "Low Bar", "Box", "Pin", "Anderson", "Pause", "1 1/4"],
      [BB, SMITH, MACHINE]),
     ("Front Squat", "SQUAT", "QUADS", BB, 0,
@@ -327,45 +487,89 @@ def implied(name, equip_word):
     return equip_word and equip_word.lower() in name.lower()
 
 
+
+# How people actually say a generated name. "Incline Dumbbell Bench Press" is the precise name and
+# nobody says it; they say "incline dumbbell press". These run over every generated row, so one rule
+# covers the whole family rather than a hand-written alias per variant.
+#
+# Each rule is (must contain, find, replace). A rule that would produce the name unchanged, or a name
+# already taken by a real movement, is dropped when the index loads.
+SPOKEN_FORMS = [
+    # "Incline Dumbbell Bench Press" -> "Incline Dumbbell Press". Not for the barbell forms, where
+    # "bench press" IS what people say.
+    ("Bench Press", " Bench Press", " Press"),
+    # "Cable Chest Fly" -> "Cable Fly", "Dumbbell Chest Fly" -> "Dumbbell Fly".
+    ("Chest Fly", " Chest Fly", " Fly"),
+    # "Dumbbell Overhead Press" -> "Dumbbell Shoulder Press".
+    ("Overhead Press", "Overhead Press", "Shoulder Press"),
+]
+
+
+def spoken_forms(canonical, equipment):
+    out = []
+    for contains, find, repl in SPOKEN_FORMS:
+        if contains not in canonical:
+            continue
+        # "Bench Press" and "Barbell Bench Press" keep their names; only the qualified forms shorten.
+        if contains == "Bench Press" and canonical.strip().endswith("Bench Press") and (
+                equipment == "BARBELL" or canonical.strip() == "Bench Press"):
+            continue
+        alt = canonical.replace(find, repl).strip()
+        if alt and alt != canonical:
+            out.append(alt)
+    return out
+
+
 def main():
     rows = {}
 
-    def add(canonical, pattern, primary, equipment, unilateral, aliases):
+    absent = [b[0] for b in BASE if b[0] not in MUSCLES]
+    if absent:
+        print(f"ERROR: no muscles for {absent}", file=sys.stderr)
+        raise SystemExit(1)
+
+    def add(canonical, pattern, primary, equipment, unilateral, aliases, base):
         key = canonical.lower()
         if key in rows:
             rows[key][5].update(a.lower() for a in aliases if a)
             return
-        rows[key] = [canonical, pattern, primary, equipment, unilateral,
-                     set(a.lower() for a in aliases if a)]
+        co, sec = MUSCLES[base]
+        # The main mover first, then the co-primaries: a consumer that wants one muscle takes
+        # [0], and that one must stay exactly what it was before this column grew.
+        primaries = [primary] + [x for x in co if x != primary]
+        secondary = [x for x in sec if x not in primaries]
+        spoken = spoken_forms(canonical, equipment)
+        rows[key] = [canonical, pattern, primaries, equipment, unilateral,
+                     set(a.lower() for a in list(aliases) + spoken if a), secondary]
 
     for (name, pattern, primary, default_eq, unilateral, aliases, variants, equips) in BASE:
-        add(name, pattern, primary, default_eq, unilateral, aliases)
+        add(name, pattern, primary, default_eq, unilateral, aliases, name)
 
         for eq in equips:
             word = EQUIPMENT_WORD[eq]
             if implied(name, word):
                 continue
             variant_name = f"{word} {name}".strip()
-            add(variant_name, pattern, primary, eq, unilateral, [])
+            add(variant_name, pattern, primary, eq, unilateral, [], name)
 
         for v in variants:
             uni = 1 if v in ("Single Arm", "Single Leg") else unilateral
-            add(f"{v} {name}", pattern, primary, default_eq, uni, [])
+            add(f"{v} {name}", pattern, primary, default_eq, uni, [], name)
             # The two qualifiers that most often appear WITH equipment: "Incline Dumbbell Press".
             if v in ANGLES or v in ("Single Arm", "Single Leg", "Seated", "Standing"):
                 for eq in equips:
                     word = EQUIPMENT_WORD[eq]
                     if not word or implied(name, word):
                         continue
-                    add(f"{v} {word} {name}", pattern, primary, eq, uni, [])
+                    add(f"{v} {word} {name}", pattern, primary, eq, uni, [], name)
 
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8", newline="\n") as f:
         f.write("# Wild Odds Reader exercise index. GENERATED by tools/build_exercise_index.py.\n")
-        f.write("# canonical\tpattern\tprimary\tequipment\tunilateral\taliases\n")
+        f.write("# canonical\tpattern\tprimary\tequipment\tunilateral\taliases\tsecondary\n")
         for key in sorted(rows):
-            c, p, m, e, u, al = rows[key]
-            f.write(f"{c}\t{p}\t{m}\t{e}\t{u}\t{','.join(sorted(al))}\n")
+            c, p, m, e, u, al, sec = rows[key]
+            f.write(f"{c}\t{p}\t{','.join(m)}\t{e}\t{u}\t{','.join(sorted(al))}\t{','.join(sec)}\n")
 
     size = os.path.getsize(OUT)
     print(f"wrote {len(rows)} exercises to {OUT} ({size // 1024} KB)")

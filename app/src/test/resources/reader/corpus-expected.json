@@ -398,14 +398,12 @@
         "sessions": 1,
         "restDays": 0,
         "exercises": 2,
-        "resolvedExactly": 1,
-        "confidenceBucket": 75,
+        "resolvedExactly": 2,
+        "confidenceBucket": 100,
         "flags": [
             "INFO:Only one week was detected. Set how many weeks it runs in re",
             "INFO:Read as a Everfit export.",
-            "REVIEW:Couldn’t confidently match “Cable Fly” — confirm the exercis",
-            "REVIEW:Weights were found but kg/lb is ambiguous — confirm units be",
-            "REVIEW:“Cable Fly” looks like “Cable Chest Fly” but wasn't certain "
+            "REVIEW:Weights were found but kg/lb is ambiguous — confirm units be"
         ],
         "rows": [
             "Dumbbell Bench Press 4x10 @ABSOLUTE:30",
@@ -875,7 +873,7 @@
         "restDays": 0,
         "exercises": 2,
         "resolvedExactly": 2,
-        "confidenceBucket": 75,
+        "confidenceBucket": 80,
         "flags": [
             "INFO:Only one week was detected. Set how many weeks it runs in re",
             "REVIEW:Part of “Burpees 3x20 finisher” wasn't understood — check it"
@@ -1387,13 +1385,11 @@
         "sessions": 1,
         "restDays": 0,
         "exercises": 1,
-        "resolvedExactly": 0,
-        "confidenceBucket": 50,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
         "flags": [
             "INFO:Only one week was detected. Set how many weeks it runs in re",
-            "INFO:“setKind” can't be stored as a field yet — it was kept in th",
-            "REVIEW:Couldn’t confidently match “Cable Fly” — confirm the exercis",
-            "REVIEW:“Cable Fly” looks like “Cable Chest Fly” but wasn't certain "
+            "INFO:“setKind” can't be stored as a field yet — it was kept in th"
         ],
         "rows": [
             "Cable Chest Fly 1x15 [MYO] +myo_reps"

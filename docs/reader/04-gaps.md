@@ -178,7 +178,6 @@ noticing until they were on a plane.
 | `colour-semantics` | Recognises fully-shaded rows as headings. It does **not** yet group consecutive same-coloured rows into supersets, which was the other half of the idea. |
 | Idempotency hash | Over the source BYTES, so the same document re-exported with a different timestamp inside it reads as a new document. |
 | Learned aliases | Per-device `SharedPreferences`. They do not sync and are lost with the app's data. |
-| `ExerciseLibrary` | The legacy 63-entry muscle map still exists alongside the 952-entry index, and is consulted as a last-resort fallback. Two sources of truth for the same question. |
 
 ---
 
@@ -188,5 +187,4 @@ The corpus scoreboard sits at 91% parse rate / 89% resolution. Ranked by expecte
 
 1. **Real photos in the corpus** (§2) — the only completely unmeasured path.
 2. **Real app exports** (§1) — turns four "probably" adapters into four "yes" adapters.
-3. **Retiring `ExerciseLibrary`** (§11) — one source of truth for what an exercise is.
-4. **A language hint** (§9) — everything needed is already in the vocabulary.
+3. **A language hint** (§9) — everything needed is already in the vocabulary.

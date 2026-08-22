@@ -3,8 +3,12 @@ package com.wildodds.gymtracker.data.importer.resolve
 import com.wildodds.gymtracker.data.importer.vocab.ReaderVocabulary
 
 /**
- * The bundled exercise library: ~950 movements with pattern, primary muscle, equipment, a unilateral
- * flag and curated aliases.
+ * The bundled exercise library: ~950 movements with pattern, primary and secondary muscles,
+ * equipment, a unilateral flag and curated aliases.
+ *
+ * It is the ONLY answer in the app to "what does this exercise train". The muscle map that used to
+ * sit beside it covered 63 names with a hand-written if-ladder and disagreed with this file on the
+ * ones they shared.
  *
  * Loaded from `resources/reader/exercises.tsv`, which is **generated** by
  * `tools/build_exercise_index.py` from a curated set of base movements crossed with the qualifiers
@@ -24,11 +28,21 @@ object ExerciseIndex {
   data class Entry(
     val canonical: String,
     val pattern: String,
-    val primaryMuscle: String,
+    /** Muscles doing the lion's share of the work. Never empty; the first is the main mover. */
+    val primaryMuscles: List<String>,
     val equipment: String,
     val unilateral: Boolean,
-    val aliases: List<String>
+    val aliases: List<String>,
+    /** Muscles that assist significantly. Empty for an isolation movement, and for a stretch. */
+    val secondaryMuscles: List<String> = emptyList()
   ) {
+    /**
+     * The main mover. This is the value the index carried before it learned about co-primaries, and
+     * it is deliberately still the first element, so every caller that wants one muscle keeps
+     * getting the same answer it always did.
+     */
+    val primaryMuscle: String get() = primaryMuscles.firstOrNull().orEmpty()
+
     /** The canonical name, normalised — the key every lookup is made on. */
     val key: String = Normalise.key(canonical)
     /** Content words, sorted, for order-insensitive matching. */
@@ -79,6 +93,33 @@ object ExerciseIndex {
     return byKey[k] ?: byAlias[k]
   }
 
+  /**
+   * The most specific movement whose every content word appears in [text], or null.
+   *
+   * This is the "does this line name an exercise" question, and it is deliberately a SUBSET test
+   * rather than a substring one. Substring matching answered yes to "Benchmark" for "bench" and let
+   * a three-word movement lose to a one-word one; requiring whole words and preferring the entry
+   * with the most of them means "Incline Bench Press" beats "Bench Press" beats "Press".
+   *
+   * Candidates come from the posting lists, so this is a scan of the entries sharing a word with the
+   * text rather than a pass over all 952.
+   */
+  fun mentionedIn(text: String): Entry? {
+    val tokens = Normalise.contentTokens(text)
+    if (tokens.isEmpty()) return null
+    var best: Entry? = null
+    val seen = HashSet<String>()
+    for (t in tokens) {
+      for (e in postings[t].orEmpty()) {
+        if (e.tokens.size > tokens.size) continue
+        if (e.tokens.size <= (best?.tokens?.size ?: 0)) continue
+        if (!seen.add(e.key)) continue
+        if (tokens.containsAll(e.tokens)) best = e
+      }
+    }
+    return best
+  }
+
   private fun load(): List<Entry> {
     val stream = ExerciseIndex::class.java.getResourceAsStream(RESOURCE)
       ?: error("Exercise index missing from the classpath at $RESOURCE")
@@ -88,13 +129,18 @@ object ExerciseIndex {
         if (line.isBlank() || line.startsWith("#")) continue
         val f = line.split('\t')
         if (f.size < 5) continue
+        fun list(i: Int) =
+          f.getOrNull(i).orEmpty().split(',').map { it.trim() }.filter { it.isNotEmpty() }
+        val primaries = list(2)
+        if (primaries.isEmpty()) continue
         out += Entry(
           canonical = f[0].trim(),
           pattern = f[1].trim(),
-          primaryMuscle = f[2].trim(),
+          primaryMuscles = primaries,
           equipment = f[3].trim(),
           unilateral = f[4].trim() == "1",
-          aliases = f.getOrNull(5).orEmpty().split(',').map { it.trim() }.filter { it.isNotEmpty() }
+          aliases = list(5),
+          secondaryMuscles = list(6)
         )
       }
     }
