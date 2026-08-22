@@ -203,26 +203,74 @@ object ColumnGroupScorer : LayoutScorer {
   override val id = "column-groups"
   override val description = "One block of columns per week"
 
+  /**
+   * A sideways sheet: `Exercise | Sets Reps Weight | Sets Reps Weight | Sets Reps Weight`, one block
+   * per week.
+   *
+   * The detection was always right and the extraction was not: it read the SAME rows and the same
+   * columns for every week, so week 3 came out holding week 1's numbers. That is the worst class of
+   * bug this subsystem can have — a program that looks complete and is wrong — because nothing
+   * downstream can tell a copied number from a read one.
+   *
+   * It now slices. The header row is split into columns whose heading occurs once (shared — the
+   * exercise name, notes) and columns whose heading occurs once per week (the blocks). Each week is
+   * read from a projection of the shared columns plus that week's block, which means the ordinary
+   * role assignment runs per week and each week gets its own numbers.
+   *
+   * If the blocks do not divide evenly, or the chunks do not carry the same headings in the same
+   * order, this returns null instead of guessing. A sheet it cannot slice is a sheet another scorer
+   * should win, and "no layout matched" is a far better outcome than three identical weeks.
+   */
   override fun score(wb: Workbook): LayoutScorer.Scored? {
     val g = wb.primary ?: return null
     val header = GridReader.findHeaderRow(g) ?: return null
-    // Repeated column headings across the row — "Sets Reps Sets Reps Sets Reps" — mean the sheet
-    // runs weeks sideways.
-    val heads = (0 until g.colCount).map { vocab.lower(g.cell(header, it).trim()) }.filter { it.isNotBlank() }
-    if (heads.size < 4) return null
-    val repeated = heads.groupingBy { it }.eachCount().filterValues { it >= 2 }
-    if (repeated.isEmpty()) return null
-    val groups = repeated.values.maxOrNull() ?: 1
+    val heads = (0 until g.colCount).map { vocab.lower(g.cell(header, it).trim()) }
+    if (heads.count { it.isNotBlank() } < 4) return null
+
+    val counts = heads.filter { it.isNotBlank() }.groupingBy { it }.eachCount()
+    val groups = counts.values.maxOrNull() ?: 1
     if (groups < 2) return null
+
+    // Every heading must be either shared (appears once) or per-week (appears once per week). A
+    // heading appearing twice on a three-week sheet means the cycle is not what it looks like, and
+    // treating those two columns as shared would hand every week whichever one won role assignment.
+    if (counts.values.any { it != 1 && it != groups }) return null
+
+    // A heading that appears once per week belongs to the blocks; anything else is shared.
+    val blockCols = heads.indices.filter { heads[it].isNotBlank() && counts[heads[it]] == groups }
+    val sharedCols = heads.indices.filter { it !in blockCols && heads[it].isNotBlank() }
+    if (blockCols.size < groups * 2) return null
+    if (blockCols.size % groups != 0) return null
+
+    val width = blockCols.size / groups
+    val chunks = blockCols.chunked(width)
+    // The cycle has to be a real cycle. "Sets Reps Sets Reps Weight Weight" is not one, and reading
+    // it as one would pair week 2's reps with week 1's weight.
+    val shape = chunks.first().map { heads[it] }
+    if (chunks.any { c -> c.map { heads[it] } != shape }) return null
+    // Blocks are contiguous runs of columns, not an interleave.
+    if (chunks.any { c -> c.last() - c.first() != c.size - 1 }) return null
+    if (sharedCols.none { c -> heads[c].isNotBlank() }) return null
+
+    val weekNumbers = chunks.map { weekLabelFor(g, header, it) }
+    val distinctWeeks = weekNumbers.filterNotNull().distinct().size == groups
+
     return LayoutScorer.Scored(
-      confidence = 0.45 + 0.08 * minOf(groups, 5),
-      evidence = listOf("column headings repeat $groups times: ${repeated.keys.take(4).joinToString(", ")}"),
+      // Higher than before: the extraction now does what the detection claims.
+      confidence = 0.55 + 0.06 * minOf(groups, 5) + (if (distinctWeeks) 0.05 else 0.0),
+      evidence = listOf(
+        "column headings repeat $groups times: ${shape.take(4).joinToString(", ")}",
+        "each week read from its own ${width}-column block" +
+          (if (distinctWeeks) ", weeks named in the sheet" else "")
+      ),
       build = {
-        // Each repeat is a week; within a repeat the exercise column is shared.
-        val a = ColumnRoles.assign(g, header)
-        val weeks = (1..groups).map { wk ->
-          WeekDraft(wk, sessions = listOf(
-            GridReader.sessionFrom(g, a, "Day 1", 1, header + 1, g.rowCount)))
+        val weeks = chunks.mapIndexed { i, chunk ->
+          val view = GridReader.projectColumns(g, sharedCols + chunk)
+          val a = ColumnRoles.assign(view, header)
+          WeekDraft(
+            index = weekNumbers[i] ?: (i + 1),
+            sessions = listOf(GridReader.sessionFrom(view, a, "Day 1", 1, header + 1, view.rowCount))
+          )
         }
         ProgramImportDraft(
           name = wb.title ?: wb.fileName.substringBeforeLast('.'),
@@ -232,6 +280,21 @@ object ColumnGroupScorer : LayoutScorer {
         )
       }
     )
+  }
+
+  /**
+   * The week number a block is labelled with, if the sheet says so — normally a "Week 2" banner in a
+   * row above the headings, spanning the block. Read, never invented: a block with no label falls
+   * back to its position, which is the only other thing we know.
+   */
+  private fun weekLabelFor(g: Grid, header: Int, chunk: List<Int>): Int? {
+    for (r in (maxOf(0, header - 3) until header).reversed()) {
+      for (c in chunk) {
+        val n = GridReader.weekNumberIn(g.cell(r, c).trim())
+        if (n != null) return n
+      }
+    }
+    return null
   }
 }
 

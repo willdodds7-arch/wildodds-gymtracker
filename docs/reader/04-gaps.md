@@ -176,7 +176,6 @@ noticing until they were on a plane.
 | YAML | Anchors, multi-document streams and block scalars are not resolved; the text passes through as lines. |
 | Markdown tables | A table whose header names none of the known column roles is joined cell-by-cell into one line rather than reflowed. |
 | `colour-semantics` | Recognises fully-shaded rows as headings. It does **not** yet group consecutive same-coloured rows into supersets, which was the other half of the idea. |
-| `column-groups` | Detects the layout and reports it, but its extraction is the weakest of the twelve — it reads the same rows for each week rather than slicing the column block. |
 | Idempotency hash | Over the source BYTES, so the same document re-exported with a different timestamp inside it reads as a new document. |
 | Learned aliases | Per-device `SharedPreferences`. They do not sync and are lost with the app's data. |
 | `ExerciseLibrary` | The legacy 63-entry muscle map still exists alongside the 952-entry index, and is consulted as a last-resort fallback. Two sources of truth for the same question. |
@@ -190,5 +189,4 @@ The corpus scoreboard sits at 91% parse rate / 89% resolution. Ranked by expecte
 1. **Real photos in the corpus** (§2) — the only completely unmeasured path.
 2. **Real app exports** (§1) — turns four "probably" adapters into four "yes" adapters.
 3. **Retiring `ExerciseLibrary`** (§11) — one source of truth for what an exercise is.
-4. **Slicing `column-groups` properly** (§11) — the one layout that detects better than it extracts.
-5. **A language hint** (§9) — everything needed is already in the vocabulary.
+4. **A language hint** (§9) — everything needed is already in the vocabulary.

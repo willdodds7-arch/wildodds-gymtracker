@@ -2278,15 +2278,15 @@
         "resolvedExactly": 6,
         "confidenceBucket": 100,
         "flags": [
-            "INFO:Read as one block of columns per week (69% confident)."
+            "INFO:Read as one block of columns per week (73% confident)."
         ],
         "rows": [
-            "Back Squat 5x3 @RPE:5",
-            "Bench Press 5x3 @RPE:5",
-            "Back Squat 5x3 @RPE:5",
-            "Bench Press 5x3 @RPE:5",
-            "Back Squat 5x3 @RPE:5",
-            "Bench Press 5x3 @RPE:5"
+            "Back Squat 5x5",
+            "Bench Press 5x5",
+            "Back Squat 5x3",
+            "Bench Press 5x3",
+            "Back Squat 5x1",
+            "Bench Press 5x1"
         ]
     },
     {
@@ -2392,8 +2392,7 @@
         "confidenceBucket": 100,
         "flags": [
             "INFO:3 rest days were read from the source and kept in place: Res",
-            "INFO:Read as a month calendar, one cell per day (75% confident).",
-            "REVIEW:This spreadsheet could also be read as one block of columns "
+            "INFO:Read as a month calendar, one cell per day (75% confident)."
         ],
         "rows": [
             "Bench Press 3x8",

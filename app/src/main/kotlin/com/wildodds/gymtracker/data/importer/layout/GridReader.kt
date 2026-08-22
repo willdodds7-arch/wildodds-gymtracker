@@ -159,6 +159,33 @@ object GridReader {
   }
 
   /** The whole row, tab-separated — the verbatim source of a spreadsheet exercise. */
+  /**
+   * A view of [grid] containing only [cols], in the order given.
+   *
+   * This is what makes a sideways-weeks sheet readable: week 3's block of columns, plus the shared
+   * exercise-name column, IS a normal grid, so the ordinary column-role assignment and row reader
+   * work on it unchanged. The alternative — teaching every reader below this about column offsets —
+   * would put the same off-by-one bug in twelve places.
+   *
+   * Hidden flags, percentage cells and fills are remapped rather than dropped, because a scorer that
+   * loses "this cell was formatted as a percent" produces 0.85 kilos.
+   */
+  fun projectColumns(grid: Grid, cols: List<Int>): Grid {
+    val newIndex = HashMap<Int, Int>(cols.size * 2)
+    cols.forEachIndexed { i, c -> newIndex[c] = i }
+    return Grid(
+      name = grid.name,
+      rows = grid.rows.map { row -> cols.map { c -> row.getOrNull(c).orEmpty() } },
+      hiddenRows = grid.hiddenRows,
+      hiddenCols = grid.hiddenCols.mapNotNull { newIndex[it] }.toSet(),
+      frozenRow = grid.frozenRow,
+      percentCells = grid.percentCells.mapNotNull { (r, c) -> newIndex[c]?.let { r to it } }.toSet(),
+      fillColors = grid.fillColors.mapNotNull { (rc, v) ->
+        newIndex[rc.second]?.let { (rc.first to it) to v }
+      }.toMap()
+    )
+  }
+
   fun rawRow(grid: Grid, row: Int): String =
     (0 until grid.colCount).map { grid.cell(row, it) }.joinToString("\t").trimEnd('\t')
 

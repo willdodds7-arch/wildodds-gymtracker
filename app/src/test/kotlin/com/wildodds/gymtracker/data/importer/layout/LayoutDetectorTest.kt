@@ -28,8 +28,13 @@ class LayoutDetectorTest {
   private fun winnerOf(bytes: ByteArray, name: String = "fixture.xlsx") =
     detect(bytes, name)?.winner?.scorer?.id
 
-  private fun draftOf(bytes: ByteArray, name: String = "fixture.xlsx") =
-    detect(bytes, name)?.winner?.scored?.build?.invoke()
+  /** The winner's draft, or — when [scorer] is given — that specific candidate's, so a test can
+   *  assert what one layout extracts without depending on it also winning. */
+  private fun draftOf(bytes: ByteArray, name: String = "fixture.xlsx", scorer: String? = null) =
+    detect(bytes, name)?.let { d ->
+      val c = if (scorer == null) d.winner else d.all.firstOrNull { it.scorer.id == scorer }
+      c?.scored?.build?.invoke()
+    }
 
   private fun slots(bytes: ByteArray) =
     draftOf(bytes)?.weeks.orEmpty().flatMap { w -> w.sessions.flatMap { it.slots } }
@@ -119,6 +124,49 @@ class LayoutDetectorTest {
     val d = detect(bytes)!!
     assertTrue("column groups must be in contention: ${d.all.map { it.scorer.id to it.scored.confidence }}",
       d.all.any { it.scorer.id == "column-groups" })
+  }
+
+  @Test fun `fixture 07b - each sideways week is read from its own columns`() {
+    // The whole point of the layout: week 2 must hold week 2's numbers. This used to read the same
+    // block three times, so all three weeks came out as 5x5 and the import looked complete.
+    val bytes = WorkbookFixtures.workbook(Sheet("Block", listOf(
+      listOf("Exercise", "Sets", "Reps", "Sets", "Reps", "Sets", "Reps"),
+      listOf("Back Squat", "5", "5", "5", "3", "5", "1"),
+      listOf("Bench Press", "5", "5", "5", "3", "5", "1")
+    )))
+    val draft = draftOf(bytes, scorer = "column-groups")!!
+    assertEquals(3, draft.weeks.size)
+    val repsPerWeek = draft.weeks.map { w ->
+      w.sessions.single().slots.first().sets.first().reps?.min
+    }
+    assertEquals(listOf(5, 3, 1), repsPerWeek)
+    // …and the shared exercise column is carried into every week, not just the first.
+    for (w in draft.weeks) {
+      assertEquals(listOf("Back Squat", "Bench Press"), w.sessions.single().slots.map { it.exercise.original })
+    }
+  }
+
+  @Test fun `fixture 07c - a week banner above the blocks names the weeks`() {
+    val bytes = WorkbookFixtures.workbook(Sheet("Block", listOf(
+      listOf("", "Week 3", "", "Week 4", "", "Week 5", ""),
+      listOf("Exercise", "Sets", "Reps", "Sets", "Reps", "Sets", "Reps"),
+      listOf("Back Squat", "5", "5", "5", "3", "5", "1")
+    )))
+    val draft = draftOf(bytes, scorer = "column-groups")!!
+    assertEquals(listOf(3, 4, 5), draft.weeks.map { it.index })
+  }
+
+  @Test fun `fixture 07d - a cycle that does not divide evenly is refused, not guessed`() {
+    // Three "Sets" but only two "Reps" is not a three-week cycle. Reading it as one would leave two
+    // reps columns shared between three weeks, so whichever won role assignment would be handed to
+    // all three. Declining lets another scorer win, which is the correct outcome.
+    val bytes = WorkbookFixtures.workbook(Sheet("Block", listOf(
+      listOf("Exercise", "Sets", "Reps", "Sets", "Reps", "Sets"),
+      listOf("Back Squat", "5", "5", "5", "3", "5")
+    )))
+    val d = detect(bytes)
+    assertTrue("column groups must decline an uneven cycle",
+      d == null || d.all.none { it.scorer.id == "column-groups" })
   }
 
   // ── 6. dated log ────────────────────────────────────────────────────────────
