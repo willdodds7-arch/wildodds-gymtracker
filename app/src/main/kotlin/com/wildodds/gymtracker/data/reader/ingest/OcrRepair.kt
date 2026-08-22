@@ -169,15 +169,34 @@ object OcrRepair {
 
   private val UNIT_SUFFIX = Regex("""(?i)(kg|kgs|lb|lbs|#|s|sec|secs|m|min|mins|km|cal|%|reps?)$""")
 
-  private fun repairToken(token: String): String {
-    val hasDigit = token.any { it.isDigit() }
-    val looksNumeric = hasDigit ||
-      (token.length <= 6 && UNIT_SUFFIX.containsMatchIn(token) && token.any { it in CONFUSABLE })
-    if (!looksNumeric) return token
+  /** Characters that can appear in a numeric token without making it a word: the operators. */
+  private val NUMERIC_OPERATORS = setOf('x', 'X', '*', '/', '+', '-', '.', ',', ':', '@', '%', '(', ')')
 
-    // Even in a numeric token, leave a trailing unit alone: the `S` in "5S" is seconds, not a 5.
+  /**
+   * Repairs one token, and only when the token is UNAMBIGUOUSLY numeric.
+   *
+   * "Unambiguously" is doing real work here. An earlier version accepted any short token ending in
+   * a unit-like letter, which meant "Press" — five letters ending in `s` — was treated as a number
+   * and came back as "Pre5". Turning a movement name into gibberish is far worse than leaving a
+   * misread digit alone, so the test is now: strip a trailing unit, and every remaining character
+   * must be a digit, a confusable, or a numeric operator. "3xlO" and "8O" qualify; "Press", "Row"
+   * and "T2B" do not.
+   */
+  private fun repairToken(token: String): String {
+    if (token.isEmpty()) return token
+    // Leave a trailing unit alone: the `S` in "5S" is seconds, not a five.
     val unit = UNIT_SUFFIX.find(token)?.value.orEmpty()
     val body = token.dropLast(unit.length)
+    if (body.isEmpty()) return token
+
+    val allNumeric = body.all { it.isDigit() || it in CONFUSABLE || it in NUMERIC_OPERATORS }
+    if (!allNumeric) return token
+    // A token of nothing but operators ("+/-") is punctuation, not a number.
+    if (body.none { it.isDigit() || it in CONFUSABLE }) return token
+    // With no real digit anywhere, a single letter is not enough evidence to call this a number:
+    // "Bs" would become "8s". "lO" — two confusables in a row — still is.
+    if (body.none { it.isDigit() } && body.length < 2) return token
+
     val fixed = buildString(body.length) {
       for (ch in body) append(CONFUSABLE[ch] ?: ch)
     }

@@ -35,11 +35,14 @@ The OCR path is complete and wired — ML Kit with the **bundled** model (so it 
 launch), `PdfRenderer` rasterisation, EXIF rotation, deskew, adaptive threshold, upscaling, and the
 `OcrRepair` pass that rebuilds lines by baseline clustering and columns by x-gap histogram.
 
-What it has **not** had is a photo. The repair logic, the legibility thresholds and the confidence
-propagation are all tested against a scripted fake recogniser; the ML Kit binding, the rasterisation
-and the preprocessing chain are tested only by compiling. Every number in `ImagePrep` — the 25-pixel
-threshold window, the ±8° deskew range, the 1400-pixel minimum width — is a reasoned default, not a
-measured one.
+What it has **not** had is a photo. `OcrExtractorTest` drives the whole path against a scripted fake
+recogniser — baseline clustering, x-gap columns, confusable repair, confidence propagation, the
+illegibility refusal, multi-page batching and the page cap — and exercises `ImagePrep`'s adaptive
+threshold under a synthetic illumination gradient, its skew estimate and its upscale. What remains
+tested only by compiling is the ML Kit binding itself and `PdfRenderer` rasterisation, both of which
+need a device. And every number in `ImagePrep` — the 25-pixel threshold window, the ±8° deskew range,
+the 1400-pixel minimum width — is a reasoned default tuned against synthetic images, not measured
+against real ones.
 
 The corpus contains `hostile/11-handwriting-note.txt` as a placeholder where a photo of a whiteboard
 should be. It is a text file. That is a real gap, and it is the single largest one here.
