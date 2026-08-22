@@ -1,6 +1,7 @@
 package com.wildodds.gymtracker.data.reader.ingest
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -244,5 +245,19 @@ class ExtractorTest {
       ZipReader.read(out.toByteArray(), IngestLimits(maxDecompressedBytes = 1024 * 1024))
     }.exceptionOrNull()
     assertTrue("expected TooLarge, got $e", e is IngestError.TooLarge)
+  }
+
+  @Test fun `every html part of an mhtml archive is read, not just the first`() {
+    // A browser's "save page complete" writes one part; an email client writing a thread, or a page
+    // saved with its frames, writes several — and a program split across them lost every part after
+    // the first, which is an import that looks complete and is missing days.
+    val mhtml = "MIME-Version: 1.0\nContent-Type: multipart/related; boundary=BOUND\n\n--BOUND\nContent-Type: text/html\n\n<html><body><p>Day 1</p><p>Back Squat 5x5 @ 100kg</p></body></html>\n--BOUND\nContent-Type: image/png\nContent-Transfer-Encoding: base64\n\niVBORw0KGgo=\n--BOUND\nContent-Type: text/html\nContent-Transfer-Encoding: quoted-printable\n\n<html><body><p>Day 2</p><p>Bench Press 3x8 =40 80kg</p></body></html>\n--BOUND--\n"
+    val text = HtmlExtractor.unwrapMhtml(mhtml)
+    assertTrue("first part missing: $text", text.contains("Back Squat 5x5"))
+    assertTrue("later part missing: $text", text.contains("Bench Press 3x8"))
+    // …and each part's own transfer encoding is undone: "=40" is an "@".
+    assertTrue("quoted-printable not decoded: $text", text.contains("@ 80kg"))
+    // The image part contributes nothing.
+    assertFalse(text.contains("iVBORw0KGgo"))
   }
 }

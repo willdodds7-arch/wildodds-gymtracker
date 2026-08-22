@@ -202,9 +202,8 @@ noticing until they were on a plane.
 
 | | |
 |---|---|
-| `.mhtml` | Only the first `text/html` part is read. Multi-part archives with the program split across parts will lose the rest. |
 | YAML | Anchors, multi-document streams and block scalars are not resolved; the text passes through as lines. |
-| Markdown tables | A table whose header names none of the known column roles is joined cell-by-cell into one line rather than reflowed. |
+| Markdown table headings | Headings are matched as substrings, so a column called `Top Set` matches the `sets` role. Content-based assignment only takes over when NO heading matches anything. |
 | `colour-semantics` | Recognises fully-shaded rows as headings. It does **not** yet group consecutive same-coloured rows into supersets, which was the other half of the idea. |
 | Idempotency hash | Over the source BYTES, so the same document re-exported with a different timestamp inside it reads as a new document. |
 | Learned aliases | Per-device `SharedPreferences`. They do not sync and are lost with the app's data. |

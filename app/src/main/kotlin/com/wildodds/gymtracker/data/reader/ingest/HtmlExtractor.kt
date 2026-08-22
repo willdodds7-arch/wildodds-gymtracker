@@ -111,16 +111,42 @@ object HtmlExtractor : Extractor {
     s.replace(' ', ' ').replace(Regex("""\s+"""), " ").trim()
 
   /**
-   * `.mhtml` is a MIME multipart archive. Take the first `text/html` part and, when it is
-   * quoted-printable, undo that — otherwise every `=` in the program becomes `=3D`.
+   * `.mhtml` is a MIME multipart archive. Every `text/html` part is read, in order, and joined —
+   * not just the first.
+   *
+   * "Save page as complete" from a browser writes one part; an email client writing a thread, or a
+   * page saved with its frames, writes several, and a coach's program can be split across them. The
+   * old first-part-only read returned whichever came first and silently lost the rest, which is the
+   * failure mode this subsystem exists to avoid: a plausible import that is missing days.
+   *
+   * Quoted-printable is undone per part, since each carries its own encoding header — otherwise
+   * every `=` in the program becomes `=3D`.
    */
   fun unwrapMhtml(raw: String): String {
     val parts = raw.split(Regex("""(?m)^--\S+\s*$"""))
-    val htmlPart = parts.firstOrNull { it.contains("Content-Type: text/html", true) } ?: return raw
-    val headerEnd = htmlPart.indexOf("\n\n").takeIf { it >= 0 } ?: return htmlPart
-    val header = htmlPart.substring(0, headerEnd)
-    val body = htmlPart.substring(headerEnd + 2)
-    return if (header.contains("quoted-printable", true)) decodeQuotedPrintable(body) else body
+    val html = parts.filter { it.contains("Content-Type: text/html", true) }.mapNotNull { part ->
+      // A MIME header block ends at the first blank line, in either line ending.
+      val headerEnd = listOf(part.indexOf("\n\n"), part.indexOf("\r\n\r\n"))
+        .filter { it >= 0 }.minOrNull() ?: return@mapNotNull null
+      val header = part.substring(0, headerEnd)
+      val body = part.substring(headerEnd).trimStart('\r', '\n')
+      val decoded =
+        if (header.contains("quoted-printable", true)) decodeQuotedPrintable(body)
+        else if (header.contains("base64", true)) decodeBase64Text(body) ?: body
+        else body
+      decoded.takeIf { it.isNotBlank() }
+    }
+    if (html.isEmpty()) return raw
+    return html.joinToString("\n")
+  }
+
+  /** A base64 part, or null when it does not decode — in which case the raw text is no worse. */
+  private fun decodeBase64Text(body: String): String? = try {
+    val cleaned = body.filterNot { it.isWhitespace() }
+    if (cleaned.isEmpty()) null
+    else String(java.util.Base64.getMimeDecoder().decode(cleaned), Charsets.UTF_8)
+  } catch (e: IllegalArgumentException) {
+    null
   }
 
   fun decodeQuotedPrintable(s: String): String {

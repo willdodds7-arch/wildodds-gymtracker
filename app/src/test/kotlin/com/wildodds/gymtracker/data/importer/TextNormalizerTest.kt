@@ -248,4 +248,43 @@ class ReaderVocabularyTest {
       java.util.Locale.setDefault(defaults)
     }
   }
+
+  @Test fun `a table whose headings name no known role is still reflowed`() {
+    // "Thing", "Amount" and "Poundage" are the coach's own words and match no column-role hint.
+    // Every row used to fall through to a cell-by-cell join, which reads as one long line with the
+    // prescription buried in it. The layout engine assigns roles from CONTENT, so it can read this.
+    val md = """
+      | Thing | Amount | Poundage |
+      |---|---|---|
+      | Back Squat | 5 | 100kg |
+      | Bench Press | 3 | 80kg |
+    """.trimIndent()
+    val out = TextNormalizer.normalize(md).lines().filter { it.isNotBlank() }
+    assertEquals(2, out.size)
+    assertTrue("expected a reflowed prescription, got $out", out[0].startsWith("Back Squat"))
+    assertTrue("the load must survive: $out", out[0].contains("100kg"))
+  }
+
+  @Test fun `a table written without a header keeps its first row`() {
+    // Markdown lets you put the separator under the first row of data. That row was being skipped
+    // along with the separator, so the table quietly lost an exercise.
+    val md = """
+      | Back Squat | 5 | 100kg |
+      |---|---|---|
+      | Bench Press | 3 | 80kg |
+    """.trimIndent()
+    val out = TextNormalizer.normalize(md).lines().filter { it.isNotBlank() }
+    assertEquals("the first row is data, not headings: $out", 2, out.size)
+    assertTrue(out[0].startsWith("Back Squat"))
+    assertTrue(out[1].startsWith("Bench Press"))
+  }
+
+  @Test fun `a table with known headings is unaffected`() {
+    val md = """
+      | Exercise | Sets | Reps |
+      |---|---|---|
+      | Back Squat | 5 | 5 |
+    """.trimIndent()
+    assertEquals("Back Squat 5x5", TextNormalizer.normalize(md).trim())
+  }
 }

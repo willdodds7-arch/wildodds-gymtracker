@@ -1,7 +1,10 @@
 package com.wildodds.gymtracker.data.importer
 
+import com.wildodds.gymtracker.data.importer.layout.ColumnRole
+import com.wildodds.gymtracker.data.importer.layout.ColumnRoles
 import com.wildodds.gymtracker.data.importer.vocab.LanguageDetector
 import com.wildodds.gymtracker.data.importer.vocab.ReaderVocabulary
+import com.wildodds.gymtracker.data.reader.ingest.Grid
 import java.text.Normalizer
 
 /**
@@ -194,21 +197,59 @@ object TextNormalizer {
    * Column roles come from the SHARED vocabulary, so a header name added for the CSV path is
    * understood here too without a second edit.
    */
+  /** The header row plus every data row of the table starting at [start], as cells. */
+  private fun collectRows(lines: List<String>, start: Int): List<List<String>> {
+    val out = ArrayList<List<String>>()
+    out += splitRow(lines[start])
+    var i = start + 2
+    while (i < lines.size && looksLikeTableRow(lines[i])) {
+      if (!tableSeparator.matches(lines[i])) out += splitRow(lines[i])
+      i++
+    }
+    return out
+  }
+
   private fun readTable(lines: List<String>, start: Int): Pair<List<String>, Int> {
     val header = splitRow(lines[start]).map { vocab.lower(it) }
     fun col(role: String): Int =
       header.indexOfFirst { h -> vocab.columnRoleHints[role].orEmpty().any { h == it || h.startsWith("$it ") || h.contains(it) } }
 
-    val nameCol = col("exercise")
-    val setCol = col("sets")
-    val repCol = col("reps")
-    val loadCol = if (col("load") >= 0) col("load") else col("percent")
-    val restCol = col("rest")
-    val rpeCol = col("rpe")
-    val notesCol = col("notes")
+    var nameCol = col("exercise")
+    var setCol = col("sets")
+    var repCol = col("reps")
+    var loadCol = if (col("load") >= 0) col("load") else col("percent")
+    var restCol = col("rest")
+    var rpeCol = col("rpe")
+    var notesCol = col("notes")
+
+    // A table whose headings are the coach's own words names no known role, and every row was
+    // falling through to a cell-by-cell join — which reads as one long line with the prescription
+    // buried in it. The layout engine assigns roles from CONTENT when header text does not help,
+    // and this is the same question, so ask it rather than giving up.
+    var firstDataRow = start + 2   // past the headings and the |---| separator
+    if (nameCol < 0) {
+      val body = collectRows(lines, start)
+      if (body.size >= 2) {
+        // A "header" row with a numeric cell is not headings — it is the first row of a table
+        // somebody wrote without one, and it was being skipped along with the separator. Losing an
+        // exercise to a formatting convention is exactly the kind of quiet loss to avoid.
+        val headerIsData = body[0].any { it.trim().toDoubleOrNull() != null }
+        val grid = Grid("markdown", body)
+        val a = ColumnRoles.assign(grid, headerRow = if (headerIsData) null else 0)
+        fun byRole(role: ColumnRole) = a.columnFor(role) ?: -1
+        nameCol = byRole(ColumnRole.EXERCISE)
+        setCol = byRole(ColumnRole.SETS)
+        repCol = byRole(ColumnRole.REPS)
+        loadCol = if (byRole(ColumnRole.LOAD) >= 0) byRole(ColumnRole.LOAD) else byRole(ColumnRole.PERCENT)
+        restCol = byRole(ColumnRole.REST)
+        rpeCol = byRole(ColumnRole.RPE)
+        notesCol = byRole(ColumnRole.NOTES)
+        if (headerIsData) firstDataRow = start   // the separator is skipped by the loop below
+      }
+    }
 
     val emitted = mutableListOf<String>()
-    var i = start + 2  // skip the header and the |---| separator
+    var i = firstDataRow
     while (i < lines.size && looksLikeTableRow(lines[i])) {
       val cells = splitRow(lines[i])
       if (tableSeparator.matches(lines[i])) { i++; continue }
