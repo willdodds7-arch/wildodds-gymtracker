@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -272,11 +273,26 @@ private fun ExerciseCard(
 
     Spacer(Modifier.height(8.dp))
 
+    // ── EVOLVING SETS ────────────────────────────────────────────────────────
+    // Shape first, numbers second. Choosing "Warm-up + working" or "Top set + back-off" writes the
+    // whole ladder at once, so a real prescription is two taps rather than eight rows of typing.
+    ShapeRow(
+      shape = SetShape.detect(exercise.sets),
+      workingSets = exercise.workingSetCount,
+      topLoad = exercise.topLoad,
+      onShape = { vm.applyShape(workout.id, exercise.id, it) },
+      onWorkingSets = { vm.changeWorkingSets(workout.id, exercise.id, it) },
+      onTopLoad = { vm.setTopLoad(workout.id, exercise.id, it) }
+    )
+
+    Spacer(Modifier.height(8.dp))
+
     // Set rows — visible without opening anything.
     exercise.sets.forEachIndexed { i, set ->
       SetRow(
         set = set,
         number = i + 1,
+        topLoad = exercise.topLoad,
         showAdvanced = configureOpen,
         onChange = { transform -> vm.updateSet(workout.id, exercise.id, set.id, transform) },
         onRemove = { vm.removeSet(workout.id, exercise.id, set.id) },
@@ -380,6 +396,7 @@ private fun ExerciseCard(
 private fun SetRow(
   set: PlanSet,
   number: Int,
+  topLoad: Float?,
   showAdvanced: Boolean,
   onChange: ((PlanSet) -> PlanSet) -> Unit,
   onRemove: () -> Unit,
@@ -419,7 +436,13 @@ private fun SetRow(
     }
 
     Spacer(Modifier.width(6.dp))
-    CompactField(set.load, "Load", Modifier.weight(1f)) { v -> onChange { it.copy(load = v) } }
+    if (set.loadPercent != null) {
+      // A ramped row shows what its percentage works out to, so the prescriber sees real weights
+      // rather than doing arithmetic in their head. Read-only: the ladder is driven by the top set.
+      ResolvedLoadCell(percent = set.loadPercent, topLoad = topLoad, modifier = Modifier.weight(1f))
+    } else {
+      CompactField(set.load, "Load", Modifier.weight(1f)) { v -> onChange { it.copy(load = v) } }
+    }
     Spacer(Modifier.width(6.dp))
     CompactField(set.reps, "Reps", Modifier.weight(1f)) { v -> onChange { it.copy(reps = v) } }
     Spacer(Modifier.width(6.dp))
@@ -506,4 +529,137 @@ private fun AlternativesDialog(
     },
     dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
   )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EVOLVING SETS — prescribing controls
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * The three decisions that define an evolving prescription, on one row: what SHAPE the sets take,
+ * how MANY working sets, and the WEIGHT everything else is a proportion of.
+ *
+ * Ordering is deliberate — pick the shape and the rows appear already filled in, then adjust the
+ * count, then (optionally) type one weight and the whole ladder resolves to real numbers.
+ */
+@Composable
+private fun ShapeRow(
+  shape: SetShape,
+  workingSets: Int,
+  topLoad: Float?,
+  onShape: (SetShape) -> Unit,
+  onWorkingSets: (Int) -> Unit,
+  onTopLoad: (String) -> Unit
+) {
+  val c = LocalAppColors.current
+  val accent = LocalAccentColor.current
+  var shapeMenu by remember { mutableStateOf(false) }
+
+  Column {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+      Box {
+        Surface(
+          onClick = { shapeMenu = true },
+          shape = RoundedCornerShape(8.dp),
+          color = c.surface2,
+          modifier = Modifier.heightIn(min = 40.dp)
+        ) {
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
+          ) {
+            Text(shape.display, style = MaterialTheme.typography.labelMedium, color = c.text)
+            Icon(Icons.Default.ArrowDropDown, "Change set shape", tint = c.textSecondary,
+              modifier = Modifier.size(18.dp))
+          }
+        }
+        DropdownMenu(expanded = shapeMenu, onDismissRequest = { shapeMenu = false }) {
+          SetShape.entries.forEach { option ->
+            DropdownMenuItem(
+              text = {
+                Column {
+                  Text(option.display, fontWeight =
+                    if (option == shape) FontWeight.Bold else FontWeight.Normal)
+                  Text(option.explanation, style = MaterialTheme.typography.labelSmall,
+                    color = c.textSecondary)
+                }
+              },
+              onClick = { shapeMenu = false; onShape(option) }
+            )
+          }
+        }
+      }
+
+      Spacer(Modifier.weight(1f))
+
+      // Working-set count. Warm-ups and drops are added by the shape, so this only ever counts
+      // the sets that are actually the work.
+      IconButton(onClick = { onWorkingSets(-1) }, modifier = Modifier.size(40.dp)) {
+        Icon(Icons.Default.Remove, "One fewer working set", tint = c.text, modifier = Modifier.size(16.dp))
+      }
+      Text("$workingSets", style = MaterialTheme.typography.bodyMedium,
+        fontWeight = FontWeight.Bold, color = c.text)
+      IconButton(onClick = { onWorkingSets(1) }, modifier = Modifier.size(40.dp)) {
+        Icon(Icons.Default.Add, "One more working set", tint = c.text, modifier = Modifier.size(16.dp))
+      }
+      Text("sets", style = MaterialTheme.typography.labelSmall, color = c.textSecondary)
+    }
+
+    if (shape != SetShape.STRAIGHT) {
+      Spacer(Modifier.height(6.dp))
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        Text("Working weight", style = MaterialTheme.typography.labelSmall, color = c.textSecondary)
+        Spacer(Modifier.width(8.dp))
+        OutlinedTextField(
+          value = topLoad?.let { if (it % 1f == 0f) it.toInt().toString() else it.toString() } ?: "",
+          onValueChange = onTopLoad,
+          modifier = Modifier.width(96.dp).heightIn(min = 48.dp),
+          placeholder = { Text("kg", style = MaterialTheme.typography.labelSmall) },
+          singleLine = true,
+          textStyle = MaterialTheme.typography.bodySmall,
+          shape = RoundedCornerShape(8.dp),
+          colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = accent),
+          keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done)
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+          if (topLoad == null) "Optional — leave blank to prescribe by percentage"
+          else "Every set scales from this",
+          style = MaterialTheme.typography.labelSmall,
+          color = c.textTertiary
+        )
+      }
+    }
+  }
+}
+
+/**
+ * What a percentage row works out to. Shows the resolved weight once there is a working weight to
+ * scale from, and the bare percentage until then — never a made-up number.
+ */
+@Composable
+private fun ResolvedLoadCell(percent: Int, topLoad: Float?, modifier: Modifier = Modifier) {
+  val c = LocalAppColors.current
+  val accent = LocalAccentColor.current
+  val resolved = SetShape.resolveLoad(topLoad, percent)
+
+  Surface(
+    shape = RoundedCornerShape(8.dp),
+    color = c.surface2,
+    modifier = modifier.heightIn(min = 48.dp)
+  ) {
+    Column(
+      modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+      verticalArrangement = Arrangement.Center
+    ) {
+      Text(
+        resolved?.let { if (it % 1f == 0f) it.toInt().toString() else it.toString() } ?: "$percent%",
+        style = MaterialTheme.typography.bodySmall,
+        color = if (resolved != null) c.text else accent
+      )
+      if (resolved != null) {
+        Text("$percent%", style = MaterialTheme.typography.labelSmall, color = c.textTertiary)
+      }
+    }
+  }
 }

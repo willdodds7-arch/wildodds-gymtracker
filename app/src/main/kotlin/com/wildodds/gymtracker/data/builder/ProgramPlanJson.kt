@@ -79,6 +79,7 @@ object ProgramPlanJson {
       JSONObject().apply {
         put("type", s.type.name)
         put("load", s.load)
+        s.loadPercent?.let { put("loadPercent", it) }
         put("reps", s.reps)
         put("restSeconds", s.restSeconds)
         put("rpe", s.rpe)
@@ -196,6 +197,7 @@ object ProgramPlanJson {
         PlanSet(
           type = runCatching { SetType.valueOf(s.optString("type")) }.getOrDefault(SetType.WORKING),
           load = s.optString("load"),
+          loadPercent = if (s.has("loadPercent")) s.optInt("loadPercent") else null,
           reps = s.optString("reps"),
           restSeconds = s.optInt("restSeconds", 90),
           rpe = s.optString("rpe"),

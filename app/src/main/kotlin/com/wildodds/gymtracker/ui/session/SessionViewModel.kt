@@ -62,8 +62,31 @@ data class SetRowState(
   val isPrefilled: Boolean = false,
   // isWeightAutoFilled = weight was propagated from set 1 and hasn't been manually changed
   val isWeightAutoFilled: Boolean = false,
-  val workoutLogId: Long = 0L
-)
+  val workoutLogId: Long = 0L,
+  // ── The prescription for THIS set (evolving sets) ──────────────────────────
+  // Null/blank on programs that predate per-set prescription, which then behave exactly as before:
+  // every set shares the exercise's single repsTarget.
+  /** Name of a `data.builder.SetType` — WARMUP rows are visually separated and skipped by volume. */
+  val plannedType: String? = null,
+  /** This set's own rep target, e.g. "5" for a warm-up inside an 8-12 exercise. */
+  val plannedReps: String = "",
+  /** Percentage of the exercise's top working set, when the prescription is a ramp. */
+  val plannedPercent: Int? = null,
+  /** Literal prescribed load, when the program named one outright. */
+  val plannedLoad: String = "",
+  /** This set's own rest, so a warm-up doesn't inherit a 3-minute working rest. */
+  val plannedRest: Int? = null,
+  /**
+   * True only for a genuinely distinguished heavy single — a top-set/back-off prescription.
+   * Three straight sets at 100% are not "top sets", they are just the work.
+   */
+  val isTopSet: Boolean = false
+) {
+  val isWarmup: Boolean get() = plannedType == "WARMUP"
+  /** True when this row has a prescription of its own worth showing. */
+  val hasPrescription: Boolean
+    get() = plannedReps.isNotBlank() || plannedPercent != null || plannedLoad.isNotBlank()
+}
 
 @Immutable
 data class ExerciseUiState(
@@ -470,9 +493,29 @@ class SessionViewModel(app: Application, savedStateHandle: SavedStateHandle) : A
   // trim back-off sets. Once anything is logged this week it's the user's data — untouched.
   val applyRecovery = recoveryAdjustment != null && currentSets.isEmpty()
   val loadScale = if (applyRecovery) recoveryAdjustment!!.loadScale else 1f
+  // ── Evolving sets ─────────────────────────────────────────────────────────
+  // A program built with a per-set prescription (warm-up ramp, pyramid, top set + back-off) stores
+  // one planned_sets row per set. When present those rows ARE the prescription and decide how many
+  // rows to show; otherwise nothing changes and the exercise's single `sets`/`repsTarget` is used
+  // exactly as before, which is every program that predates this.
+  val planned = db.plannedSetDao().forExercise(exercise.id).sortedBy { it.setNumber }
+  val plannedCount = planned.size
+
+  // The weight the percentage ladder hangs off: whatever the program named on its 100% set (or,
+  // failing that, its first set with a literal load). Resolved ONCE here so every row can show a
+  // real target weight rather than each row doing its own arithmetic.
+  val plannedTopLoad = planned.firstOrNull { it.loadPercent == 100 && it.load.isNotBlank() }?.load?.toFloatOrNull()
+  ?: planned.firstOrNull { it.load.isNotBlank() }?.load?.toFloatOrNull()
+
+  // Only call something a "top set" when it genuinely stands above lighter working sets — three
+  // straight sets at 100% are just the working sets.
+  val workingPercents = planned.filter { it.type != "WARMUP" }.mapNotNull { it.loadPercent }
+  val hasDistinctTopSet = workingPercents.count { it == 100 } == 1 && workingPercents.any { it < 100 }
+
+  val baseCount = if (plannedCount > 0) plannedCount else exercise.sets
   val setCount = if (applyRecovery)
-  (exercise.sets * recoveryAdjustment!!.volumeScale).roundToInt().coerceIn(1, exercise.sets)
-  else exercise.sets
+  (baseCount * recoveryAdjustment!!.volumeScale).roundToInt().coerceIn(1, baseCount)
+  else baseCount
 
   // Program-prescribed %1RM working weights derived from the user's configured 1RM — per SET,
   // because slash-lists ("58.5/67.5/76.5%", i.e. 5/3/1's wave) prescribe a different percentage
@@ -488,6 +531,7 @@ class SessionViewModel(app: Application, savedStateHandle: SavedStateHandle) : A
   val pct1rmPrefill = pct1rmPrefills?.getOrNull(setNum - 1)
   val prefillWeight = (adj?.weightKg ?: prev?.weightKg)?.let { scaleWeight(it, loadScale) }
   val prefillReps  = adj?.reps ?: prev?.reps
+  val plan = planned.getOrNull(setNum - 1)
   SetRowState(
   setNumber = setNum,
   weightKg  = existing?.weightKg?.let { if (it % 1f == 0f) it.toInt().toString() else it.toString() }
@@ -502,7 +546,17 @@ class SessionViewModel(app: Application, savedStateHandle: SavedStateHandle) : A
   repsRight = existing?.repsRight?.toString() ?: prev?.repsRight?.toString() ?: "",
   pct1rm  = existing?.pct1rm?.let { if (it % 1f == 0f) it.toInt().toString() else it.toString() } ?: "",
   isPrefilled = existing == null && (prev != null || pct1rmPrefill != null),
-  workoutLogId = log.id
+  workoutLogId = log.id,
+  plannedType = plan?.type,
+  plannedReps = plan?.reps.orEmpty(),
+  plannedPercent = plan?.loadPercent,
+  plannedLoad = plan?.load?.takeIf { it.isNotBlank() }
+  ?: com.wildodds.gymtracker.data.builder.SetShape
+  .resolveLoad(plannedTopLoad, plan?.loadPercent)
+  ?.let { w -> if (w % 1f == 0f) w.toInt().toString() else w.toString() }
+  .orEmpty(),
+  plannedRest = plan?.restSeconds,
+  isTopSet = hasDistinctTopSet && plan?.loadPercent == 100
   )
   }
 
@@ -540,7 +594,10 @@ class SessionViewModel(app: Application, savedStateHandle: SavedStateHandle) : A
   // Autofill from set 1 applies on EVERY week: blank, previously auto-filled, and
   // carried-forward prefill sets follow set 1; a set the user manually edited is never
   // clobbered. (See [autofillWeights].) Non-first sets just take the typed value.
-  val newSets = if (setIndex == 0) {
+  val newSets = if (oldSets.any { it.plannedPercent != null }) {
+  // Any row of a ramp can be the anchor — people often type the set they are about to do.
+  autofillFromRamp(oldSets, value, anchorIndex = setIndex)
+  } else if (setIndex == 0) {
   autofillWeights(oldSets, value)
   } else {
   oldSets.toMutableList().also {
@@ -1185,8 +1242,54 @@ class SessionViewModel(app: Application, savedStateHandle: SavedStateHandle) : A
  * non-blank entry overwrites that prefill. A set the user manually edited is never clobbered.
  * Clearing set 1 (blank) clears blank/auto-filled followers but leaves carry-forward prefills.
  */
+/**
+ * Fill a percentage-prescribed exercise from one typed number.
+ *
+ * [typed] is whatever the user entered in the row they touched; it is interpreted as that row's
+ * prescribed percentage, so the implied top-set weight is `typed / percent * 100`. Every other
+ * percentage row is then resolved from that top set. A row the user typed by hand is never
+ * overwritten — the ramp is a suggestion, not a cage.
+ */
+internal fun autofillFromRamp(
+  sets: List<SetRowState>,
+  typed: String,
+  anchorIndex: Int = 0
+): List<SetRowState> {
+  val result = sets.toMutableList()
+  result[anchorIndex] = result[anchorIndex].copy(
+  weightKg = typed, isPrefilled = false, isWeightAutoFilled = false)
+
+  val anchorPercent = sets.getOrNull(anchorIndex)?.plannedPercent ?: 100
+  val typedValue = typed.toFloatOrNull()
+  // Blank the derived rows when the anchor is cleared, rather than leaving stale numbers behind.
+  val topLoad = if (typedValue == null || typedValue <= 0f || anchorPercent <= 0) null
+  else typedValue / anchorPercent * 100f
+
+  for (i in result.indices) {
+  if (i == anchorIndex) continue
+  val s = result[i]
+  val isManual = !s.isWeightAutoFilled && !s.isPrefilled && s.weightKg.isNotBlank()
+  if (isManual) continue
+  val percent = s.plannedPercent ?: continue
+  val resolved = com.wildodds.gymtracker.data.builder.SetShape.resolveLoad(topLoad, percent)
+  result[i] = s.copy(
+  weightKg = resolved?.let { w -> if (w % 1f == 0f) w.toInt().toString() else w.toString() } ?: "",
+  isWeightAutoFilled = resolved != null,
+  isPrefilled = false
+  )
+  }
+  return result
+}
+
 internal fun autofillWeights(sets: List<SetRowState>, firstWeight: String): List<SetRowState> {
   if (sets.isEmpty()) return sets
+
+  // EVOLVING SETS: when the exercise was prescribed as a ramp, the sets are not all the same
+  // weight, so copying set 1 everywhere would be wrong. Instead, treat the typed number as the
+  // reference the percentages hang off — type your working weight once and the warm-ups, back-offs
+  // and drops all fill themselves in at the right proportion.
+  if (sets.any { it.plannedPercent != null }) return autofillFromRamp(sets, firstWeight)
+
   val result = sets.toMutableList()
   result[0] = result[0].copy(weightKg = firstWeight, isPrefilled = false, isWeightAutoFilled = false)
   for (i in 1 until result.size) {

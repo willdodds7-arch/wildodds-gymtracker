@@ -1396,6 +1396,64 @@ private fun SwipeToDeleteSetRow(
 
 // ── Set row ───────────────────────────────────────────────────────────────────
 
+/**
+ * One line of "what this set is asking for": its type, the target reps, and the target load —
+ * either a real weight (once the ladder has an anchor) or the raw percentage until then.
+ */
+@Composable
+private fun SetPrescriptionStrip(setRow: SetRowState) {
+  val accent = LocalAccentColor.current
+  val muted = MaterialTheme.colorScheme.onSurfaceVariant
+
+  // The top set is the one everything else is a percentage of, so it gets named as such.
+  val label = when {
+  setRow.isWarmup -> "Warm-up"
+  setRow.plannedType == "DROP" -> "Drop"
+  setRow.plannedType == "BACKOFF" -> "Back-off"
+  setRow.plannedType == "FAILURE" -> "To failure"
+  setRow.isTopSet -> "Top set"
+  else -> null
+  }
+
+  val target = buildString {
+  // A resolved weight when the program named one, the bare percentage when it didn't — never a
+  // blank row, and never a number the program didn't actually prescribe.
+  val load = when {
+  setRow.plannedLoad.isNotBlank() -> "${setRow.plannedLoad} kg"
+  setRow.plannedPercent != null -> "${setRow.plannedPercent}%"
+  else -> ""
+  }
+  if (load.isNotBlank()) append(load)
+  if (setRow.plannedReps.isNotBlank()) {
+  if (isNotEmpty()) append(" × ")
+  append("${setRow.plannedReps} reps")
+  }
+  }
+
+  Row(
+  verticalAlignment = Alignment.CenterVertically,
+  modifier = Modifier.fillMaxWidth().padding(start = 24.dp, top = 2.dp)
+  ) {
+  if (label != null) {
+  Surface(
+  shape = RoundedCornerShape(4.dp),
+  color = if (setRow.isWarmup) muted.copy(alpha = 0.15f) else accent.copy(alpha = 0.15f)
+  ) {
+  Text(
+  label,
+  modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp),
+  style = MaterialTheme.typography.labelSmall,
+  color = if (setRow.isWarmup) muted else accent
+  )
+  }
+  Spacer(Modifier.width(6.dp))
+  }
+  if (target.isNotBlank()) {
+  Text(target, style = MaterialTheme.typography.labelSmall, color = muted)
+  }
+  }
+}
+
 @Composable
 private fun SetRow(setRow: SetRowState, setIndex: Int, exerciseIndex: Int, vm: SessionViewModel, featAutofill: Boolean = true, unilateralMode: Int = 0) {
   val isFilled  = setRow.weightKg.toFloatOrNull() != null && setRow.reps.toIntOrNull() != null
@@ -1430,6 +1488,11 @@ private fun SetRow(setRow: SetRowState, setIndex: Int, exerciseIndex: Int, vm: S
   .onFocusChanged { rowHasFocus = it.hasFocus }
   .focusGroup()
   ) {
+  // EVOLVING SETS: this row's own prescription, shown above its inputs, so a warm-up ramp or a
+  // top-set/back-off reads correctly mid-workout instead of every set claiming the same target.
+  // Absent on programs without a per-set prescription, which look exactly as they did before.
+  if (setRow.hasPrescription) SetPrescriptionStrip(setRow)
+
   when (unilateralMode) {
   1 -> {
   // Single weight, separate L/R reps
@@ -1439,7 +1502,10 @@ private fun SetRow(setRow: SetRowState, setIndex: Int, exerciseIndex: Int, vm: S
   OutlinedTextField(
   value  = setRow.weightKg,
   onValueChange = {
-  if (setIndex == 0 && featAutofill) vm.updateSetWeight(exerciseIndex, setIndex, it)
+  // A ramped set re-anchors the whole ladder from whichever row was typed; otherwise only
+  // set 1 propagates, as before.
+  if ((setIndex == 0 || setRow.plannedPercent != null) && featAutofill)
+  vm.updateSetWeight(exerciseIndex, setIndex, it)
   else vm.updateSetWeightManual(exerciseIndex, setIndex, it)
   },
   modifier  = Modifier.weight(1f),
@@ -1559,7 +1625,10 @@ private fun SetRow(setRow: SetRowState, setIndex: Int, exerciseIndex: Int, vm: S
   OutlinedTextField(
   value  = setRow.weightKg,
   onValueChange = {
-  if (setIndex == 0 && featAutofill) vm.updateSetWeight(exerciseIndex, setIndex, it)
+  // A ramped set re-anchors the whole ladder from whichever row was typed; otherwise only
+  // set 1 propagates, as before.
+  if ((setIndex == 0 || setRow.plannedPercent != null) && featAutofill)
+  vm.updateSetWeight(exerciseIndex, setIndex, it)
   else vm.updateSetWeightManual(exerciseIndex, setIndex, it)
   },
   modifier  = Modifier.weight(1f),

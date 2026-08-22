@@ -21,6 +21,15 @@ data class PlanSet(
   val type: SetType = SetType.WORKING,
   /** Free text so "60", "bodyweight" and "" are all valid — never blocks saving. */
   val load: String = "",
+  /**
+   * Load as a percentage of this exercise's top working set, when the prescription is a ramp
+   * rather than fixed weights (see [SetShape]). Null for a plain "same weight every set".
+   *
+   * Kept SEPARATE from [load] rather than replacing it: the percentage is the prescription, the
+   * literal load is what the user actually put on the bar. Storing a percentage means the ladder
+   * recomputes when the top set changes instead of going stale.
+   */
+  val loadPercent: Int? = null,
   /** "8", "8-12", "AMRAP", "30s" — parsed leniently by [ProgramMath.repsForVolume]. */
   val reps: String = "",
   val restSeconds: Int = 90,
@@ -50,6 +59,20 @@ data class PlanExercise(
   val isOptional: Boolean = false
 ) {
   val workingSetCount: Int get() = sets.count { it.type.countsAsVolume }
+
+  /**
+   * The reference weight the percentage ladder resolves against: whatever literal load sits on the
+   * 100% set, falling back to the first working set that has one. Typing one number here fills in
+   * every other row, which is the whole point of prescribing by shape.
+   */
+  val topLoad: Float?
+    get() = sets.firstOrNull { it.loadPercent == 100 && it.load.isNotBlank() }?.load?.toFloatOrNull()
+      ?: sets.firstOrNull { it.type.countsAsVolume && it.load.isNotBlank() }?.load?.toFloatOrNull()
+
+  /** True when this exercise's sets differ from each other — an "evolving" prescription. */
+  val isEvolving: Boolean
+    get() = sets.mapNotNull { it.loadPercent }.distinct().size > 1 ||
+      sets.map { it.type }.distinct().size > 1
   /** True when nothing in this exercise prescribes a rep target — surfaced as a soft warning. */
   val hasNoRepTarget: Boolean get() = sets.none { it.reps.isNotBlank() }
 }

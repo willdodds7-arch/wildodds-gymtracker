@@ -104,6 +104,41 @@ class MigrationTest {
   db.close()
   }
 
+  /** v24→v25 adds the evolving-set percentage column. Additive and nullable. */
+  @Test
+  fun migration24To25AddsLoadPercentWithoutTouchingExistingPlannedSets() {
+  seedVersion1Database()
+  val upTo24 = AppDatabase.ALL_MIGRATIONS.filter { it.startVersion in 1 until 24 }.toTypedArray()
+  val db = helper.runMigrationsAndValidate(TEST_DB, 24, true, *upTo24)
+  db.execSQL("INSERT INTO programs (id, name, totalWeeks, createdAt) VALUES (1, 'P', 4, 1)")
+  db.execSQL("INSERT INTO sessions (id, programId, weekNumber, dayNumber, name, muscleGroups) " +
+  "VALUES (1, 1, 1, 1, 'Push', '')")
+  db.execSQL("INSERT INTO exercises (id, sessionId, name, sets, repsTarget, notes, orderIndex) " +
+  "VALUES (1, 1, 'Bench Press', 3, '8-12', '', 0)")
+  db.execSQL("INSERT INTO planned_sets (exerciseId, setNumber, type, load, reps) " +
+  "VALUES (1, 1, 'WORKING', '60', '8')")
+  db.close()
+
+  val migration = AppDatabase.ALL_MIGRATIONS.first { it.startVersion == 24 }
+  val migrated = helper.runMigrationsAndValidate(TEST_DB, 25, true, migration)
+
+  // The pre-existing row keeps its literal load and reads NULL for the new column.
+  migrated.query("SELECT load, reps, loadPercent FROM planned_sets WHERE setNumber = 1").use { c ->
+  c.moveToFirst()
+  assertEquals("60", c.getString(0))
+  assertEquals("8", c.getString(1))
+  assertEquals(true, c.isNull(2))
+  }
+
+  // And a percentage-based row now stores.
+  migrated.execSQL("INSERT INTO planned_sets (exerciseId, setNumber, type, reps, loadPercent) " +
+  "VALUES (1, 2, 'WARMUP', '8', 50)")
+  migrated.query("SELECT loadPercent FROM planned_sets WHERE setNumber = 2").use { c ->
+  c.moveToFirst(); assertEquals(50, c.getInt(0))
+  }
+  migrated.close()
+  }
+
   /** v20→v21 backfills sync metadata: every pre-existing row must get a unique, non-blank syncId. */
   @Test
   fun migration20To21BackfillsSyncIds() {
@@ -176,7 +211,7 @@ class MigrationTest {
    * Must track [AppDatabase]'s `version`. Bump it in the same change as a new migration —
    * otherwise the 1→N test silently stops covering everything past the old number.
    */
-  private const val LATEST_VERSION = 24
+  private const val LATEST_VERSION = 25
 
   /**
    * The schema as it existed at version 1 — i.e. the v13 entities minus every column/table

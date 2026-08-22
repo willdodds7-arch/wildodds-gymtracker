@@ -114,6 +114,7 @@ object PlanMapper {
         setNumber = i + 1,
         type = s.type.name,
         load = s.load,
+        loadPercent = s.loadPercent,
         reps = s.reps,
         restSeconds = s.restSeconds,
         rpe = s.rpe,
@@ -128,6 +129,9 @@ object PlanMapper {
     if (ex.sets.isEmpty()) return false
     if (ex.sets.any { it.type != SetType.WORKING }) return true
     if (ex.sets.any { it.load.isNotBlank() || it.tempo.isNotBlank() || it.notes.isNotBlank() }) return true
+    // A percentage ladder is the whole prescription — it must survive a save even when every row
+    // happens to share the same reps and rest.
+    if (ex.sets.any { it.loadPercent != null }) return true
     return ex.sets.map { it.reps }.distinct().size > 1 ||
       ex.sets.map { it.restSeconds }.distinct().size > 1
   }
@@ -189,6 +193,7 @@ object PlanMapper {
         PlanSet(
           type = runCatching { SetType.valueOf(p.type) }.getOrDefault(SetType.WORKING),
           load = p.load,
+          loadPercent = p.loadPercent,
           reps = p.reps,
           restSeconds = p.restSeconds,
           rpe = p.rpe,

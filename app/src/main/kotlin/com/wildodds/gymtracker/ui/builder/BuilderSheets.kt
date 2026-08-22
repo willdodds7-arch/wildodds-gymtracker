@@ -362,6 +362,17 @@ internal object ProgramTemplates {
   private fun ex(name: String, n: Int, reps: String, rest: Int = 90) =
     PlanExercise(name = name, sets = sets(n, reps, rest))
 
+  /**
+   * A heavy compound with warm-up sets ramping into the working sets — the shape people actually
+   * use for their first lift of the day. Templates lead with these so evolving sets are visible
+   * from the first program a user opens rather than being a setting they have to go find.
+   */
+  private fun ramped(name: String, n: Int, reps: String, rest: Int = 150) =
+    PlanExercise(name = name, sets = SetShape.WARMUP_RAMP.build(n, reps, rest))
+
+  private fun topSet(name: String, n: Int, reps: String, rest: Int = 180) =
+    PlanExercise(name = name, sets = SetShape.TOP_SET_BACKOFF.build(n, reps, rest))
+
   private fun workout(name: String, vararg exercises: PlanExercise) =
     PlanWorkout(name = name, exercises = exercises.toList())
 
@@ -375,21 +386,21 @@ internal object ProgramTemplates {
     goal = ProgramGoal.HYPERTROPHY,
     workouts = listOf(
       workout("Push A",
-        ex("Barbell Bench Press", 4, "6-8", 150),
+        ramped("Barbell Bench Press", 4, "6-8"),
         ex("Overhead Press", 3, "8-10"),
         ex("Incline Dumbbell Press", 3, "10-12"),
         ex("Lateral Raise", 3, "12-15", 60),
         ex("Rope Pushdown", 3, "10-12", 60)
       ),
       workout("Pull A",
-        ex("Deadlift", 3, "5", 180),
+        ramped("Deadlift", 3, "5", 180),
         ex("Pull-up", 3, "8-10"),
         ex("Barbell Row", 3, "8-10"),
         ex("Face Pull", 3, "12-15", 60),
         ex("Barbell Curl", 3, "10-12", 60)
       ),
       workout("Legs A",
-        ex("Back Squat", 4, "6-8", 180),
+        ramped("Back Squat", 4, "6-8", 180),
         ex("Romanian Deadlift", 3, "8-10"),
         ex("Leg Press", 3, "10-12"),
         ex("Leg Curl", 3, "12-15", 60),
@@ -425,14 +436,14 @@ internal object ProgramTemplates {
     goal = ProgramGoal.HYPERTROPHY,
     workouts = listOf(
       workout("Upper A",
-        ex("Barbell Bench Press", 4, "6-8", 150),
+        ramped("Barbell Bench Press", 4, "6-8"),
         ex("Barbell Row", 4, "6-8", 150),
         ex("Overhead Press", 3, "8-10"),
         ex("Lat Pulldown", 3, "10-12"),
         ex("Barbell Curl", 3, "10-12", 60)
       ),
       workout("Lower A",
-        ex("Back Squat", 4, "6-8", 180),
+        ramped("Back Squat", 4, "6-8", 180),
         ex("Romanian Deadlift", 3, "8-10"),
         ex("Leg Press", 3, "10-12"),
         ex("Calf Raise", 4, "12-15", 60)
@@ -533,13 +544,13 @@ internal object ProgramTemplates {
     ),
     workouts = listOf(
       workout("Workout A",
-        ex("Back Squat", 5, "5", 180),
+        ramped("Back Squat", 5, "5", 180),
         ex("Barbell Bench Press", 5, "5", 180),
         ex("Barbell Row", 5, "5", 180)
       ),
       rest(),
       workout("Workout B",
-        ex("Back Squat", 5, "5", 180),
+        ramped("Back Squat", 5, "5", 180),
         ex("Overhead Press", 5, "5", 180),
         ex("Deadlift", 1, "5", 180)
       ),

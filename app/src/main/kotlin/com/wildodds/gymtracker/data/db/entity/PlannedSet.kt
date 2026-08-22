@@ -39,6 +39,12 @@ data class PlannedSet(
   val type: String = "WORKING",
   /** Free text: "60", "bodyweight", "" — never validated, never blocks a save. */
   val load: String = "",
+  /**
+   * Percentage of the exercise's top working set, for ramped/pyramid prescriptions. Null means a
+   * fixed load. Stored instead of concrete kilos so the ladder recomputes when the user's working
+   * weight moves. See `data/builder/SetShape.kt`.
+   */
+  @ColumnInfo(defaultValue = "NULL") val loadPercent: Int? = null,
   /** "8", "8-12", "AMRAP", "30s". */
   val reps: String = "",
   val restSeconds: Int = 90,

@@ -3,6 +3,7 @@ package com.wildodds.gymtracker.ui.builder
 import com.wildodds.gymtracker.data.ExerciseLibrary
 import com.wildodds.gymtracker.data.MuscleGroup
 import com.wildodds.gymtracker.data.builder.ProgramMath
+import com.wildodds.gymtracker.data.builder.SetType
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -71,6 +72,23 @@ class ProgramTemplatesTest {
   fun `push pull legs really is a six day split`() {
     val ppl = ProgramTemplates.all().first { it.name == "Push Pull Legs" }
     assertEquals(6, ProgramMath.trainingDaysPerWeek(ppl))
+  }
+
+  @Test
+  fun `templates lead with a ramped compound so evolving sets are discoverable`() {
+    // The feature is invisible if no bundled program uses it.
+    val ramped = ProgramTemplates.all().count { t ->
+      t.workouts.any { w -> w.exercises.any { it.isEvolving } }
+    }
+    assertTrue("no template shows an evolving prescription", ramped >= 3)
+  }
+
+  @Test
+  fun `a ramped template exercise keeps its working set count`() {
+    val fiveByFive = ProgramTemplates.all().first { it.name == "5×5 Strength" }
+    val squat = fiveByFive.workouts.first().exercises.first { it.name == "Back Squat" }
+    assertEquals(5, squat.workingSetCount)
+    assertTrue("should have warm-ups", squat.sets.any { it.type == SetType.WARMUP })
   }
 
   @Test

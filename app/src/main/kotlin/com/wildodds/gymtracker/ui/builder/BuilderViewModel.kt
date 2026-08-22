@@ -15,6 +15,7 @@ import com.wildodds.gymtracker.data.builder.ProgramMath
 import com.wildodds.gymtracker.data.builder.ProgramPlanJson
 import com.wildodds.gymtracker.data.builder.ProgramSummary
 import com.wildodds.gymtracker.data.builder.ProgressionSettings
+import com.wildodds.gymtracker.data.builder.SetShape
 import com.wildodds.gymtracker.data.builder.SetType
 import com.wildodds.gymtracker.data.builder.WorkoutKind
 import com.wildodds.gymtracker.data.db.AppDatabase
@@ -330,6 +331,58 @@ class BuilderViewModel(app: Application) : AndroidViewModel(app) {
   fun applyPreset(workoutId: String, exerciseId: String, preset: SetPreset) =
     updateExercise(workoutId, exerciseId) { it.copy(sets = preset.build()) }
 
+  // ── Evolving sets ──────────────────────────────────────────────────────────
+
+  /**
+   * Re-shape an exercise's whole prescription (warm-up ramp, pyramid, top set + back-off…).
+   *
+   * Keeps what the user has already decided: the working-set count and rep target carry over from
+   * the existing sets, and any weight typed on the top set is preserved so switching shapes doesn't
+   * throw away their working weight. See `data/builder/SetShape.kt`.
+   */
+  fun applyShape(workoutId: String, exerciseId: String, shape: SetShape) =
+    updateExercise(workoutId, exerciseId) { ex ->
+      val workingSets = ex.workingSetCount.coerceAtLeast(1)
+      val reps = ex.sets.firstOrNull { it.type.countsAsVolume && it.reps.isNotBlank() }?.reps ?: "8-12"
+      val rest = ex.sets.firstOrNull { it.type.countsAsVolume }?.restSeconds ?: 90
+      val keptTopLoad = ex.topLoad
+
+      val rebuilt = shape.build(workingSets, reps, rest)
+      ex.copy(sets = rebuilt.map { s ->
+        if (s.loadPercent == 100 && keptTopLoad != null) s.copy(load = keptTopLoad.tidyLoad()) else s
+      })
+    }
+
+  /** Set the reference weight the whole ladder resolves from. */
+  fun setTopLoad(workoutId: String, exerciseId: String, load: String) =
+    updateExercise(workoutId, exerciseId) { ex ->
+      val anchor = ex.sets.indexOfFirst { it.loadPercent == 100 }
+        .takeIf { it >= 0 }
+        ?: ex.sets.indexOfFirst { it.type.countsAsVolume }
+      if (anchor < 0) return@updateExercise ex
+      ex.copy(sets = ex.sets.mapIndexed { i, s -> if (i == anchor) s.copy(load = load) else s })
+    }
+
+  /** Add or remove one working set, keeping the shape's proportions intact. */
+  fun changeWorkingSets(workoutId: String, exerciseId: String, delta: Int) =
+    updateExercise(workoutId, exerciseId) { ex ->
+      val shape = SetShape.detect(ex.sets)
+      val target = (ex.workingSetCount + delta).coerceIn(1, 12)
+      val reps = ex.sets.firstOrNull { it.type.countsAsVolume && it.reps.isNotBlank() }?.reps ?: "8-12"
+      val rest = ex.sets.firstOrNull { it.type.countsAsVolume }?.restSeconds ?: 90
+      val keptTopLoad = ex.topLoad
+      val rebuilt = shape.build(target, reps, rest)
+      ex.copy(sets = rebuilt.map { s ->
+        if (s.loadPercent == 100 && keptTopLoad != null) s.copy(load = keptTopLoad.tidyLoad()) else s
+      })
+    }
+
+  /** Change the rep target on every working set at once. */
+  fun setRepsForAllWorking(workoutId: String, exerciseId: String, reps: String) =
+    updateExercise(workoutId, exerciseId) { ex ->
+      ex.copy(sets = ex.sets.map { if (it.type.countsAsVolume) it.copy(reps = reps) else it })
+    }
+
   fun addSet(workoutId: String, exerciseId: String) =
     updateExercise(workoutId, exerciseId) { ex ->
       // A new set copies the last one — far more often right than a blank row.
@@ -504,3 +557,7 @@ enum class SetPreset(val label: String) {
   private fun working(n: Int, reps: String, rest: Int) =
     List(n) { PlanSet(type = SetType.WORKING, reps = reps, restSeconds = rest) }
 }
+
+/** "60" not "60.0" — the load field is text the user typed, so keep it looking typed. */
+private fun Float.tidyLoad(): String =
+  if (this % 1f == 0f) toInt().toString() else toString().trimEnd('0').trimEnd('.')
