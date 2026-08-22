@@ -1,0 +1,195 @@
+{
+  "version": 3,
+  "_comment": [
+    "The Reader's recognisable-token vocabulary. ONE vocabulary, THREE consumers: the text",
+    "pipeline, the delimited/CSV path and the spreadsheet layout engine all read it, so a new",
+    "abbreviation or section label is added once and everything benefits.",
+    "",
+    "This is DATA, not code: growing the vocabulary must never mean touching the grammar. Every",
+    "list here is matched case-insensitively under Locale.ROOT and word-boundary anchored, so",
+    "adding an entry cannot change how an existing line parses unless it genuinely collides.",
+    "",
+    "Bump `version` on every change. ReaderVocabularyTest pins the invariants (no duplicate surface",
+    "forms across modifiers, every canonical modifier declared in Modifier.ALL is present, no entry",
+    "shadows a common exercise word)."
+  ],
+
+  "abbreviations": {
+    "bb": "barbell",
+    "db": "dumbbell",
+    "kb": "kettlebell",
+    "sm": "smith machine",
+    "bw": "bodyweight",
+    "ohp": "overhead press",
+    "ohs": "overhead squat",
+    "rdl": "romanian deadlift",
+    "sldl": "stiff leg deadlift",
+    "sdl": "stiff leg deadlift",
+    "dl": "deadlift",
+    "bp": "bench press",
+    "cgbp": "close grip bench press",
+    "cg": "close grip",
+    "wg": "wide grip",
+    "ng": "neutral grip",
+    "gm": "good morning",
+    "ghr": "glute ham raise",
+    "ghd": "glute ham developer",
+    "bss": "bulgarian split squat",
+    "rfe": "rear foot elevated",
+    "rfess": "rear foot elevated split squat",
+    "bor": "barbell row",
+    "pu": "pull up",
+    "cu": "chin up",
+    "hspu": "handstand push up",
+    "t2b": "toes to bar",
+    "k2e": "knees to elbow",
+    "du": "double under",
+    "su": "single under",
+    "lpd": "lat pulldown",
+    "lp": "leg press",
+    "le": "leg extension",
+    "lc": "leg curl",
+    "kbs": "kettlebell swing",
+    "sq": "squat",
+    "fs": "front squat",
+    "bs": "back squat",
+    "hbbs": "high bar back squat",
+    "lbbs": "low bar back squat",
+    "sa": "single arm",
+    "sl": "single leg",
+    "db bp": "dumbbell bench press",
+    "tng": "touch and go",
+    "amrap": "amrap",
+    "emom": "emom",
+    "hiit": "high intensity interval training",
+    "wod": "workout of the day",
+    "tm": "training max",
+    "1rm": "one rep max",
+    "e1rm": "estimated one rep max",
+    "rm": "rep max",
+    "pr": "personal record",
+    "fsl": "first set last",
+    "bbb": "boring but big",
+    "ss": "superset",
+    "mtn": "mountain"
+  },
+
+  "_abbreviationNote": [
+    "Expanded only as a WHOLE token. 'db' becomes 'dumbbell'; the 'db' inside 'Dbell' does not.",
+    "Deliberately excluded: 'row' (a movement), 'max' (ambiguous), 'set' (structural), 'in'/'on'."
+  ],
+
+  "modifiers": [
+    { "canonical": "each_side",     "patterns": ["each side", "per side", "each arm", "per arm", "e/s", "ea side", "ea/side", "es", "each hand", "alternating"] },
+    { "canonical": "per_leg",       "patterns": ["per leg", "each leg", "e/l", "ea leg", "each foot"] },
+    { "canonical": "cluster",       "patterns": ["cluster", "cluster set", "cluster sets"] },
+    { "canonical": "drop_set",      "patterns": ["drop set", "dropset", "drop-set", "drop sets", "strip set", "run the rack"] },
+    { "canonical": "rest_pause",    "patterns": ["rest pause", "rest-pause", "restpause", "rp set"] },
+    { "canonical": "myo_reps",      "patterns": ["myo rep", "myo-rep", "myoreps", "myo reps", "activation set"] },
+    { "canonical": "amrap_in_time", "patterns": ["amrap in", "amrap for"] },
+    { "canonical": "emom",          "patterns": ["emom", "e2mom", "e3mom", "every minute on the minute", "otm", "on the minute"] },
+    { "canonical": "for_time",      "patterns": ["for time", "ft", "as fast as possible", "afap"] },
+    { "canonical": "paused",        "patterns": ["paused", "pause", "with a pause", "dead stop", "deadstop"] },
+    { "canonical": "tempo_only",    "patterns": ["tempo only", "tempo work"] },
+    { "canonical": "band",          "patterns": ["band", "banded", "with bands", "red band", "green band", "blue band", "black band", "purple band", "orange band", "mini band", "monster band"] },
+    { "canonical": "chain",         "patterns": ["chain", "chains", "with chains"] },
+    { "canonical": "optional",      "patterns": ["optional", "if time", "if time permits", "if you have time", "extra credit", "accessory optional"] },
+    { "canonical": "to_failure",    "patterns": ["to failure", "till failure", "until failure", "technical failure", "to tech failure", "to form failure"] },
+    { "canonical": "total_reps",    "patterns": ["total reps", "total", "in as few sets as possible", "afsap"] }
+  ],
+
+  "sectionLabels": {
+    "warmup":       ["warm up", "warm-up", "warmup", "prep", "activation", "mobility", "ramp up", "general warm up", "specific warm up", "raise", "primer"],
+    "main":         ["main lift", "main", "primary", "strength", "main work", "a) strength", "power", "competition lift", "t1", "tier 1"],
+    "accessory":    ["accessory", "accessories", "assistance", "supplemental", "hypertrophy", "secondary", "t2", "tier 2", "t3", "tier 3", "bodybuilding"],
+    "cooldown":     ["cool down", "cool-down", "cooldown", "stretch", "stretching", "recovery", "flush"],
+    "conditioning": ["conditioning", "cardio", "finisher", "metcon", "engine", "gpp", "energy systems"],
+    "core":         ["core", "abs", "midsection", "trunk", "anti rotation"]
+  },
+
+  "restDayWords": ["rest", "off", "day off", "rest day", "no training", "recovery day", "active recovery", "active rest", "deload day", "free day"],
+
+  "splitKeywords": [
+    "upper", "lower", "push", "pull", "legs", "leg", "full body", "fullbody", "total body",
+    "chest", "back", "shoulders", "arms", "glutes", "posterior", "anterior",
+    "squat", "bench", "deadlift", "press", "olympic", "conditioning", "accessory"
+  ],
+
+  "weekdays": {
+    "monday":    ["monday", "mon", "mo", "montag", "lunes", "lundi", "segunda", "segunda-feira"],
+    "tuesday":   ["tuesday", "tue", "tues", "tu", "dienstag", "martes", "mardi", "terca", "terça"],
+    "wednesday": ["wednesday", "wed", "weds", "we", "mittwoch", "miercoles", "miércoles", "mercredi", "quarta"],
+    "thursday":  ["thursday", "thu", "thur", "thurs", "th", "donnerstag", "jueves", "jeudi", "quinta"],
+    "friday":    ["friday", "fri", "fr", "freitag", "viernes", "vendredi", "sexta"],
+    "saturday":  ["saturday", "sat", "sa", "samstag", "sabado", "sábado", "samedi"],
+    "sunday":    ["sunday", "sun", "su", "sonntag", "domingo", "dimanche"]
+  },
+
+  "units": {
+    "kg":       ["kg", "kgs", "kilo", "kilos", "kilogram", "kilograms", "kilogramme"],
+    "lb":       ["lb", "lbs", "pound", "pounds", "#"],
+    "pood":     ["pood", "poods"],
+    "seconds":  ["s", "sec", "secs", "second", "seconds", "sek", "seg"],
+    "minutes":  ["m", "min", "mins", "minute", "minutes"],
+    "hours":    ["h", "hr", "hrs", "hour", "hours"],
+    "metres":   ["m", "meter", "meters", "metre", "metres"],
+    "km":       ["km", "kilometre", "kilometres", "kilometer", "kilometers"],
+    "miles":    ["mi", "mile", "miles"],
+    "yards":    ["yd", "yds", "yard", "yards"],
+    "calories": ["cal", "cals", "calorie", "calories", "kcal"]
+  },
+
+  "_unitNote": [
+    "'m' is deliberately in BOTH minutes and metres — it genuinely is ambiguous. The grammar",
+    "resolves it by context (a rep-position 'm' after a small number is metres in a carry, minutes",
+    "after 'rest'), and flags it when it cannot."
+  ],
+
+  "restWords": ["rest", "recover", "recovery", "break", "pause between", "pausa", "descanso", "repos"],
+  "restAsNeeded": ["as needed", "as required", "full recovery", "full rest", "walk back", "walk back rest", "when ready", "auto regulated", "autoregulated"],
+  "noRestWords": ["no rest", "straight into", "superset", "no break", "immediately into", "back to back"],
+
+  "amrapWords": ["amrap", "as many reps as possible", "as many rounds as possible", "max reps", "max effort reps"],
+
+  "languages": {
+    "_note": "Applied only behind an explicit language hint, never guessed aggressively — the risk of an English program containing 'series' is higher than the benefit.",
+    "de": { "sets": ["satz", "satze", "sätze", "saetze"], "reps": ["wdh", "wiederholungen", "wiederholung"], "session": ["training", "einheit", "trainingstag"], "week": ["woche"], "day": ["tag"], "rest": ["pause"] },
+    "es": { "sets": ["serie", "series"], "reps": ["rep", "reps", "repeticion", "repeticiones", "repeticiónes"], "session": ["sesion", "sesión", "entrenamiento"], "week": ["semana"], "day": ["dia", "día"], "rest": ["descanso"] },
+    "fr": { "sets": ["serie", "series", "série", "séries"], "reps": ["rep", "reps", "repetition", "repetitions", "répétition", "répétitions"], "session": ["seance", "séance", "entrainement", "entraînement"], "week": ["semaine"], "day": ["jour"], "rest": ["repos"] },
+    "pt": { "sets": ["serie", "series", "série", "séries"], "reps": ["rep", "reps", "repeticao", "repetição", "repeticoes", "repetições"], "session": ["treino", "sessao", "sessão"], "week": ["semana"], "day": ["dia"], "rest": ["descanso"] }
+  },
+
+  "appExportSignatures": {
+    "_note": "Header column names each adapter keys on. Kept here so a signature can be widened without a code change; the adapters read these at construction.",
+    "strong":      ["exercise name", "set order", "workout name"],
+    "hevy":        ["exercise_title", "weight_kg", "set_index"],
+    "fitnotes":    ["exercise", "weight unit", "category"],
+    "jefit":       ["belongsys", "mydate"],
+    "boostcamp":   ["week", "day", "exercise", "sets", "reps", "intensity"],
+    "trainheroic": ["week", "day title", "exercise"],
+    "everfit":     ["workout title", "exercise title"],
+    "trainerize":  ["workout name", "exercise name", "target reps"],
+    "wildodds":    ["wildodds.program"]
+  },
+
+  "genericSheetNames": ["sheet", "tab", "page", "table", "blad", "hoja", "foglio", "feuille", "data", "export", "sheet1", "untitled"],
+
+  "columnRoleHints": {
+    "_note": "Header surface forms per column role, shared by the CSV path and the spreadsheet layout engine so the two can never drift apart.",
+    "exercise":  ["exercise", "exercises", "exercise name", "movement", "lift", "name", "drill", "ex", "übung", "ubung", "ejercicio", "exercice"],
+    "sets":      ["sets", "set", "# sets", "num sets", "no. sets", "satz", "sätze", "series", "séries"],
+    "reps":      ["reps", "rep", "repetitions", "reps/set", "reps per set", "wdh", "repeticiones", "répétitions"],
+    "load":      ["weight", "load", "wt", "kg", "kgs", "lbs", "lb", "working weight", "target weight", "gewicht", "peso", "charge"],
+    "percent":   ["%1rm", "1rm%", "% of 1rm", "percent", "percentage", "intensity", "%tm", "tm%", "% tm", "%e1rm", "intensity%"],
+    "rpe":       ["rpe", "rir", "rpe target", "target rpe", "rpe/rir", "effort"],
+    "rest":      ["rest", "rest time", "rest (s)", "rest (sec)", "rest period", "recovery", "pause", "descanso", "repos"],
+    "tempo":     ["tempo", "cadence", "eccentric"],
+    "notes":     ["notes", "note", "comment", "comments", "cue", "cues", "coaching", "coaching cues", "instructions", "description"],
+    "week":      ["week", "wk", "w", "mesocycle", "block", "woche", "semana", "semaine"],
+    "day":       ["day", "session", "workout", "d", "training day", "tag", "dia", "jour"],
+    "date":      ["date", "when", "datum", "fecha"],
+    "superset":  ["superset", "ss", "superset group", "circuit", "pair", "group", "block"],
+    "order":     ["order", "#", "no", "no.", "position", "seq"],
+    "muscle":    ["muscle group", "muscles", "muscle", "focus", "body part", "target", "primary muscle"]
+  }
+}
