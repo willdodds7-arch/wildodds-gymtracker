@@ -43,11 +43,34 @@ object AndroidReader {
     }
   }
 
+  /**
+   * The shared extraction cache. One per process, so re-parsing a document the user already picked
+   * skips extraction entirely — which on a photo is the difference between instant and several
+   * seconds of watching a spinner.
+   */
+  private val cache = com.wildodds.gymtracker.data.reader.ingest.ExtractionCache()
+
   fun reader(context: Context, limits: IngestLimits = IngestLimits.DEFAULT,
              gridReader: GridProgramReader =
                com.wildodds.gymtracker.data.importer.layout.LayoutDetector): ProgramReader {
     ensurePdfBox(context)
-    return ProgramReader(registry(context), limits, gridReader)
+    requireNotMainThread()
+    return ProgramReader(registry(context), limits, gridReader, cache)
+  }
+
+  /**
+   * Import never runs on the main thread. Extraction can take seconds — a 12-page PDF, an OCR pass,
+   * a 50-sheet workbook — and doing that on the UI thread is a frozen app and, past five seconds,
+   * an ANR. Every caller already dispatches to IO; this makes the requirement checkable rather than
+   * a convention, and fails loudly in debug where it will be seen.
+   */
+  private fun requireNotMainThread() {
+    if (com.wildodds.gymtracker.BuildConfig.DEBUG &&
+        android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) {
+      throw IllegalStateException(
+        "The reader must not run on the main thread — extraction can take seconds. " +
+        "Dispatch to Dispatchers.IO.")
+    }
   }
 
   /** The pure registry plus PDF text, PDF scans and images. */
@@ -90,6 +113,7 @@ object AndroidReader {
    */
   fun extractText(context: Context, uri: Uri, progress: IngestProgress = IngestProgress.NONE): String {
     ensurePdfBox(context)
+    requireNotMainThread()
     val bytes = readBytes(context, uri)
     return com.wildodds.gymtracker.data.reader.ingest.IngestPipeline(registry(context))
       .ingest(bytes, displayName(context, uri), mimeType(context, uri), progress)

@@ -38,7 +38,14 @@ import com.wildodds.gymtracker.data.reader.ingest.SourceKind
 class ProgramReader(
   registry: ExtractorRegistry = ExtractorRegistry.pureOnly(),
   private val limits: IngestLimits = IngestLimits.DEFAULT,
-  private val gridReader: GridProgramReader = com.wildodds.gymtracker.data.importer.layout.LayoutDetector
+  private val gridReader: GridProgramReader = com.wildodds.gymtracker.data.importer.layout.LayoutDetector,
+  /**
+   * Caches extraction against the source hash. Extraction is the expensive half — OCR of a photo
+   * takes seconds — and it happens more than once per import in practice: the user edits the name
+   * and re-parses, corrects an exercise, or asks for a re-parse with the current reader.
+   */
+  private val cache: com.wildodds.gymtracker.data.reader.ingest.ExtractionCache =
+    com.wildodds.gymtracker.data.reader.ingest.ExtractionCache()
 ) {
 
   private val pipeline = IngestPipeline(registry, limits)
@@ -58,8 +65,17 @@ class ProgramReader(
     aliasLookup: (String) -> String? = { null },
     progress: IngestProgress = IngestProgress.NONE
   ): Result {
-    val ingested = pipeline.ingest(bytes, fileName, mimeType, progress)
-    return route(ingested.document, ingested.kind, ingested.suggestedName, aliasLookup)
+    val hash = com.wildodds.gymtracker.data.reader.ingest.ExtractionCache.hash(bytes)
+    val cached = cache.get(hash)
+    val (doc, kind, suggested) = if (cached != null) {
+      progress.report("Already read — re-parsing")
+      cached
+    } else {
+      val ingested = pipeline.ingest(bytes, fileName, mimeType, progress)
+      cache.put(hash, ingested.document, ingested.kind, ingested.suggestedName)
+      Triple(ingested.document, ingested.kind, ingested.suggestedName)
+    }
+    return route(doc, kind, suggested, aliasLookup)
   }
 
   /** Pasted text takes the same route as a `.txt` file — one pipeline, not two. */
