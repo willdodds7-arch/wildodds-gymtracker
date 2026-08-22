@@ -207,7 +207,6 @@ noticing until they were on a plane.
 | Markdown tables | A table whose header names none of the known column roles is joined cell-by-cell into one line rather than reflowed. |
 | `colour-semantics` | Recognises fully-shaded rows as headings. It does **not** yet group consecutive same-coloured rows into supersets, which was the other half of the idea. |
 | Idempotency hash | Over the source BYTES, so the same document re-exported with a different timestamp inside it reads as a new document. |
-| Headerless delimited text | A tab- or comma-separated table with no header row reads as one exercise per line with no prescriptions when it arrives as TEXT. The same table arriving as a GRID (a spreadsheet, or a rebuilt PDF page) reads correctly, because the layout engine assigns column roles from content when there is no header. |
 | Learned aliases | Per-device `SharedPreferences`. They do not sync and are lost with the app's data. |
 
 ---

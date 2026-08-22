@@ -1,5 +1,10 @@
 package com.wildodds.gymtracker.data.importer
 
+import com.wildodds.gymtracker.data.importer.layout.ColumnRole
+import com.wildodds.gymtracker.data.importer.layout.ColumnRoles
+import com.wildodds.gymtracker.data.importer.layout.GridReader
+import com.wildodds.gymtracker.data.reader.ingest.Grid
+
 /**
  * Deterministic importer for CSV/TSV tables — the common "coach spreadsheet exported to CSV" case.
  * Detects the delimiter, finds the header row (it isn't always row 1), and maps columns by fuzzy
@@ -48,6 +53,38 @@ object CsvProgramImporter {
     return topMultiCol != null && topMultiCol.value >= (lines.size * 0.6)
   }
 
+  /**
+   * Reads a headerless table through the layout engine's column roles, or null when that is not
+   * what this is.
+   *
+   * Two guards, both about not making things worse than the line-join fallback: the rows have to be
+   * consistently multi-column (a handful of per-set commas is not a table), and the roles have to
+   * find an exercise column plus at least one other. An assignment that finds only a name column
+   * has learned nothing the join did not already know.
+   */
+  private fun readWithoutHeader(rows: List<List<String>>): List<SlotDraft>? {
+    val multiColumn = rows.count { it.size >= 2 }
+    if (multiColumn < maxOf(2, (rows.size * 0.6).toInt())) return null
+
+    val grid = Grid("csv", rows)
+    val assignment = ColumnRoles.assign(grid, headerRow = null)
+    val nameCol = assignment.columnFor(ColumnRole.EXERCISE) ?: return null
+
+    // The name column of a real table holds names. "Front Squat 6, 8, 10" splits into
+    // ["Front Squat 6", "8", "10"], which looks exactly like a three-column row and is one exercise
+    // with three sets - reading it as a table would turn it into 6 sets of 8. A digit in the name
+    // cell means these are not columns, and the line reader below handles it correctly.
+    val named = rows.mapNotNull { it.getOrNull(nameCol)?.trim() }.filter { it.isNotBlank() }
+    if (named.isEmpty()) return null
+    if (named.count { cell -> cell.any(Char::isDigit) } * 2 > named.size) return null
+    val others = listOf(
+      ColumnRole.SETS, ColumnRole.REPS, ColumnRole.LOAD, ColumnRole.PERCENT,
+      ColumnRole.RPE, ColumnRole.REST, ColumnRole.TEMPO)
+    if (others.none { assignment.columnFor(it) != null }) return null
+
+    return GridReader.readSlots(grid, assignment, 0, grid.rowCount).ifEmpty { null }
+  }
+
   fun import(name: String, raw: String): ProgramImportDraft {
     val rawLines = raw.lines().filter { it.isNotBlank() }
     if (rawLines.isEmpty()) return ProgramImportDraft(name.ifBlank { "Imported Program" }, weeks = listOf(WeekDraft(1, sessions = emptyList())))
@@ -57,8 +94,24 @@ object CsvProgramImporter {
     val rows = rawLines.map { splitCsv(it, delim) }
     val headerIdx = rows.indexOfFirst { row -> colIndex(row, "exercise") != null }
     if (headerIdx < 0) {
-      // No recognisable header — treat every row's first cell as an exercise line for Day 1.
-      val slots = rows.mapIndexedNotNull { i, r -> SetNotationParser.parseExerciseLine(r.joinToString(" "), i) }
+      // No recognisable header. Joining the cells back into one line and re-parsing it was losing
+      // the table: "Back Squat", "5", "5", "100kg" became the line "Back Squat 5 5 100kg", which
+      // names a movement and prescribes nothing. A headerless table is precisely what the layout
+      // engine's column-role assignment was built for — it reads roles from CONTENT statistics when
+      // there is no header text — so a pasted table without headings now reads the same way the
+      // identical spreadsheet does.
+      val fromGrid = readWithoutHeader(rows)
+      if (fromGrid != null) {
+        return ProgramImportDraft(name.ifBlank { "Imported Program" }, source = "csv (no header)",
+          weeks = listOf(WeekDraft(1, sessions = listOf(SessionDraft("Day 1", 1, slots = fromGrid)))))
+      }
+      // Genuinely one column, or a table the roles could not read: the line reader is still the
+      // right answer for it. Read the ORIGINAL line, not the cells joined back with spaces —
+      // rejoining threw the delimiters away, so "Front Squat 6, 8, 10" arrived as
+      // "Front Squat 6 8 10", which parses as nothing at all and dropped the exercise entirely.
+      val slots = rawLines.mapIndexedNotNull { i, line ->
+        SetNotationParser.parseExerciseLine(line.replace('\t', ' '), i)
+      }
       return ProgramImportDraft(name.ifBlank { "Imported Program" }, source = "csv",
         weeks = listOf(WeekDraft(1, sessions = listOf(SessionDraft("Day 1", 1, slots = slots)))))
     }
@@ -119,11 +172,26 @@ object CsvProgramImporter {
   }
 
   // ── helpers ──────────────────────────────────────────────────────────────────
+  /**
+   * The column a header names, matched on WHOLE WORDS.
+   *
+   * Substring matching looked harmless and ate whole imports: "lift" is an alias for the exercise
+   * column and "Romanian Deadlift" contains it, so a pasted headerless table whose second row
+   * happened to name a deadlift had that row taken for the header — leaving no data rows at all and
+   * returning a program with zero weeks. "name" inside "Hammer" and "set" inside "Offset" are the
+   * same trap.
+   *
+   * A header cell is short and says what the column is, so equality or a whole-word hit is all that
+   * is ever needed. `#`-prefixed and parenthesised forms ("# sets", "rest (s)") still match because
+   * the split is on non-letters.
+   */
   private fun colIndex(header: List<String>, key: String): Int? {
     val aliases = headerAliases[key] ?: return null
     return header.indexOfFirst { cell ->
-      val h = cell.trim().lowercase()
-      aliases.any { a -> h == a || h.startsWith(a) || h.contains(a) }
+      val h = cell.trim().lowercase(java.util.Locale.ROOT)
+      if (h.isEmpty() || h.length > 24) return@indexOfFirst false
+      val words = h.split(Regex("""[^\p{L}\p{N}%]+""")).filter { it.isNotEmpty() }
+      aliases.any { a -> h == a || a in words }
     }.takeIf { it >= 0 }
   }
 
