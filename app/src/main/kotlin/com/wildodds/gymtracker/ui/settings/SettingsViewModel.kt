@@ -29,7 +29,10 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
   private val db  = AppDatabase.getInstance(app)
   private val repo  = GymRepository(db)
   private val gymPrefs = app.getSharedPreferences("gym_prefs", Context.MODE_PRIVATE)
-  private val wearableGateway = RealHealthConnectGateway(app)
+  // `by lazy`: constructing this pulls in the whole Health Connect SDK. SettingsViewModel is built
+  // by Home and by the session screen too, so eager construction paid that class-loading cost during
+  // cold start for a row only the Settings screen ever shows.
+  private val wearableGateway by lazy { RealHealthConnectGateway(app) }
 
   private val _claudeApiKey = MutableStateFlow(gymPrefs.getString("claude_api_key", "") ?: "")
   val claudeApiKey: StateFlow<String> = _claudeApiKey.asStateFlow()
@@ -39,19 +42,23 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
     gymPrefs.edit().putString("claude_api_key", key).apply()
   }
 
+  // PERF: WhileSubscribed, not Eagerly. This ViewModel exposes ~35 DataStore-backed flows (the
+  // typed ones here plus one per registry toggle in `toggleStates`), and it is constructed by Home
+  // and the session screen as well as Settings — so `Eagerly` opened all ~35 collectors during cold
+  // start. The last value stays cached, so the screens that do read them still get an instant answer.
   val isDarkMode: StateFlow<Boolean> = prefs.isDarkMode
-  .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+  .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
   val accentHue: StateFlow<Float> = prefs.accentHue
-  .stateIn(viewModelScope, SharingStarted.Eagerly, 203f)
+  .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 203f)
   val accentSaturation: StateFlow<Float> = prefs.accentSaturation
-  .stateIn(viewModelScope, SharingStarted.Eagerly, 0.72f)
+  .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0.72f)
 
-  val featSessionTimer: StateFlow<Boolean>      = prefs.featSessionTimer.stateIn(viewModelScope, SharingStarted.Eagerly, true)
-  val featWeightAutofill: StateFlow<Boolean>    = prefs.featWeightAutofill.stateIn(viewModelScope, SharingStarted.Eagerly, true)
-  val featAddExercise: StateFlow<Boolean>       = prefs.featAddExercise.stateIn(viewModelScope, SharingStarted.Eagerly, true)
-  val featProgressionPicker: StateFlow<Boolean> = prefs.featProgressionPicker.stateIn(viewModelScope, SharingStarted.Eagerly, true)
-  val feat1rmCalculator: StateFlow<Boolean>     = prefs.feat1rmCalculator.stateIn(viewModelScope, SharingStarted.Eagerly, true)
-  val timerSound: StateFlow<String>             = prefs.timerSound.stateIn(viewModelScope, SharingStarted.Eagerly, "ding")
+  val featSessionTimer: StateFlow<Boolean>      = prefs.featSessionTimer.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
+  val featWeightAutofill: StateFlow<Boolean>    = prefs.featWeightAutofill.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
+  val featAddExercise: StateFlow<Boolean>       = prefs.featAddExercise.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
+  val featProgressionPicker: StateFlow<Boolean> = prefs.featProgressionPicker.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
+  val feat1rmCalculator: StateFlow<Boolean>     = prefs.feat1rmCalculator.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
+  val timerSound: StateFlow<String>             = prefs.timerSound.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "ding")
 
   // ── Generic, registry-driven flag state ──────────────────────────────────────
   // One combined map { flagKey -> enabled } over every TOGGLE entry in the registry, so the
@@ -64,7 +71,7 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
   }
   ) { pairs -> pairs.toMap() }
   .stateIn(
-  viewModelScope, SharingStarted.Eagerly,
+  viewModelScope, SharingStarted.WhileSubscribed(5_000),
   SettingsRegistry.toggleEntries.associate { it.key to it.default }
   )
 
@@ -77,7 +84,7 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
 
   /** "unset" | "granted" | "denied" — the Settings toggle shows granted as ON, anything else OFF. */
   val analyticsConsent: StateFlow<String> = prefs.analyticsConsent
-  .stateIn(viewModelScope, SharingStarted.Eagerly, "unset")
+  .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "unset")
 
   fun setAnalyticsConsent(granted: Boolean) {
   viewModelScope.launch(Dispatchers.IO) {
@@ -126,7 +133,9 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
   /** The read permissions the connect button requests in one grant flow. */
   val wearablePermissions: Set<String> get() = WearableHealthPermissions.ALL
 
-  init { refreshWearableStatus() }
+  // No refresh in `init` — Settings re-reads this on ON_RESUME (which fires as soon as the screen
+  // attaches its observer), so the status is current by the time the row is on screen, without
+  // every SettingsViewModel construction touching the Health Connect provider.
 
   fun refreshWearableStatus() {
   viewModelScope.launch {

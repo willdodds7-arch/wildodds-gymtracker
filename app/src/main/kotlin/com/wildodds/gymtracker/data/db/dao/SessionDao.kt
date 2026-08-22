@@ -7,6 +7,9 @@ import kotlinx.coroutines.flow.Flow
 /** Planned sessions in a given week of a program. */
 data class WeekSessionCount(val week: Int, val count: Int)
 
+/** How many distinct training days one program has, from its week 1. */
+data class ProgramDayCount(val programId: Long, val dayCount: Int)
+
 @Dao
 interface SessionDao {
   @Query("SELECT * FROM sessions WHERE programId = :programId ORDER BY weekNumber, dayNumber")
@@ -17,6 +20,15 @@ interface SessionDao {
 
   @Query("SELECT * FROM sessions WHERE weekNumber = :weekNumber AND programId = :programId ORDER BY dayNumber")
   suspend fun getSessionsForWeek(weekNumber: Int, programId: Long): List<Session>
+
+  /**
+   * Distinct week-1 day count for EVERY program in one query. The Library shows a "N days" badge
+   * per card; doing that with one `getSessionsForWeek` call per program was a round-trip per row
+   * (and materialised every Session object just to count distinct dayNumbers).
+   */
+  @Query("""SELECT programId, COUNT(DISTINCT dayNumber) AS dayCount FROM sessions
+    WHERE weekNumber = 1 GROUP BY programId""")
+  suspend fun getDayCountsForAllPrograms(): List<ProgramDayCount>
 
   @Query("SELECT * FROM sessions WHERE id = :sessionId")
   suspend fun getSessionById(sessionId: Long): Session?

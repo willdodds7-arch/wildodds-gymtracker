@@ -64,6 +64,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalDensity
@@ -81,6 +82,8 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.wildodds.gymtracker.R
@@ -107,13 +110,32 @@ fun SessionScreen(
   settingsVm: SettingsViewModel = viewModel()
 ) {
   val state         by vm.state.collectAsStateWithLifecycle()
-  val timerState    by vm.timerState.collectAsStateWithLifecycle()
+  // PERF: the timer emits a new TimerState every second. Collecting the whole thing HERE meant the
+  // entire session screen — every exercise card, every weight/reps field — recomposed once a
+  // second for the whole rest period. Only the two booleans that decide whether the timer panels
+  // exist are read at this level; the ticking seconds are collected inside the panels themselves,
+  // so a running timer now only invalidates the timer.
+  val timerVisible by remember(vm) {
+  vm.timerState.map { it.isVisible }.distinctUntilChanged()
+  }.collectAsStateWithLifecycle(initialValue = vm.timerState.value.isVisible)
+  val timerFullscreen by remember(vm) {
+  vm.timerState.map { it.isFullscreen }.distinctUntilChanged()
+  }.collectAsStateWithLifecycle(initialValue = vm.timerState.value.isFullscreen)
   val featTimer     by settingsVm.featSessionTimer.collectAsStateWithLifecycle()
   val featAutofill  by settingsVm.featWeightAutofill.collectAsStateWithLifecycle()
   val featAddEx     by settingsVm.featAddExercise.collectAsStateWithLifecycle()
   val featProgression by settingsVm.featProgressionPicker.collectAsStateWithLifecycle()
   val feat1rmCalc     by settingsVm.feat1rmCalculator.collectAsStateWithLifecycle()
   val timerSound      by settingsVm.timerSound.collectAsStateWithLifecycle()
+
+  // nSuns CAP3: the main lifts re-price whenever a training max moves, and an AMRAP that earns a
+  // new max says so here rather than interrupting with a dialog.
+  val cap3Config      by vm.cap3Config.collectAsStateWithLifecycle()
+  val cap3Message     by vm.cap3Message.collectAsStateWithLifecycle()
+  val cap3Snackbar    = remember { SnackbarHostState() }
+  LaunchedEffect(cap3Message) {
+  cap3Message?.let { cap3Snackbar.showSnackbar(it, duration = SnackbarDuration.Long); vm.clearCap3Message() }
+  }
 
   // Exit-session confirmation guard (registry flag, default ON). Only intercepts back when the
   // user has logged something this visit and the session isn't already complete.
@@ -227,6 +249,18 @@ fun SessionScreen(
   val pages     = remember(state.exercises) { buildSupersetPages(state.exercises) }
   val pagerState  = rememberPagerState { pages.size.coerceAtLeast(1) }
   val scope   = rememberCoroutineScope()
+
+  // Settle guard for the exercise pager. The screen recomposes constantly (rest timer ticking, live
+  // heart rate, fatigue) and `pages` is rebuilt on every set edit, so an in-flight fling/settle can
+  // be cancelled mid-slide and leave the pager stranded between two pages. Whenever scrolling stops
+  // at a non-trivial fractional offset, snap to the nearest whole page so it never sticks half-way.
+  LaunchedEffect(pagerState) {
+  snapshotFlow { pagerState.isScrollInProgress }.collect { scrolling ->
+  if (!scrolling && kotlin.math.abs(pagerState.currentPageOffsetFraction) > 0.01f) {
+  pagerState.animateScrollToPage(pagerState.currentPage)
+  }
+  }
+  }
 
   if (state.isLoading) {
   SessionLoadingSkeleton()
@@ -348,7 +382,7 @@ fun SessionScreen(
   Icon(
   Icons.Default.Timer,
   "Toggle timer",
-  tint = if (timerState.isVisible) LocalAccentColor.current else MaterialTheme.colorScheme.onSurfaceVariant
+  tint = if (timerVisible) LocalAccentColor.current else MaterialTheme.colorScheme.onSurfaceVariant
   )
   }
   }
@@ -565,6 +599,13 @@ fun SessionScreen(
   } else {
   val idx = idxs.firstOrNull() ?: return@HorizontalPager
   val exState = state.exercises.getOrNull(idx) ?: return@HorizontalPager
+  // nSuns CAP3 main lifts are priced from the user's training max, so they render their own
+  // card. Everything else on the page — accessories included — is an ordinary exercise.
+  val cap3Block = remember(exState.exercise, cap3Config) { vm.cap3Block(exState.exercise) }
+  if (cap3Block != null) {
+  Cap3SessionCard(exerciseState = exState, exerciseIndex = idx, block = cap3Block, vm = vm)
+  return@HorizontalPager
+  }
   val partnerName = exState.exercise.supersetGroupId?.let { gid ->
   state.exercises.firstOrNull { it.exercise.id != exState.exercise.id && it.exercise.supersetGroupId == gid }?.exercise?.name
   }
@@ -582,11 +623,11 @@ fun SessionScreen(
   }
 
   // ── Timer panel (below exercise, so keyboard doesn't cover reps) ────
-  if (featTimer && timerState.isVisible) {
-  TimerPanel(timerState = timerState, vm = vm)
+  if (featTimer && timerVisible) {
+  TimerPanel(vm = vm)
   }
-  if (featTimer && timerState.isFullscreen) {
-  FullscreenTimerOverlay(timerState = timerState, vm = vm)
+  if (featTimer && timerFullscreen) {
+  FullscreenTimerOverlay(vm = vm)
   }
 
   // ── "+ Add Exercise" row ─────────────────────────────────────────────
@@ -615,31 +656,43 @@ fun SessionScreen(
   onToggleProgressionExpanded = { progressionExpandedByUser = !progressionExpandedByUser },
   onChoiceSelected    = { if (currentExIndex >= 0) vm.setExerciseProgressionChoice(currentExIndex, it) },
   onNext  = {
-  scope.launch { pagerState.animateScrollToPage(currentPage + 1) }
+  // Read the live page at launch (not the stale composition value) and clamp to the last
+  // page, so a rapid double-tap can't drive an out-of-range animation that stalls mid-slide.
+  scope.launch {
+  val target = (pagerState.currentPage + 1).coerceAtMost(pages.size - 1)
+  if (target != pagerState.currentPage) pagerState.animateScrollToPage(target)
+  }
   },
   onComplete  = {
   vm.completeSession(showSummary = summaryEnabled) { navController.popBackStack() }
   }
   )
   }
+
+  // Announces automatic CAP3 training-max changes. Silent for every other program.
+  SnackbarHost(cap3Snackbar, modifier = Modifier.fillMaxWidth())
   }
 }
 
 // ── Loading skeleton (grey placeholder tiles, shown while the session loads) ──
 
+// PERF: the pulse is passed down as a State and read inside a graphicsLayer lambda, so it animates
+// in the draw phase. Passing a pre-faded Color instead meant every one of the ~14 tiles below
+// recomposed on every frame — while the session was still loading, i.e. the worst possible moment.
 @Composable
 private fun SkeletonTile(
-  color: Color,
+  pulse: State<Float>,
   modifier: Modifier,
   shape: Shape = RoundedCornerShape(6.dp)
 ) {
-  Box(modifier = modifier.clip(shape).background(color))
+  val color = MaterialTheme.colorScheme.surfaceVariant
+  Box(modifier = modifier.graphicsLayer { alpha = pulse.value }.clip(shape).background(color))
 }
 
 @Composable
 private fun SessionLoadingSkeleton() {
   val transition = rememberInfiniteTransition(label = "skeleton")
-  val alpha by transition.animateFloat(
+  val tile = transition.animateFloat(
   initialValue = 0.35f,
   targetValue  = 0.75f,
   animationSpec = infiniteRepeatable(
@@ -648,7 +701,6 @@ private fun SessionLoadingSkeleton() {
   ),
   label = "skeletonAlpha"
   )
-  val tile = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = alpha)
 
   Column(
   modifier = Modifier
@@ -710,7 +762,8 @@ private fun SessionLoadingSkeleton() {
 // ── Timer panel (compact bar) ─────────────────────────────────────────────────
 
 @Composable
-private fun TimerPanel(timerState: SessionViewModel.TimerState, vm: SessionViewModel) {
+private fun TimerPanel(vm: SessionViewModel) {
+  val timerState by vm.timerState.collectAsStateWithLifecycle()
   val accent = LocalAccentColor.current
   fun Int.toMmSs() = "%d:%02d".format(this / 60, this % 60)
   val isRest = timerState.mode == SessionViewModel.TimerMode.REST
@@ -815,7 +868,8 @@ private fun TimerPanel(timerState: SessionViewModel.TimerState, vm: SessionViewM
  * start/pause/reset/10s-delay controls. Back or the shrink icon returns to the compact bar.
  */
 @Composable
-private fun FullscreenTimerOverlay(timerState: SessionViewModel.TimerState, vm: SessionViewModel) {
+private fun FullscreenTimerOverlay(vm: SessionViewModel) {
+  val timerState by vm.timerState.collectAsStateWithLifecycle()
   val accent = LocalAccentColor.current
   val isRest = timerState.mode == SessionViewModel.TimerMode.REST
   val inDelay = timerState.delayRemaining > 0

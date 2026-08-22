@@ -45,14 +45,15 @@ import com.wildodds.gymtracker.ui.settings.FeatureFlags
 import com.wildodds.gymtracker.ui.session.InjuryAccommodationStore
 import com.wildodds.gymtracker.ui.session.InjuryTriageSheet
 import com.wildodds.gymtracker.ui.settings.SettingsRegistry
-import com.wildodds.gymtracker.ui.settings.SettingsViewModel
 import com.wildodds.gymtracker.ui.theme.*
 
 @Composable
 fun HomeScreen(
   navController: NavController,
   vm: HomeViewModel = viewModel(),
-  settingsVm: SettingsViewModel = viewModel(),
+  // NOTE: no SettingsViewModel here. Home never read it, but the `= viewModel()` default still
+  // built one on every cold start — and building it opens a DataStore collector per feature flag.
+  // Home reads the flags it needs through FeatureFlags, which shares one collector per key.
   achievementsVm: com.wildodds.gymtracker.ui.achievements.AchievementsViewModel = viewModel(),
   insightsVm: ActivityInsightsViewModel = viewModel()
 ) {
@@ -176,6 +177,7 @@ fun HomeScreen(
       onAdd = { name -> vm.addDay(name) },
       onRename = { dayNumber, name -> vm.renameDay(dayNumber, name) },
       onRemove = { dayNumber -> vm.removeDay(dayNumber) },
+      onReorder = { orderedDayNumbers -> vm.reorderDays(orderedDayNumbers) },
       onDismiss = { showManageDays = false }
     )
   }
@@ -327,6 +329,19 @@ fun HomeScreen(
               Icon(Icons.Default.FitnessCenter, null, modifier = Modifier.size(20.dp))
               Spacer(Modifier.width(Space.sm))
               Text("Choose a Default Program", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+            }
+            if (FeatureFlags.isEnabled(SettingsRegistry.UNIVERSAL_IMPORT)) {
+              OutlinedButton(
+                onClick  = { navController.navigate("import_program") },
+                modifier = Modifier.fillMaxWidth().height(52.dp),
+                shape    = Radii.cardShape,
+                border   = BorderStroke(1.dp, c.border),
+                colors   = ButtonDefaults.outlinedButtonColors(contentColor = c.text)
+              ) {
+                Icon(Icons.Default.ContentPaste, null, modifier = Modifier.size(20.dp))
+                Spacer(Modifier.width(Space.sm))
+                Text("Import from Text / CSV", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+              }
             }
           }
         }
@@ -553,7 +568,26 @@ private fun DayBlock(
       verticalAlignment = Alignment.CenterVertically
     ) {
       Column(Modifier.weight(1f)) {
-        Text(row.session.name.uppercase(), style = AppType.display, color = c.text)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          // weight(fill = false) so a long day title cannot squeeze the badge beside it to zero
+          // width — display type fills the row otherwise and the icon silently disappears.
+          Text(
+            row.session.name.uppercase(),
+            style = AppType.display,
+            color = c.text,
+            modifier = Modifier.weight(1f, fill = false)
+          )
+          // nSuns CAP3's weekly major-effort test, flagged where the day is picked.
+          if (com.wildodds.gymtracker.data.cap3.Cap3Tag.isMajorEffortDay(exercises.map { it.cap3Tag })) {
+            Spacer(Modifier.width(Space.sm))
+            Icon(
+              androidx.compose.material.icons.Icons.Default.Bolt,
+              contentDescription = "Major-effort day",
+              tint = c.accent,
+              modifier = Modifier.size(22.dp)
+            )
+          }
+        }
         Spacer(Modifier.height(Space.xs))
         val sub = listOfNotNull(
           "Day ${row.session.dayNumber}",
@@ -673,16 +707,30 @@ private fun InsightCard(message: String, onStart: () -> Unit, onDismiss: () -> U
 
 // ─── Manage days (add / rename / remove days from Home) ───────────────────────
 
+/** Returns the days' dayNumbers with the entry at [from] moved to [to] (front-to-back order). */
+private fun reorderedDayNumbers(
+  days: List<com.wildodds.gymtracker.data.db.entity.Session>,
+  from: Int,
+  to: Int
+): List<Int> {
+  val order = days.map { it.dayNumber }.toMutableList()
+  if (from !in order.indices || to !in order.indices) return order
+  order.add(to, order.removeAt(from))
+  return order
+}
+
 @Composable
 private fun ManageDaysSheet(
   days: List<com.wildodds.gymtracker.data.db.entity.Session>,
   onAdd: (String) -> Unit,
   onRename: (dayNumber: Int, name: String) -> Unit,
   onRemove: (dayNumber: Int) -> Unit,
+  onReorder: (orderedDayNumbers: List<Int>) -> Unit,
   onDismiss: () -> Unit
 ) {
   val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
   val c = LocalAppColors.current
+  val haptics = androidx.compose.ui.platform.LocalHapticFeedback.current
   var newDayName by remember { mutableStateOf("") }
   var pendingDelete by remember { mutableStateOf<com.wildodds.gymtracker.data.db.entity.Session?>(null) }
 
@@ -705,14 +753,38 @@ private fun ManageDaysSheet(
       .padding(horizontal = Space.screenEdge).padding(bottom = Space.x3)) {
       Text("MANAGE DAYS", style = AppType.section, color = c.textSecondary)
       Spacer(Modifier.height(Space.sm))
-      Text("Rename or remove a day, or add a new one. Changes apply to every week.",
+      Text("Reorder, rename or remove a day, or add a new one. Reordering keeps every logged set — " +
+        "your progress moves with the day. Changes apply to every week.",
         style = AppType.body, color = c.textSecondary)
       Spacer(Modifier.height(Space.md))
 
-      days.forEach { day ->
+      days.forEachIndexed { index, day ->
         var name by remember(day.dayNumber, day.name) { mutableStateOf(day.name) }
         Row(verticalAlignment = Alignment.CenterVertically,
           modifier = Modifier.fillMaxWidth().padding(vertical = Space.xs)) {
+          if (days.size > 1) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+              IconButton(
+                onClick = { haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove); onReorder(reorderedDayNumbers(days, index, index - 1)) },
+                enabled = index > 0,
+                modifier = Modifier.size(28.dp)
+              ) {
+                Icon(Icons.Default.KeyboardArrowUp, "Move day up",
+                  tint = if (index > 0) c.accent else c.textSecondary.copy(alpha = 0.3f),
+                  modifier = Modifier.size(20.dp))
+              }
+              IconButton(
+                onClick = { haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove); onReorder(reorderedDayNumbers(days, index, index + 1)) },
+                enabled = index < days.size - 1,
+                modifier = Modifier.size(28.dp)
+              ) {
+                Icon(Icons.Default.KeyboardArrowDown, "Move day down",
+                  tint = if (index < days.size - 1) c.accent else c.textSecondary.copy(alpha = 0.3f),
+                  modifier = Modifier.size(20.dp))
+              }
+            }
+            Spacer(Modifier.width(Space.xs))
+          }
           OutlinedTextField(
             value = name, onValueChange = { name = it },
             modifier = Modifier.weight(1f), singleLine = true,
@@ -824,7 +896,20 @@ private fun DefaultProgramSheet(
   var query     by remember { mutableStateOf("") }
   var dayFilter by remember { mutableStateOf<Int?>(null) }
 
-  val defaultOrder = programs.map { it.category.ifBlank { "Other" } }.distinct()
+  // PERF: the catalogue is ~800 blocks, each holding its own session list, and this sheet is a
+  // live search box. Everything derived from it is memoised on the inputs that can actually change
+  // it — otherwise a keystroke re-walked every block AND every session inside every block (twice:
+  // once for the search results, once for the grouping), on the main thread, between characters.
+  val defaultOrder = remember(programs) { programs.map { it.category.ifBlank { "Other" } }.distinct() }
+
+  // Day count per block, computed once. `days()` scans a block's whole session list, and both the
+  // filter and the grouping below ask for it on every pass.
+  val daysByProgram: Map<String, Int> = remember(programs) {
+    programs.associate { p ->
+      p.name to (p.sessions.filter { it.weekNumber == 1 }.maxOfOrNull { it.dayNumber }
+        ?: p.sessions.map { it.dayNumber }.distinct().size)
+    }
+  }
 
   val expanded = remember {
     mutableStateMapOf<String, Boolean>().also { m ->
@@ -834,8 +919,7 @@ private fun DefaultProgramSheet(
     }
   }
 
-  fun ParsedProgram.days(): Int = sessions.filter { it.weekNumber == 1 }.maxOfOrNull { it.dayNumber }
-    ?: sessions.map { it.dayNumber }.distinct().size
+  fun ParsedProgram.days(): Int = daysByProgram[name] ?: 0
 
   fun ParsedProgram.matchesDayFilter(): Boolean {
     if (dayFilter == null) return true
@@ -845,12 +929,16 @@ private fun DefaultProgramSheet(
 
   val trimmed = query.trim()
   val filtersActive = trimmed.isNotEmpty() || dayFilter != null
-  val matchedDefault = if (filtersActive) programs.filter {
-    (trimmed.isEmpty() || it.name.contains(trimmed, ignoreCase = true) || it.category.contains(trimmed, ignoreCase = true))
-      && it.matchesDayFilter()
-  } else emptyList()
+  val matchedDefault = remember(programs, daysByProgram, trimmed, dayFilter) {
+    if (filtersActive) programs.filter {
+      (trimmed.isEmpty() || it.name.contains(trimmed, ignoreCase = true) || it.category.contains(trimmed, ignoreCase = true))
+        && it.matchesDayFilter()
+    } else emptyList()
+  }
 
-  val grouped = programs.filter { it.matchesDayFilter() }.groupBy { it.category.ifBlank { "Other" } }
+  val grouped = remember(programs, daysByProgram, dayFilter) {
+    programs.filter { it.matchesDayFilter() }.groupBy { it.category.ifBlank { "Other" } }
+  }
 
   ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, containerColor = c.bg) {
     LazyColumn(contentPadding = PaddingValues(start = Space.screenEdge, end = Space.screenEdge, bottom = Space.x5)) {

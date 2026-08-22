@@ -143,6 +143,84 @@ class SessionViewModel(app: Application, savedStateHandle: SavedStateHandle) : A
   private val _summary = MutableStateFlow<SessionSummaryData?>(null)
   val summary: StateFlow<SessionSummaryData?> = _summary.asStateFlow()
 
+  // ── nSuns CAP3 ─────────────────────────────────────────────────────────────
+  // Only the main lifts of a CAP3 program are affected: they carry a cap3Tag and are priced from
+  // the user's current training maxes rather than from stored weights. Everything else on the
+  // screen — accessories included — is untouched.
+  private val cap3Prefs = com.wildodds.gymtracker.data.cap3.Cap3Preferences(app)
+  val cap3Config: StateFlow<com.wildodds.gymtracker.data.cap3.Cap3Config> = cap3Prefs.config
+  .stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.Eagerly,
+  com.wildodds.gymtracker.data.cap3.Cap3Config())
+
+  /** Announcements from automatic training-max changes, shown as a snackbar. */
+  private val _cap3Message = MutableStateFlow<String?>(null)
+  val cap3Message: StateFlow<String?> = _cap3Message.asStateFlow()
+  fun clearCap3Message() { _cap3Message.value = null }
+
+  /** The prescription for a CAP3-tagged exercise, or null for any ordinary exercise. */
+  fun cap3Block(exercise: Exercise): com.wildodds.gymtracker.data.cap3.Cap3LiftBlock? {
+  val tag = com.wildodds.gymtracker.data.cap3.Cap3Tag.parse(exercise.cap3Tag) ?: return null
+  return com.wildodds.gymtracker.data.cap3.Cap3Engine.block(cap3Config.value, tag)
+  }
+
+  /**
+   * Tick or untick a prescribed set. Ticking logs it at the prescribed weight and reps, so the
+   * checkbox is the log — history, volume and progress all see a normal set.
+   */
+  fun toggleCap3Set(exerciseIndex: Int, setIndex: Int, weight: Double, reps: Int, checked: Boolean) {
+  updateSets(exerciseIndex) { sets ->
+  sets.toMutableList().also {
+  val row = it.getOrNull(setIndex) ?: return@also
+  it[setIndex] = if (checked) {
+  row.copy(weightKg = trimZero(weight), reps = reps.toString(), isPrefilled = false)
+  } else {
+  row.copy(weightKg = "", reps = "", isPrefilled = false)
+  }
+  }
+  }
+  if (checked) markLoggedThisVisit()
+  viewModelScope.launch {
+  if (checked) saveSet(exerciseIndex, setIndex)
+  else _state.value.exercises.getOrNull(exerciseIndex)?.let { ex ->
+  ex.sets.getOrNull(setIndex)?.let { repo.deleteSetLog(ex.workoutLogId, it.setNumber) }
+  }
+  }
+  }
+
+  /**
+   * Log an AMRAP and let it move the training max on its own. CAP3's whole progression rule is
+   * arithmetic the user already did in the gym, so a change is applied immediately and announced
+   * rather than offered for confirmation.
+   */
+  fun logCap3Amrap(
+  exerciseIndex: Int,
+  setIndex: Int,
+  block: com.wildodds.gymtracker.data.cap3.Cap3LiftBlock,
+  set: com.wildodds.gymtracker.data.cap3.Cap3Set,
+  achievedReps: Int
+  ) {
+  if (achievedReps <= 0) return
+  toggleCap3Set(exerciseIndex, setIndex, set.weight, achievedReps, checked = true)
+
+  val cfg = cap3Config.value
+  val isEndOfCycle = weekNumber >= com.wildodds.gymtracker.data.cap3.CAP3_WEEKS
+  val change = if (block.isMajorEffort) {
+  com.wildodds.gymtracker.data.cap3.Cap3Progression.evaluateMajorEffort(
+  cfg, block.slot, set.weight, achievedReps, set.repsTarget)
+  } else {
+  com.wildodds.gymtracker.data.cap3.Cap3Progression.evaluateAmrap(
+  cfg, block.slot, set.weight, achievedReps, set.repsTarget, endOfCycle = isEndOfCycle)
+  }
+  if (!change.isChange) return
+  viewModelScope.launch {
+  cap3Prefs.setTrainingMax(change.slot, change.newTmKg, change.newEst1RmKg)
+  _cap3Message.value = change.message
+  }
+  }
+
+  private fun trimZero(v: Double): String =
+  if (v % 1.0 == 0.0) v.toInt().toString() else v.toString()
+
   // ── Real-time fatigue (Phase 3F) ──────────────────────────────────────────
   // Suggestion-only signal; null when the feature is off or there isn't enough logged data.
   private var fatigueEnabled = false

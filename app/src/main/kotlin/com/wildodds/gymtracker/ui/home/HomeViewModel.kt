@@ -59,6 +59,9 @@ data class ProgramStats(
   val totalSessions: Int
 )
 
+/** How long a derived flow keeps its upstream alive after the last collector goes away. */
+private const val STOP_TIMEOUT = 5_000L
+
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
@@ -86,8 +89,17 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
   }
   }
 
+  // PERF — two rules for every derived flow in this file:
+  //   • `.flowOn(Dispatchers.Default)` before `stateIn`. Flow operators run on the COLLECTOR's
+  //     context, and `viewModelScope` is Main.immediate, so the grouping/combining below was
+  //     running on the UI thread every time the DB emitted. Room does its own query dispatch, so
+  //     this moves only the transform.
+  //   • `WhileSubscribed` instead of `Eagerly`. Eagerly ran every one of these queries during
+  //     ViewModel construction — i.e. during cold start — whether or not anything was on screen to
+  //     show them, and never released them. The last value is still cached, so a returning
+  //     collector gets it instantly.
   val userPrograms: StateFlow<List<Program>> = repo.userPrograms()
-  .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+  .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), emptyList())
 
   private val _favourites = MutableStateFlow(
   prefs.getStringSet("favourites", emptySet())!!.toSet()
@@ -140,6 +152,15 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
   viewModelScope.launch { repo.renameDayInProgram(id, dayNumber, name) }
   }
 
+  /**
+   * Reorder the program's days. [orderedDayNumbers] is the existing dayNumbers in their new order.
+   * Only renumbers days (UPDATE) so logged sets/completions are preserved — progress is untouched.
+   */
+  fun reorderDays(orderedDayNumbers: List<Int>) {
+  val id = program.value?.id ?: return
+  viewModelScope.launch { repo.reorderProgramDays(id, orderedDayNumbers) }
+  }
+
   private val allSessions: Flow<List<Session>> = program
   .filterNotNull()
   .flatMapLatest { repo.allSessions(it.id) }
@@ -154,13 +175,14 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
   .filterNotNull()
   .flatMapLatest { repo.programExercises(it.id) }
   .map { list -> list.groupBy { it.sessionId } }
-  .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
+  .flowOn(Dispatchers.Default)
+  .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), emptyMap())
 
   // Phases of the active program (empty / single = a normal single-block program).
   val phases: StateFlow<List<com.wildodds.gymtracker.data.db.entity.ProgramPhase>> = program
   .filterNotNull()
   .flatMapLatest { repo.programPhases(it.id) }
-  .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+  .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), emptyList())
 
   fun setPhase(phase: Int) {
   val id = program.value?.id ?: return
@@ -195,7 +217,8 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
   }
   WeekSection(week, rows, rows.count { it.isCompleted })
   }
-  }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+  }.flowOn(Dispatchers.Default)
+  .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), emptyList())
 
   val programStats: StateFlow<ProgramStats> = weekSections
   .map { sections ->
@@ -204,7 +227,8 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
   totalSessions  = sections.sumOf { it.sessions.size }
   )
   }
-  .stateIn(viewModelScope, SharingStarted.Eagerly, ProgramStats(0, 0))
+  .flowOn(Dispatchers.Default)
+  .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), ProgramStats(0, 0))
 
   private val _importState = MutableStateFlow<ImportState>(ImportState.Idle)
   val importState: StateFlow<ImportState> = _importState.asStateFlow()
@@ -226,7 +250,8 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
   combine(program, defaultPrograms) { active, all ->
   val split = active?.split?.takeIf { it.isNotBlank() } ?: return@combine emptyList()
   all.filter { it.split.equals(split, ignoreCase = true) && it.name != active.name }
-  }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+  }.flowOn(Dispatchers.Default)
+  .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), emptyList())
 
   // ── AI-powered import (any file type) ────────────────────────────────────
 
@@ -357,7 +382,8 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
   .map { sections ->
   sections.isNotEmpty() && sections.all { week -> week.sessions.all { it.isCompleted } }
   }
-  .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+  .flowOn(Dispatchers.Default)
+  .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), false)
 
   // ── Goal re-calibration (Phase 3B) ────────────────────────────────────────
   // Program-wide stall: re-evaluated whenever completions change (a session was just logged).
@@ -374,7 +400,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
   stalled  -> RecalibrationTrigger.STALLED
   else  -> RecalibrationTrigger.NONE
   }
-  }.stateIn(viewModelScope, SharingStarted.Eagerly, RecalibrationTrigger.NONE)
+  }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), RecalibrationTrigger.NONE)
 
   // Stall detection now lives in the repository (shared with the Phase 4B adaptive plan engine).
   private suspend fun computeProgramStalled(programId: Long): Boolean =

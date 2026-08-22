@@ -1,0 +1,95 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# BASELINE PROFILE
+#
+# On a fresh install, ART has no idea which code matters, so the first launches run
+# interpreted/JIT — which is exactly why a Compose app feels sluggish for its first few sessions and
+# fine afterwards. This file names the classes and methods on the launch and interaction paths so
+# they are AOT-compiled at install time instead, typically cutting cold start substantially and
+# removing the first-scroll jank.
+#
+# Line format: [flags]ClassDescriptor->method(params)ret
+#   H = hot (called often)   S = startup (runs during app launch)   P = post-startup
+# `**` wildcards match packages/methods. Rules that match nothing are ignored, so this stays valid
+# as the code moves.
+#
+# HOW TO REGENERATE FROM REAL USAGE (better than these hand-written rules):
+#   1. add a :baselineprofile Gradle module (androidx.baselineprofile plugin)
+#   2. write a MacrobenchmarkRule journey: launch → Home → open a session → log a set → scroll
+#   3. `./gradlew :baselineprofile:generateBaselineProfile` on a rooted emulator/userdebug device
+#   4. drop the generated profile in over this file
+# The plugin measures what actually runs; the rules below are the informed approximation.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── This app: everything on the launch path, plus the screens and view-models ──────────────
+HSPLcom/wildodds/gymtracker/MainActivity;->**(**)**
+HSPLcom/wildodds/gymtracker/ui/theme/**->**(**)**
+HSPLcom/wildodds/gymtracker/ui/navigation/**->**(**)**
+HSPLcom/wildodds/gymtracker/ui/components/**->**(**)**
+HSPLcom/wildodds/gymtracker/ui/home/**->**(**)**
+HSPLcom/wildodds/gymtracker/ui/library/**->**(**)**
+HSPLcom/wildodds/gymtracker/ui/profile/**->**(**)**
+HSPLcom/wildodds/gymtracker/ui/session/**->**(**)**
+HSPLcom/wildodds/gymtracker/ui/settings/**->**(**)**
+HSPLcom/wildodds/gymtracker/data/db/**->**(**)**
+HSPLcom/wildodds/gymtracker/data/repository/**->**(**)**
+HSPLcom/wildodds/gymtracker/data/datastore/**->**(**)**
+HSPLcom/wildodds/gymtracker/data/parser/**->**(**)**
+Lcom/wildodds/gymtracker/MainActivity;
+Lcom/wildodds/gymtracker/ui/theme/**
+Lcom/wildodds/gymtracker/ui/navigation/**
+Lcom/wildodds/gymtracker/ui/components/**
+Lcom/wildodds/gymtracker/ui/home/**
+Lcom/wildodds/gymtracker/ui/library/**
+Lcom/wildodds/gymtracker/ui/profile/**
+Lcom/wildodds/gymtracker/ui/session/**
+Lcom/wildodds/gymtracker/ui/settings/**
+Lcom/wildodds/gymtracker/data/db/**
+Lcom/wildodds/gymtracker/data/repository/**
+Lcom/wildodds/gymtracker/data/datastore/**
+Lcom/wildodds/gymtracker/data/parser/**
+
+# ── Compose runtime: the recomposer, snapshot system and slot table run on every frame ──────
+HSPLandroidx/compose/runtime/**->**(**)**
+Landroidx/compose/runtime/**
+
+# ── Compose UI: composition, measure/layout, draw, input, text ──────────────────────────────
+HSPLandroidx/compose/ui/**->**(**)**
+Landroidx/compose/ui/**
+
+# ── Foundation: lazy lists, pager, scroll, gestures — the scroll-smoothness path ────────────
+HSPLandroidx/compose/foundation/**->**(**)**
+Landroidx/compose/foundation/**
+
+# ── Animation: the transitions and springs this app leans on ────────────────────────────────
+HSPLandroidx/compose/animation/**->**(**)**
+Landroidx/compose/animation/**
+
+# ── Material 3 components ───────────────────────────────────────────────────────────────────
+HSPLandroidx/compose/material3/**->**(**)**
+Landroidx/compose/material3/**
+HSPLandroidx/compose/material/ripple/**->**(**)**
+Landroidx/compose/material/ripple/**
+
+# ── Navigation, lifecycle, activity glue ────────────────────────────────────────────────────
+HSPLandroidx/navigation/**->**(**)**
+Landroidx/navigation/**
+HSPLandroidx/lifecycle/**->**(**)**
+Landroidx/lifecycle/**
+HSPLandroidx/activity/**->**(**)**
+Landroidx/activity/**
+HSPLandroidx/savedstate/**->**(**)**
+Landroidx/savedstate/**
+
+# ── Room + SQLite: every screen's first paint waits on a query ──────────────────────────────
+HSPLandroidx/room/**->**(**)**
+Landroidx/room/**
+HSPLandroidx/sqlite/**->**(**)**
+Landroidx/sqlite/**
+
+# ── DataStore: read on the launch path for theme + feature flags ────────────────────────────
+HSPLandroidx/datastore/**->**(**)**
+Landroidx/datastore/**
+
+# ── Coroutines: dispatchers and flow operators are on every one of the above paths ──────────
+HSPLkotlinx/coroutines/**->**(**)**
+Lkotlinx/coroutines/**

@@ -22,10 +22,8 @@ LEGAL_PAGES = {
     "health-data-notice.md": "health-data.html",
     "support.md": "support.html",
     "open-source-licenses.md": "open-source-licenses.html",
-    # Creator marketplace tier (all require lawyer review before launch — see each doc's header).
-    "creator-agreement.md": "creator-agreement.html",
-    "subscription-billing-terms.md": "subscription-billing-terms.html",
-    "refunds-policy.md": "refunds-policy.html",
+    # Paid-tier legal docs (Creator Agreement, Subscription & Billing, Refunds) are parked for the
+    # free launch — not published. Re-add these mappings when the paid tier ships.
 }
 
 TEMPLATE = """<!DOCTYPE html>

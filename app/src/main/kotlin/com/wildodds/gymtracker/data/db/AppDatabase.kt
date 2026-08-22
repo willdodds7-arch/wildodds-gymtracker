@@ -26,7 +26,7 @@ import com.wildodds.gymtracker.data.db.entity.*
   SyncTombstone::class,
   AnalyticsOutboxEntry::class
   ],
-  version = 22,
+  version = 23,
   exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -338,13 +338,21 @@ abstract class AppDatabase : RoomDatabase() {
   }
   }
 
+  private val MIGRATION_22_23 = object : Migration(22, 23) {
+  override fun migrate(db: SupportSQLiteDatabase) {
+  // nSuns CAP3 marks its main lifts so the session screen can price them from the current
+  // training max. Blank for every other exercise, which is every pre-existing row.
+  db.execSQL("ALTER TABLE exercises ADD COLUMN cap3Tag TEXT NOT NULL DEFAULT ''")
+  }
+  }
+
   /** Every migration, in order, as applied by the app. Exposed so tests can run the
    *  identical 1→N chain against a seed database. */
   val ALL_MIGRATIONS: Array<Migration> = arrayOf(
   MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7,
   MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13,
   MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19,
-  MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22
+  MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23
   )
 
   fun getInstance(context: Context): AppDatabase =

@@ -25,6 +25,10 @@
 -keep class com.wildodds.gymtracker.data.account.AccountExport { *; }
 -keep class com.wildodds.gymtracker.data.account.AccountExport$* { *; }
 -keep class com.wildodds.gymtracker.data.db.entity.** { *; }
+# The bundled program catalogue (blocks.json) and AI import are parsed by Gson field reflection —
+# without these keeps R8 renames the fields and the catalogue silently fails to populate in release.
+-keep class com.wildodds.gymtracker.data.parser.** { *; }
+-keep class com.wildodds.gymtracker.data.ai.** { *; }
 # Gson type-token machinery.
 -keepattributes Signature, EnclosingMethod
 -keep class com.google.gson.reflect.TypeToken { *; }
@@ -40,6 +44,15 @@
 # ── Google Credential Manager / Sign-in ──────────────────────────────────────
 -keep class com.google.android.libraries.identity.googleid.** { *; }
 -dontwarn com.google.android.libraries.identity.googleid.**
+
+# ── Compose + lifecycle 2.8 CompositionLocals ────────────────────────────────
+# Release-only crash "CompositionLocal LocalLifecycleOwner not present": R8 strips the provider that
+# wires lifecycle 2.8's LocalLifecycleOwner into the Android composition. Keep the lifecycle-compose
+# API and Compose's Android composition-local providers so collectAsStateWithLifecycle works.
+-keep class androidx.lifecycle.compose.** { *; }
+-keep class androidx.lifecycle.viewmodel.compose.** { *; }
+-keep class androidx.compose.ui.platform.AndroidCompositionLocals_androidKt { *; }
+-keepclassmembers class androidx.compose.ui.platform.** { *; }
 
 # ── Kotlin coroutines / metadata (defensive) ─────────────────────────────────
 -keepclassmembers class kotlinx.coroutines.** { volatile <fields>; }

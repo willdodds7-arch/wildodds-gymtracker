@@ -7,7 +7,8 @@ data class ParsedExercise(
   val notes: String,
   val orderIndex: Int,
   val rpeTarget: String = "",  // Prescribed RPE from program (e.g. "8", "7-8")
-  val pct1rmTarget: String = ""  // Prescribed %1RM from program (e.g. "75%", "70-80%")
+  val pct1rmTarget: String = "",  // Prescribed %1RM from program (e.g. "75%", "70-80%")
+  val cap3Tag: String = ""  // nSuns CAP3 main lifts only — see Exercise.cap3Tag
 )
 
 data class ParsedSession(

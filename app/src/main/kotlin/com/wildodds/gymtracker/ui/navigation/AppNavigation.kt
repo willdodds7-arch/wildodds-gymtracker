@@ -34,6 +34,7 @@ import com.wildodds.gymtracker.ui.home.HomeScreen
 import com.wildodds.gymtracker.ui.profile.ProfileScreen
 import com.wildodds.gymtracker.ui.library.LibraryScreen
 import com.wildodds.gymtracker.ui.library.SessionLibraryScreen
+import com.wildodds.gymtracker.ui.cap3.Cap3SetupScreen
 import com.wildodds.gymtracker.ui.create.CreateProgramScreen
 import com.wildodds.gymtracker.ui.session.SessionScreen
 import com.wildodds.gymtracker.ui.session.SessionViewModel
@@ -41,6 +42,7 @@ import com.wildodds.gymtracker.ui.session.SessionInfoScreen
 import com.wildodds.gymtracker.ui.settings.SettingsScreen
 import com.wildodds.gymtracker.ui.achievements.AchievementsScreen
 import com.wildodds.gymtracker.ui.theme.LocalAccentColor
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 data class BottomNavItem(val route: String, val icon: ImageVector, val label: String)
@@ -89,8 +91,14 @@ fun AppNavigation() {
         composable("create_program") {
             CreateProgramScreen(navController = navController)
         }
+        composable("import_program") {
+            com.wildodds.gymtracker.ui.programimport.ImportReviewScreen(navController = navController)
+        }
         composable("session_library") {
             SessionLibraryScreen(navController = navController)
+        }
+        composable("cap3_setup") {
+            Cap3SetupScreen(navController = navController)
         }
         composable("achievements") {
             AchievementsScreen(navController = navController)
@@ -144,15 +152,23 @@ private fun MainPagerScreen(
     val pagerState = rememberPagerState(initialPage = 0) { items.size }
     val scope      = rememberCoroutineScope()
 
+    // Neighbouring tabs are pre-composed so the first swipe never stutters on a cold page — but NOT
+    // during cold start, where building Library's tree (and starting its ViewModel's queries)
+    // alongside Home is the single biggest thing standing between launch and the first frame.
+    // Home paints alone, then the neighbour warms up a beat later, well before a swipe can land.
+    var neighbourPages by remember { mutableIntStateOf(0) }
+    LaunchedEffect(Unit) {
+        delay(350)
+        neighbourPages = 1
+    }
+
     Box(modifier = Modifier
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.background)
     ) {
         HorizontalPager(
             state    = pagerState,
-            // Compose neighbouring tabs ahead of time so the first swipe never stutters on a
-            // cold page composition.
-            beyondBoundsPageCount = 1,
+            beyondBoundsPageCount = neighbourPages,
             modifier = Modifier
                 .fillMaxSize()
                 .navigationBarsPadding()

@@ -136,4 +136,47 @@ class GymRepositoryTest {
   assertEquals(80f, best[com.wildodds.gymtracker.data.profile.MainLift.BENCH]!!, 0.1f)
   assertTrue("squat should be absent", best[com.wildodds.gymtracker.data.profile.MainLift.SQUAT] == null)
   }
+
+  @Test
+  fun reorderProgramDays_renumbersEveryWeek_andKeepsLoggedProgress() = runTest {
+  // ── Arrange: a 2-week program with 3 days each, and a real logged set on Day 2 / Week 1 ──
+  val programId = db.programDao().insert(Program(name = "Reorder Me", totalWeeks = 2, isActive = true))
+  for (week in 1..2) {
+  db.sessionDao().insertAll(listOf(
+  Session(programId = programId, weekNumber = week, dayNumber = 1, name = "Day 1", muscleGroups = ""),
+  Session(programId = programId, weekNumber = week, dayNumber = 2, name = "Day 2", muscleGroups = ""),
+  Session(programId = programId, weekNumber = week, dayNumber = 3, name = "Day 3", muscleGroups = "")
+  ))
+  }
+  val day2Week1Id = db.sessionDao().getSessionsForWeek(1, programId).first { it.dayNumber == 2 }.id
+  val exId = db.exerciseDao().insert(
+  Exercise(sessionId = day2Week1Id, name = "Squat", sets = 3, repsTarget = "5", orderIndex = 0))
+  val log = repo.getOrCreateWorkoutLog(exId, day2Week1Id, weekNumber = 1)
+  repo.upsertSetLog(SetLog(workoutLogId = log.id, setNumber = 1, weightKg = 100f, reps = 5))
+
+  // ── Act: move Day 2 to the front → new order of dayNumbers is [2, 1, 3] ──
+  repo.reorderProgramDays(programId, listOf(2, 1, 3))
+
+  // ── Assert: both weeks share the new order (by name), renumbered 1..3 ──
+  val after = db.sessionDao().getAllSessionsOnce(programId)
+  for (week in 1..2) {
+  val names = after.filter { it.weekNumber == week }.sortedBy { it.dayNumber }.map { it.name }
+  assertEquals("week $week order", listOf("Day 2", "Day 1", "Day 3"), names)
+  }
+
+  // The logged session kept its id (only dayNumber changed) and is now day 1…
+  val moved = after.first { it.id == day2Week1Id }
+  assertEquals(1, moved.dayNumber)
+  // …and its logged set is still attached — progress is untouched by the reorder.
+  val logs = repo.getSessionSetLogs(day2Week1Id, weekNumber = 1).values.flatten()
+  assertEquals(1, logs.size)
+  assertEquals(100f, logs.first().weightKg!!, 0.001f)
+  assertEquals(5, logs.first().reps)
+
+  // A non-permutation is ignored (no partial renumber).
+  repo.reorderProgramDays(programId, listOf(2, 1))
+  val unchanged = db.sessionDao().getAllSessionsOnce(programId)
+  .filter { it.weekNumber == 1 }.sortedBy { it.dayNumber }.map { it.name }
+  assertEquals(listOf("Day 2", "Day 1", "Day 3"), unchanged)
+  }
 }

@@ -95,10 +95,12 @@ object SettingsRegistry {
   // Phase 3H feature key.
   const val ON_DEMAND_LIBRARY = "feat_ondemand_library"
 
+  const val UNIVERSAL_IMPORT = "feat_universal_import"
+
   private val _entries: MutableList<SettingsEntry> = mutableListOf(
   SettingsEntry(
-  key = SHARE_USAGE_STATS, title = "Share usage statistics",
-  summary = "Send anonymous feature-usage events (which screens get used — never workout data, names or location). Off keeps everything local.",
+  key = SHARE_USAGE_STATS, title = "Record usage statistics",
+  summary = "Record anonymous, non-identifying in-app events (which screens get used — never workout data, names or location). The app has no server, so these stay on your device and are never uploaded. Off by default.",
   group = "Account",
   keywords = listOf("analytics", "usage", "statistics", "diagnostics", "telemetry", "consent", "privacy", "tracking", "opt out"),
   control = SettingControl.SHARE_USAGE_STATS
@@ -283,6 +285,13 @@ object SettingsRegistry {
   summary = "Key for AI-assisted program import", group = "AI Import",
   keywords = listOf("ai", "claude", "anthropic", "api", "key", "import", "gpt"),
   control = SettingControl.API_KEY
+  ),
+  SettingsEntry(
+  key = UNIVERSAL_IMPORT, title = "Universal program import (beta)",
+  summary = "Paste a program as plain text or CSV and turn it into a structured, editable program. Runs fully on-device; more formats (Excel, PDF, photos) coming.",
+  group = "AI Import",
+  keywords = listOf("import", "universal", "parse", "text", "csv", "paste", "program", "spreadsheet", "reddit"),
+  default = false
   ),
   SettingsEntry(
   key = EXPORT_DATA, title = "Export data",

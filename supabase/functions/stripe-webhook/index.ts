@@ -1,7 +1,9 @@
 // stripe-webhook — the single source of truth for entitlements and purchase records.
 //
 // Security: NO user auth (Stripe calls it) — instead every request's signature is verified with
-// STRIPE_WEBHOOK_SECRET before anything is read. Deploy with JWT verification OFF:
+// STRIPE_WEBHOOK_SECRET (platform-account destination) or STRIPE_WEBHOOK_SECRET_CONNECT
+// (connected-accounts destination for account.updated) before anything is read. Deploy with JWT
+// verification OFF:
 //   npx supabase functions deploy stripe-webhook --no-verify-jwt
 //
 // Idempotency: every event id is inserted into stripe_events first; a duplicate delivery hits the
@@ -29,18 +31,28 @@ Deno.serve(async (req) => {
 
   const body = await req.text();
   const s = stripe();
-  let event: Stripe.Event;
-  try {
-    event = await s.webhooks.constructEventAsync(
-      body,
-      signature,
-      Deno.env.get("STRIPE_WEBHOOK_SECRET")!,
-      undefined,
-      cryptoProvider,
-    );
-  } catch {
-    return new Response("bad signature", { status: 400 });
+
+  // Two event destinations feed this endpoint (Stripe's Workbench splits scope, and each
+  // destination has its OWN signing secret): the platform-account destination signs the money
+  // events (checkout.session.completed, payment_intent.succeeded, customer.subscription.*,
+  // invoice.*, charge.refunded) with STRIPE_WEBHOOK_SECRET; the connected-accounts destination
+  // signs account.updated with STRIPE_WEBHOOK_SECRET_CONNECT. Verify against whichever matches.
+  // (If only STRIPE_WEBHOOK_SECRET is set, this behaves exactly as the old single-secret setup.)
+  const secrets = [
+    Deno.env.get("STRIPE_WEBHOOK_SECRET"),
+    Deno.env.get("STRIPE_WEBHOOK_SECRET_CONNECT"),
+  ].filter((v): v is string => !!v);
+
+  let event: Stripe.Event | null = null;
+  for (const secret of secrets) {
+    try {
+      event = await s.webhooks.constructEventAsync(body, signature, secret, undefined, cryptoProvider);
+      break;
+    } catch {
+      // signature didn't match this secret — try the next configured one
+    }
   }
+  if (!event) return new Response("bad signature", { status: 400 });
 
   const db = admin();
 

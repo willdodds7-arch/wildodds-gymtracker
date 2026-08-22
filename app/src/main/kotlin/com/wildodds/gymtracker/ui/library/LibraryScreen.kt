@@ -54,6 +54,8 @@ import com.wildodds.gymtracker.ui.home.ImportState
 import com.wildodds.gymtracker.ui.home.SpreadsheetPreviewSheet
 import com.wildodds.gymtracker.ui.settings.FeatureFlags
 import com.wildodds.gymtracker.ui.settings.SettingsRegistry
+import com.wildodds.gymtracker.ui.components.AppMotion
+import com.wildodds.gymtracker.ui.components.appTween
 import com.wildodds.gymtracker.ui.theme.LocalAccentColor
 import com.wildodds.gymtracker.ui.tools.PlateCalculatorSheet
 
@@ -85,8 +87,9 @@ private val MUSCLE_ORDER: List<Pair<String, List<MuscleGroup>>> = listOf(
 @Composable
 fun LibraryScreen(
   navController: androidx.navigation.NavController,
-  vm: LibraryViewModel = viewModel(),
-  homeVm: HomeViewModel = viewModel()
+  vm: LibraryViewModel = viewModel()
+  // NOTE: no HomeViewModel here either — Library never read it, but the default argument still
+  // constructed one (and, before this pass, eagerly started all of its queries).
 ) {
   val programs    by vm.programs.collectAsStateWithLifecycle()
   val programsLoaded by vm.programsLoaded.collectAsStateWithLifecycle()
@@ -234,26 +237,48 @@ fun LibraryScreen(
   style = MaterialTheme.typography.bodyMedium,
   color = MaterialTheme.colorScheme.onSurfaceVariant)
   }
-  Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+  }
+
+  // The two actions are stacked full-width rather than sitting beside the title: "Create and
+  // import program" is far too long to share a row with another button on a phone, and truncating
+  // it to "Create and imp…" would defeat the point of the longer label. This also matches the
+  // universal-import button directly below.
+  Spacer(Modifier.height(12.dp))
+  Button(
+  onClick  = { navController.navigate("create_program") },
+  modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+  shape  = RoundedCornerShape(12.dp),
+  colors  = ButtonDefaults.buttonColors(containerColor = accent)
+  ) {
+  Icon(Icons.Default.Add, null, modifier = Modifier.size(16.dp))
+  Spacer(Modifier.width(8.dp))
+  Text("Create and import program", fontWeight = FontWeight.Bold)
+  }
+  Spacer(Modifier.height(8.dp))
   OutlinedButton(
   onClick  = { showBrowseSheet = true },
+  modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
   shape  = RoundedCornerShape(12.dp),
   colors  = ButtonDefaults.outlinedButtonColors(contentColor = accent),
   border  = androidx.compose.foundation.BorderStroke(1.dp, accent)
   ) {
   Icon(Icons.Default.FitnessCenter, null, modifier = Modifier.size(16.dp))
-  Spacer(Modifier.width(4.dp))
-  Text("Add", fontWeight = FontWeight.Bold)
+  Spacer(Modifier.width(8.dp))
+  Text("Select Program", fontWeight = FontWeight.Bold)
   }
-  Button(
-  onClick  = { navController.navigate("create_program") },
+
+  if (FeatureFlags.isEnabled(SettingsRegistry.UNIVERSAL_IMPORT)) {
+  Spacer(Modifier.height(12.dp))
+  OutlinedButton(
+  onClick  = { navController.navigate("import_program") },
+  modifier = Modifier.fillMaxWidth(),
   shape  = RoundedCornerShape(12.dp),
-  colors  = ButtonDefaults.buttonColors(containerColor = accent)
+  colors  = ButtonDefaults.outlinedButtonColors(contentColor = accent),
+  border  = androidx.compose.foundation.BorderStroke(1.dp, accent)
   ) {
-  Icon(Icons.Default.Add, null, modifier = Modifier.size(16.dp))
-  Spacer(Modifier.width(4.dp))
-  Text("Create", fontWeight = FontWeight.Bold)
-  }
+  Icon(Icons.Default.ContentPaste, null, modifier = Modifier.size(16.dp))
+  Spacer(Modifier.width(6.dp))
+  Text("Import from Text / CSV", fontWeight = FontWeight.Bold)
   }
   }
 
@@ -387,6 +412,28 @@ fun LibraryScreen(
   onView   = { vm.loadProgramForView(program) }
   )
   Spacer(Modifier.height(16.dp))
+  }
+  }
+
+  // nSuns CAP3 — a percentage-driven module rather than a stored program, so it gets
+  // its own entry instead of a ProgramCard.
+  item {
+  Spacer(Modifier.height(8.dp))
+  GlassCard(modifier = Modifier.fillMaxWidth().clickable { navController.navigate("cap3_setup") }) {
+  Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+  Box(modifier = Modifier.size(38.dp).clip(RoundedCornerShape(10.dp))
+  .background(accent.copy(alpha = 0.15f)), contentAlignment = Alignment.Center) {
+  Icon(Icons.Default.Bolt, null, tint = accent, modifier = Modifier.size(20.dp))
+  }
+  Spacer(Modifier.width(12.dp))
+  Column(modifier = Modifier.weight(1f)) {
+  Text("nSuns CAP3", fontWeight = FontWeight.SemiBold,
+  color = MaterialTheme.colorScheme.onBackground, fontSize = 14.sp)
+  Text("Set your maxes and start the 3-week AMRAP cycle",
+  color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall)
+  }
+  Icon(Icons.Default.ChevronRight, null, tint = accent.copy(alpha = 0.6f), modifier = Modifier.size(18.dp))
+  }
   }
   }
 
@@ -735,7 +782,9 @@ private fun MuscleBar(muscle: MuscleGroup, sets: Float, maxSets: Float) {
   LaunchedEffect(Unit) { triggered = true }
   val fraction by animateFloatAsState(
   if (triggered) (sets / maxSets).coerceIn(0f, 1f) else 0f,
-  tween(500), label = muscle.name
+  // Was a bespoke 500 ms — routed through the shared motion system so the bars fill at the same
+  // pace as everything else rather than lagging half a second behind the sheet that opened them.
+  appTween(AppMotion.TRANSITION), label = muscle.name
   )
 
   val status  = setsStatus(sets)
@@ -1013,12 +1062,18 @@ fun BrowseDefaultsSheet(
   var coachPage by remember { mutableStateOf<String?>(null) }
 
   val coaches = remember(programs) { programs.map { it.coach }.filter { it.isNotBlank() }.distinct().sorted() }
-  val dayOptions = remember(programs) { programs.map { browseDays(it) }.filter { it > 0 }.distinct().sorted() }
+  // browseDays() walks a program's whole session list, so cache it per program rather than paying
+  // for it inside the filter below on every keystroke of the search box.
+  val daysByProgram = remember(programs) { programs.associateWith { browseDays(it) } }
+  val dayOptions = remember(daysByProgram) { daysByProgram.values.filter { it > 0 }.distinct().sorted() }
 
-  val filtered = programs.filter { p ->
-  (query.isBlank() || p.name.contains(query.trim(), true) || p.coach.contains(query.trim(), true)) &&
+  val filtered = remember(programs, daysByProgram, query, coachF, daysF) {
+  val q = query.trim()
+  programs.filter { p ->
+  (q.isBlank() || p.name.contains(q, true) || p.coach.contains(q, true)) &&
   (coachF == null || p.coach == coachF) &&
-  (daysF == null || browseDays(p) == daysF)
+  (daysF == null || daysByProgram[p] == daysF)
+  }
   }
 
   ModalBottomSheet(onDismissRequest = onDismiss) {

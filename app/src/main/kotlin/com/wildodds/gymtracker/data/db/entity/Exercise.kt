@@ -29,6 +29,11 @@ data class Exercise(
   val supersetGroupId: Int? = null,
   // 0 = normal, 1 = single weight + L/R reps, 2 = L/R weight + L/R reps
   val unilateralMode: Int = 0,
+  // Non-empty on the main lifts of an nSuns CAP3 program: "week:daySlot:role", e.g.
+  // "1:BENCH_A:T1". The session screen reads it to render the prescribed sets from the user's
+  // current training max rather than from stored weights, so a training-max change is reflected
+  // immediately. Accessories leave it blank and behave like any other exercise.
+  @ColumnInfo(defaultValue = "") val cap3Tag: String = "",
   // ── Sync metadata (Phase 3, online-first) ────────────────────────────────────
   // syncId: globally-unique row identity across devices ('' until the insert trigger fills it).
   // updatedAt: last local modification (epoch ms), maintained by SQLite triggers — the

@@ -6,14 +6,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.wildodds.gymtracker.ui.components.rememberReducedMotion
 
 /** Current accent colour — the single red used for active states across the app. */
 val LocalAccentColor = compositionLocalOf { MonoLightAccent }
 
 // Map the monochrome token set onto Material 3 roles so every stock component
 // (TopAppBar, Card, Menu, Switch, Button, …) inherits the redesign automatically.
-// `accent` is the one red; it lands on `primary` and `error` only — both are
-// genuinely-active signals — while everything structural stays greyscale.
+// `accent` is the one highlight colour and lands on `primary` only; `danger` (always red) owns the
+// `error` roles. These were the same value while the accent was red, which quietly meant every
+// Delete button was tinted with the accent — splitting them keeps destructive actions red now that
+// light mode's accent is blue. Everything structural stays greyscale.
 private fun monoColorScheme(c: AppColors, accent: Color): ColorScheme =
   if (c.isDark) {
     darkColorScheme(
@@ -45,10 +48,10 @@ private fun monoColorScheme(c: AppColors, accent: Color): ColorScheme =
       inverseOnSurface       = c.bg,
       outline                = c.border,
       outlineVariant         = c.border,
-      error                  = accent,
+      error                  = c.danger,
       onError                = Color.White,
       errorContainer         = c.surface2,
-      onErrorContainer       = accent,
+      onErrorContainer       = c.danger,
       scrim                  = Color.Black
     )
   } else {
@@ -81,10 +84,10 @@ private fun monoColorScheme(c: AppColors, accent: Color): ColorScheme =
       inverseOnSurface       = c.bg,
       outline                = c.border,
       outlineVariant         = c.border,
-      error                  = accent,
+      error                  = c.danger,
       onError                = Color.White,
       errorContainer         = c.surface2,
-      onErrorContainer       = accent,
+      onErrorContainer       = c.danger,
       scrim                  = Color.Black
     )
   }
@@ -105,7 +108,12 @@ fun AppTheme(
   // mode-appropriate red so the accent reads correctly on both backgrounds.
   val appColors = if (isDarkMode) DarkAppColors else LightAppColors
   val accent    = appColors.accent
-  val colorScheme = monoColorScheme(appColors, accent)
+  // PERF: keyed on the only input that can change it. Material reads colours off this object by
+  // identity, so rebuilding a 40-slot ColorScheme on every root recomposition invalidated every
+  // `MaterialTheme.colorScheme.*` read in the app.
+  val colorScheme = remember(isDarkMode) { monoColorScheme(appColors, accent) }
+
+  val reducedMotion = rememberReducedMotion()
 
   val view = LocalView.current
   if (!view.isInEditMode) {
@@ -117,10 +125,11 @@ fun AppTheme(
   }
 
   CompositionLocalProvider(
-    LocalDarkMode       provides isDarkMode,
-    LocalToggleDarkMode provides onToggleDarkMode,
-    LocalAccentColor    provides accent,
-    LocalAppColors      provides appColors
+    LocalDarkMode         provides isDarkMode,
+    LocalToggleDarkMode   provides onToggleDarkMode,
+    LocalAccentColor      provides accent,
+    LocalAppColors        provides appColors,
+    com.wildodds.gymtracker.ui.components.LocalReducedMotion provides reducedMotion
   ) {
     MaterialTheme(
       colorScheme = colorScheme,

@@ -116,7 +116,7 @@ class GymRepository(private val db: AppDatabase) {
   db.exerciseDao().insertAll(ps.exercises.map { pe ->
   Exercise(sessionId = dbSession.id, name = pe.name, sets = pe.sets,
   repsTarget = pe.repsTarget, notes = pe.notes, orderIndex = pe.orderIndex,
-  rpeTarget = pe.rpeTarget, pct1rmTarget = pe.pct1rmTarget)
+  rpeTarget = pe.rpeTarget, pct1rmTarget = pe.pct1rmTarget, cap3Tag = pe.cap3Tag)
   })
   }
   programId
@@ -399,6 +399,26 @@ class GymRepository(private val db: AppDatabase) {
   val mapping = days.withIndex().associate { (i, d) -> d to (((i - startIdx + n) % n) + 1) }
   val rotated = sessions.mapNotNull { s -> mapping[s.dayNumber]?.let { s.copy(dayNumber = it) } }
   db.sessionDao().updateAll(rotated)
+  }
+
+  /**
+   * Reorder a program's days into an arbitrary sequence. [orderedDayNumbers] lists the program's
+   * existing `dayNumber`s in their new front-to-back order; each becomes its 1-based position.
+   * Applied across EVERY week so all weeks share the new order. Like [rotateProgramStartDay] this
+   * only renumbers the `dayNumber` column via UPDATE (never delete/insert), so every logged set and
+   * completion stays attached to its session row — reordering never touches the user's progress.
+   * No-op when the argument isn't a permutation of the existing days or the order is unchanged.
+   */
+  suspend fun reorderProgramDays(programId: Long, orderedDayNumbers: List<Int>) = withContext(Dispatchers.IO) {
+  val sessions = db.sessionDao().getAllSessionsOnce(programId)
+  val existing = sessions.map { it.dayNumber }.distinct()
+  // Guard: must be a permutation of the current day numbers (same set, same size).
+  if (orderedDayNumbers.size != existing.size || orderedDayNumbers.toSet() != existing.toSet()) return@withContext
+  // old dayNumber -> new dayNumber (1-based position in the requested order)
+  val mapping = orderedDayNumbers.withIndex().associate { (i, d) -> d to (i + 1) }
+  if (mapping.all { (old, new) -> old == new }) return@withContext  // already in this order
+  val renumbered = sessions.mapNotNull { s -> mapping[s.dayNumber]?.let { s.copy(dayNumber = it) } }
+  db.sessionDao().updateAll(renumbered)
   }
 
   /** Add a new (empty) day to a program — one session per existing week, at the next dayNumber. */

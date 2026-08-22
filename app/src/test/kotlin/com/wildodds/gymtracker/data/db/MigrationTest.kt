@@ -39,7 +39,7 @@ class MigrationTest {
   seedVersion1Database()
 
   // 2. Run every migration in order and validate the final schema against the latest schema JSON.
-  helper.runMigrationsAndValidate(TEST_DB, 22, true, *AppDatabase.ALL_MIGRATIONS).close()
+  helper.runMigrationsAndValidate(TEST_DB, LATEST_VERSION, true, *AppDatabase.ALL_MIGRATIONS).close()
   }
 
   /** v20→v21 backfills sync metadata: every pre-existing row must get a unique, non-blank syncId. */
@@ -109,6 +109,12 @@ class MigrationTest {
 
   companion object {
   private const val TEST_DB = "migration-test.db"
+
+  /**
+   * Must track [AppDatabase]'s `version`. Bump it in the same change as a new migration —
+   * otherwise the 1→N test silently stops covering everything past the old number.
+   */
+  private const val LATEST_VERSION = 23
 
   /**
    * The schema as it existed at version 1 — i.e. the v13 entities minus every column/table

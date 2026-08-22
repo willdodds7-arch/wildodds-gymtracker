@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -18,6 +19,13 @@ const val DEFAULT_ACCENT_HUE = 203f
 const val DEFAULT_ACCENT_SAT = 0.72f
 
 class ThemePreferences(private val context: Context) {
+
+  // PERF: one de-duplicated view of the preferences file that every accessor below maps off.
+  // DataStore replays the whole Preferences object to every collector on every write, so without
+  // this each of the ~35 flows the app keeps open would wake (and re-run its `map`) whenever ANY
+  // single preference changed. `distinctUntilChanged` on each derived flow confines a write to the
+  // consumers that actually care about the key that moved.
+  private val prefs: Flow<Preferences> = context.dataStore.data
   private val DARK_MODE_KEY              = booleanPreferencesKey("dark_mode")
   private val ACCENT_HUE_KEY             = floatPreferencesKey("accent_hue")
   private val ACCENT_SAT_KEY             = floatPreferencesKey("accent_sat")
@@ -39,33 +47,27 @@ class ThemePreferences(private val context: Context) {
   // by the analytics layer (events dropped entirely), per Rule 4.
   private val ANALYTICS_CONSENT_KEY      = stringPreferencesKey("analytics_consent")
 
-  val isDarkMode: Flow<Boolean> = context.dataStore.data.map { prefs ->
-  prefs[DARK_MODE_KEY] ?: false
-  }
-  val accentHue: Flow<Float> = context.dataStore.data.map { prefs ->
-  prefs[ACCENT_HUE_KEY] ?: DEFAULT_ACCENT_HUE
-  }
-  val accentSaturation: Flow<Float> = context.dataStore.data.map { prefs ->
-  prefs[ACCENT_SAT_KEY] ?: DEFAULT_ACCENT_SAT
-  }
-  val featSessionTimer: Flow<Boolean>        = context.dataStore.data.map { it[FEAT_TIMER_KEY]           ?: true }
-  val featWeightAutofill: Flow<Boolean>      = context.dataStore.data.map { it[FEAT_WEIGHT_AUTOFILL_KEY] ?: true }
-  val featAddExercise: Flow<Boolean>         = context.dataStore.data.map { it[FEAT_ADD_EXERCISE_KEY]    ?: true }
-  val featProgressionPicker: Flow<Boolean>   = context.dataStore.data.map { it[FEAT_PROGRESSION_KEY]    ?: true }
-  val feat1rmCalculator: Flow<Boolean>       = context.dataStore.data.map { it[FEAT_1RM_CALC_KEY]        ?: true }
+  val isDarkMode: Flow<Boolean> = prefs.map { it[DARK_MODE_KEY] ?: false }.distinctUntilChanged()
+  val accentHue: Flow<Float> = prefs.map { it[ACCENT_HUE_KEY] ?: DEFAULT_ACCENT_HUE }.distinctUntilChanged()
+  val accentSaturation: Flow<Float> = prefs.map { it[ACCENT_SAT_KEY] ?: DEFAULT_ACCENT_SAT }.distinctUntilChanged()
+  val featSessionTimer: Flow<Boolean>        = prefs.map { it[FEAT_TIMER_KEY]           ?: true }.distinctUntilChanged()
+  val featWeightAutofill: Flow<Boolean>      = prefs.map { it[FEAT_WEIGHT_AUTOFILL_KEY] ?: true }.distinctUntilChanged()
+  val featAddExercise: Flow<Boolean>         = prefs.map { it[FEAT_ADD_EXERCISE_KEY]    ?: true }.distinctUntilChanged()
+  val featProgressionPicker: Flow<Boolean>   = prefs.map { it[FEAT_PROGRESSION_KEY]    ?: true }.distinctUntilChanged()
+  val feat1rmCalculator: Flow<Boolean>       = prefs.map { it[FEAT_1RM_CALC_KEY]        ?: true }.distinctUntilChanged()
   // "none" | "ding" | "ronnie"
-  val timerSound: Flow<String>               = context.dataStore.data.map { it[TIMER_SOUND_KEY]          ?: "ding" }
+  val timerSound: Flow<String>               = prefs.map { it[TIMER_SOUND_KEY]          ?: "ding" }.distinctUntilChanged()
   // Onboarding / account (Phase 2). Only pass/fail booleans are stored — never the birth date
   // itself (data minimisation: the age gate runs before ANY data collection).
-  val ageGatePassed: Flow<Boolean>           = context.dataStore.data.map { it[AGE_GATE_PASSED_KEY]       ?: false }
-  val ageGateBlocked: Flow<Boolean>          = context.dataStore.data.map { it[AGE_GATE_BLOCKED_KEY]      ?: false }
-  val onboardingComplete: Flow<Boolean>      = context.dataStore.data.map { it[ONBOARDING_COMPLETE_KEY]   ?: false }
-  val analyticsConsent: Flow<String>         = context.dataStore.data.map { it[ANALYTICS_CONSENT_KEY]     ?: "unset" }
+  val ageGatePassed: Flow<Boolean>           = prefs.map { it[AGE_GATE_PASSED_KEY]       ?: false }.distinctUntilChanged()
+  val ageGateBlocked: Flow<Boolean>          = prefs.map { it[AGE_GATE_BLOCKED_KEY]      ?: false }.distinctUntilChanged()
+  val onboardingComplete: Flow<Boolean>      = prefs.map { it[ONBOARDING_COMPLETE_KEY]   ?: false }.distinctUntilChanged()
+  val analyticsConsent: Flow<String>         = prefs.map { it[ANALYTICS_CONSENT_KEY]     ?: "unset" }.distinctUntilChanged()
   // Manually-entered 1RMs (kg). 0f = not set yet.
-  val oneRmSquat: Flow<Float>                = context.dataStore.data.map { it[ONE_RM_SQUAT_KEY]          ?: 0f }
-  val oneRmBench: Flow<Float>                = context.dataStore.data.map { it[ONE_RM_BENCH_KEY]          ?: 0f }
-  val oneRmDeadlift: Flow<Float>             = context.dataStore.data.map { it[ONE_RM_DEADLIFT_KEY]       ?: 0f }
-  val oneRmOhp: Flow<Float>                  = context.dataStore.data.map { it[ONE_RM_OHP_KEY]            ?: 0f }
+  val oneRmSquat: Flow<Float>                = prefs.map { it[ONE_RM_SQUAT_KEY]          ?: 0f }.distinctUntilChanged()
+  val oneRmBench: Flow<Float>                = prefs.map { it[ONE_RM_BENCH_KEY]          ?: 0f }.distinctUntilChanged()
+  val oneRmDeadlift: Flow<Float>             = prefs.map { it[ONE_RM_DEADLIFT_KEY]       ?: 0f }.distinctUntilChanged()
+  val oneRmOhp: Flow<Float>                  = prefs.map { it[ONE_RM_OHP_KEY]            ?: 0f }.distinctUntilChanged()
 
   suspend fun setDarkMode(enabled: Boolean) {
   context.dataStore.edit { prefs -> prefs[DARK_MODE_KEY] = enabled }
@@ -111,7 +113,7 @@ class ThemePreferences(private val context: Context) {
 
   /** Observe a boolean flag by key, falling back to [default] when unset. */
   fun flag(key: String, default: Boolean): Flow<Boolean> =
-  context.dataStore.data.map { it[booleanPreferencesKey(key)] ?: default }
+  prefs.map { it[booleanPreferencesKey(key)] ?: default }.distinctUntilChanged()
 
   /** Persist a boolean flag by key. */
   suspend fun setFlag(key: String, value: Boolean) {

@@ -6,9 +6,14 @@ import androidx.compose.ui.graphics.Color
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MONOCHROME DESIGN TOKENS  (single source of truth)
-// Editorial / Swiss / brutalist-minimal: black, white, greys + ONE red accent.
+// Editorial / Swiss / brutalist-minimal: black, white, greys + ONE accent.
 // The accent appears ONLY on genuinely active states (a checked item, a selected
 // tab). Everything else is greyscale. No gradients, no shadows.
+//
+// ACCENT vs DANGER are separate tokens. They used to be the same value, which worked only
+// because the accent happened to be red — every Delete button reads `colorScheme.error`. Now that
+// light mode's accent is blue, `danger` stays red on its own so destructive actions still look
+// destructive.
 // ─────────────────────────────────────────────────────────────────────────────
 
 // LIGHT
@@ -19,7 +24,11 @@ val MonoLightBorder        = Color(0xFFE4E4E4) // 1px hairlines, dividers
 val MonoLightText          = Color(0xFF0B0B0B) // primary
 val MonoLightTextSecondary = Color(0xFF6B6B6B) // labels, subtitles
 val MonoLightTextTertiary  = Color(0xFFA0A0A0) // meta, captions
-val MonoLightAccent        = Color(0xFFE5342B) // active / checked / selected ONLY
+// Electric azure. Chosen as light/cyan-leaning as it can be while still carrying white content:
+// it sits at 4.1:1 against white, matching the 4.3:1 of the red it replaced, so the selected-tab
+// indicator (white icon on accent) and accent-coloured text stay legible.
+val MonoLightAccent        = Color(0xFF0284C7) // active / checked / selected ONLY
+val MonoLightDanger        = Color(0xFFE5342B) // destructive + error states ONLY
 
 // DARK
 val MonoDarkBg             = Color(0xFF0C0C0C)
@@ -30,6 +39,7 @@ val MonoDarkText           = Color(0xFFFAFAFA)
 val MonoDarkTextSecondary  = Color(0xFF9A9A9A)
 val MonoDarkTextTertiary   = Color(0xFF6A6A6A)
 val MonoDarkAccent         = Color(0xFFFF4D43)
+val MonoDarkDanger         = Color(0xFFFF4D43)
 
 /**
  * Semantic colour set provided down the tree via [LocalAppColors]. Prefer these
@@ -46,6 +56,7 @@ data class AppColors(
   val textSecondary: Color,
   val textTertiary:  Color,
   val accent:        Color,
+  val danger:        Color,
   val isDark:        Boolean
 )
 
@@ -58,6 +69,7 @@ val LightAppColors = AppColors(
   textSecondary = MonoLightTextSecondary,
   textTertiary  = MonoLightTextTertiary,
   accent        = MonoLightAccent,
+  danger        = MonoLightDanger,
   isDark        = false
 )
 
@@ -70,6 +82,7 @@ val DarkAppColors = AppColors(
   textSecondary = MonoDarkTextSecondary,
   textTertiary  = MonoDarkTextTertiary,
   accent        = MonoDarkAccent,
+  danger        = MonoDarkDanger,
   isDark        = true
 )
 
@@ -79,7 +92,7 @@ val LocalAppColors = staticCompositionLocalOf { LightAppColors }
 // Back-compat aliases.
 // Older screens reference these flat vals directly. They are repointed onto the
 // monochrome palette so any lingering usage degrades to greyscale (or the single
-// red accent) instead of the old blue. New code should use [LocalAppColors].
+// accent) instead of ad-hoc colours. New code should use [LocalAppColors].
 // ─────────────────────────────────────────────────────────────────────────────
 
 val AccentPrimary    = MonoLightAccent

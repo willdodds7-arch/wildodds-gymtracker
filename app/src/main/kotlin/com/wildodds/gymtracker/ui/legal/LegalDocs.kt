@@ -11,10 +11,9 @@ enum class LegalDoc(val key: String, val title: String, val asset: String) {
   TERMS("terms", "Terms of Service", "terms-of-service.md"),
   HEALTH("health", "Health & Fitness Data Notice", "health-data-notice.md"),
   LICENSES("licenses", "Open-Source Licenses", "open-source-licenses.md"),
-  SUPPORT("support", "Support", "support.md"),
-  CREATOR_AGREEMENT("creator_agreement", "Creator Agreement", "creator-agreement.md"),
-  BILLING("billing", "Subscription & Billing Terms", "subscription-billing-terms.md"),
-  REFUNDS("refunds", "Refunds Policy", "refunds-policy.md");
+  SUPPORT("support", "Support", "support.md");
+  // The app is free and open-source (MIT) with no paid tier, so there are no billing/subscription/
+  // creator legal docs. If a paid tier is ever added, add its doc to /legal and a new enum entry here.
 
   companion object {
     fun byKey(key: String?): LegalDoc? = entries.firstOrNull { it.key == key }

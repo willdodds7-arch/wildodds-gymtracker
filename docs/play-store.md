@@ -1,7 +1,13 @@
 # Google Play — compliance worksheet
 
 The master worksheet for the Play Console: the exact answers to give, and where each comes from.
-Accurate to the implemented behaviour of Phases 1–6.
+Accurate to the current build (2026-07): accounts + sync, opt-in analytics, Health Connect (heart
+rate + optional write-back), and the **Friends** social layer which is **ON by default**. The paid
+Creator/Marketplace tier is **parked** behind `feat_creator_marketplace` (default OFF) and there is
+no Google Play Billing / in-app purchase in this build.
+
+> **Ordered submission runbook lives in [`PLAY_SUBMISSION.md`](PLAY_SUBMISSION.md)** — this file is
+> the reference answers; that file is the step-by-step you follow.
 
 ## App identity & SDK levels
 
@@ -22,8 +28,8 @@ Accurate to the implemented behaviour of Phases 1–6.
 | Health data notice | https://willdodds7-arch.github.io/wildodds-gymtracker/health-data.html |
 | Support | https://willdodds7-arch.github.io/wildodds-gymtracker/support.html |
 
-> Replace the `REPLACE-ME.example` support-email placeholders in `/legal` and `/site` with a real
-> address before submission (they flow into both the app and the website).
+> Support email is wired to **wildoddssupport@gmail.com** across `/legal` and `/site` (flows into
+> both the app and the website). Rebuild app assets so the bundled copies pick it up before submission.
 
 ## Data Safety form — datum-by-datum
 
@@ -40,9 +46,27 @@ Everything is encrypted in transit (HTTPS) and deletable (in-app + web deletion)
 | App interactions (usage analytics) | App activity → App interactions | Yes (only if you opt in) | No | Analytics | Yes | Yes | Yes |
 | Other diagnostic (app version, OS version, device class) | App info & performance → Diagnostics | Yes (only with analytics opt-in) | No | Analytics | Yes | Yes | Yes |
 
-- **Data sold or "shared" (CPRA sense): none.**
-- **Data used for advertising or tracking: none.** No ad SDKs, no ad IDs.
+- **Data sold or "shared" with third parties (companies/advertisers): none.** No ad SDKs, no ad IDs.
 - **Account deletion available:** Yes — in-app and via the web URL above.
+
+### In-app social sharing — the Friends layer (ON by default)
+
+Friends is a **user-initiated** social feature: nothing is shared until you add a specific person by
+their friend code / invite link. Once you're friends, that person can see:
+
+| What a friend can see | Source |
+|---|---|
+| Your username | the name you set on your profile |
+| Programs you choose to share | explicit "share program" action |
+| Training-session activity + achievement titles (for motivation) | published when you train, to friends only |
+
+- Under Play's Data Safety rules this is a **user-initiated transfer the user reasonably expects**, so
+  it is generally **not** third-party "sharing" — but it **does** mean the app has social interaction,
+  which the **content-rating questionnaire must reflect** (see below), and which the listing discloses.
+- Friend requests, unfriending, and request withdrawal are all supported; removing a friend stops all
+  visibility. There is no public feed — visibility is strictly friend-to-friend.
+- If you would rather launch without any social surface, set `feat_friends` default to `false` in
+  `SettingsRegistry` and rebuild; then the rows above do not apply.
 
 ## Health apps declaration
 
@@ -56,9 +80,17 @@ Everything is encrypted in transit (HTTPS) and deletable (in-app + web deletion)
 ## Content rating (IARC questionnaire) — draft answers
 
 - Violence / sexual content / profanity / controlled substances / gambling: **None**.
-- User-generated content shared with others: **No** (data is private to the user's account).
+- **Does the app let users interact or communicate?** **Yes** — the Friends layer lets users add each
+  other and share programs / training activity / motivation *(friend-to-friend only, no public feed,
+  no free-text chat)*. Answer the "users can interact" / "shares user-provided content" questions
+  **Yes**; there is **no** open/unmoderated messaging, so the follow-ups about unrestricted user
+  communication are **No**.
 - Shares user location: **No**.
-- Expected rating: **Everyone / PEGI 3** (a fitness utility).
+- Digital purchases: **No** (the paid Creator tier is parked and, when live, is web-only — no in-app
+  purchase in this build).
+- Expected rating: **Everyone / PEGI 3** (a fitness utility with limited, user-initiated social
+  sharing). The social-interaction answers may nudge some regional boards to a low teen rating; that
+  is expected and fine.
 
 ## Target audience & content
 
@@ -93,11 +125,16 @@ Everything is encrypted in transit (HTTPS) and deletable (in-app + web deletion)
 > • Program builder, a curated program catalogue, and Excel/AI import
 > • Fast set-logging with carry-forward, supersets, unilateral modes, rest timer, 1RM calculator
 > • Program analysis: weekly set volume per muscle group, push/pull balance, insights
+> • Add friends to share programs, compare achievements and send a little training motivation
+> • Optional: connect a wearable (via Health Connect) to pull heart rate into your session summary
 > • History, a daily habit tracker with a home-screen widget, dark mode and accent colour
 > • Optional, opt-in usage statistics only — never your workout numbers, name or location
 > • Export your data anytime; delete your account and all its data anytime
 >
 > Open source (GPLv3).
+
+**What's new (v2.0.0):** accounts + cross-device sync, Friends, a login-first onboarding, refreshed
+motion/skeleton loading, and two added programs (Aaron's 5-Day Oly Split, Ed Coen Program).
 
 **Screenshot / feature-graphic shot list (capture on a device):**
 1. Home — active program with week/day cards.

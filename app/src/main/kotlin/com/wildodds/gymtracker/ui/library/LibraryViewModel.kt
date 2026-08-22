@@ -135,7 +135,7 @@ class LibraryViewModel(app: Application) : AndroidViewModel(app) {
   }
 
   val pausedPrograms: StateFlow<List<Program>> = repo.pausedPrograms()
-  .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+  .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
   private val _defaultPrograms = MutableStateFlow<List<ParsedProgram>>(emptyList())
   val defaultPrograms: StateFlow<List<ParsedProgram>> = _defaultPrograms.asStateFlow()
@@ -204,16 +204,19 @@ class LibraryViewModel(app: Application) : AndroidViewModel(app) {
   }
   }
 
+  /**
+   * "N days" badge per library card. One GROUP BY over week 1 covers every program — this used to
+   * be a separate query per program, each one loading whole Session rows just to count distinct
+   * dayNumbers, run from the main dispatcher on every change to the program list.
+   */
   @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
   val programDays: StateFlow<Map<Long, Int>> = programs
   .transformLatest { progs ->
-  val map = progs.associate { prog ->
-  val sessions = db.sessionDao().getSessionsForWeek(1, prog.id)
-  prog.id to sessions.map { it.dayNumber }.distinct().size
+  val counts = db.sessionDao().getDayCountsForAllPrograms().associate { it.programId to it.dayCount }
+  emit(progs.associate { prog -> prog.id to (counts[prog.id] ?: 0) })
   }
-  emit(map)
-  }
-  .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
+  .flowOn(Dispatchers.Default)
+  .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
   // Analysis
   private val _analysis  = MutableStateFlow<AnalysisResult?>(null)

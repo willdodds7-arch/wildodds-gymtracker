@@ -26,8 +26,8 @@ android {
         applicationId = "com.wildodds.gymtracker"
         minSdk = 26
         targetSdk = 36
-        versionCode = 2
-        versionName = "2.0.0"
+        versionCode = 3
+        versionName = "2.1.0"
         multiDexEnabled = true
     }
 
@@ -94,6 +94,16 @@ android {
 
     kotlinOptions {
         jvmTarget = "17"
+
+        // Compose STRONG SKIPPING. By default a composable with any unstable parameter (a
+        // `List`, a lambda capturing an unstable value, a data class from another module) is not
+        // skippable, so it re-executes on every recomposition of its parent even when nothing it
+        // reads has changed. This app passes plenty of those around — session/exercise lists,
+        // callbacks — so most of the screen tree was un-skippable. Strong skipping compares such
+        // parameters by instance and memoises lambdas, which makes them skippable.
+        freeCompilerArgs += listOf(
+            "-P", "plugin:androidx.compose.compiler.plugins.kotlin:experimentalStrongSkipping=true"
+        )
     }
 
     // Local unit tests run on Robolectric and need the merged Android resources/assets
@@ -160,6 +170,10 @@ ksp {
 }
 
 dependencies {
+    // Installs the bundled baseline profile (src/main/baseline-prof.txt) on API 28–30, where the
+    // platform won't pick it up on its own. On 31+ the platform reads it from the APK directly.
+    implementation(libs.androidx.profileinstaller)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
