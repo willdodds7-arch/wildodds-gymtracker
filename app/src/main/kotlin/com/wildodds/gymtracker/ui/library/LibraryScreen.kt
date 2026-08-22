@@ -385,7 +385,11 @@ fun LibraryScreen(
   } else if (filtered.isEmpty()) {
   item {
   Box(Modifier.fillMaxWidth().padding(vertical = 40.dp), Alignment.Center) {
-  Text("No programs match your filters",
+  // Search is the only filter on this list now that the day chips are gone, so say which
+  // of the two empty states this actually is rather than blaming absent "filters".
+  Text(
+  if (query.isBlank()) "No other programs yet"
+  else "No programs match \"${query.trim()}\"",
   color = MaterialTheme.colorScheme.onSurfaceVariant,
   style = MaterialTheme.typography.bodyMedium)
   }
@@ -1126,7 +1130,7 @@ fun BrowseDefaultsSheet(
   } else if (filtered.isEmpty()) {
   item {
   Box(Modifier.fillMaxWidth().padding(vertical = 40.dp), Alignment.Center) {
-  Text("No programs match your filters", color = MaterialTheme.colorScheme.onSurfaceVariant,
+  Text("No programs match that search or filter", color = MaterialTheme.colorScheme.onSurfaceVariant,
   style = MaterialTheme.typography.bodyMedium)
   }
   }

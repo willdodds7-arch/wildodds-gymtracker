@@ -367,30 +367,52 @@ internal object ProgramTemplates {
 
   private fun rest() = PlanWorkout(name = "Rest", kind = WorkoutKind.REST)
 
+  // Run twice through, which is what "PPL" normally means and what the description promises —
+  // the first version listed one rotation and then claimed to be a 6-day split.
   private fun pushPullLegs() = PlanProgram(
     name = "Push Pull Legs",
     description = "Hypertrophy-focused 6-day split",
     goal = ProgramGoal.HYPERTROPHY,
     workouts = listOf(
-      workout("Push",
+      workout("Push A",
         ex("Barbell Bench Press", 4, "6-8", 150),
         ex("Overhead Press", 3, "8-10"),
         ex("Incline Dumbbell Press", 3, "10-12"),
         ex("Lateral Raise", 3, "12-15", 60),
         ex("Rope Pushdown", 3, "10-12", 60)
       ),
-      workout("Pull",
+      workout("Pull A",
         ex("Deadlift", 3, "5", 180),
         ex("Pull-up", 3, "8-10"),
         ex("Barbell Row", 3, "8-10"),
         ex("Face Pull", 3, "12-15", 60),
         ex("Barbell Curl", 3, "10-12", 60)
       ),
-      workout("Legs",
+      workout("Legs A",
         ex("Back Squat", 4, "6-8", 180),
         ex("Romanian Deadlift", 3, "8-10"),
         ex("Leg Press", 3, "10-12"),
         ex("Leg Curl", 3, "12-15", 60),
+        ex("Calf Raise", 4, "12-15", 60)
+      ),
+      workout("Push B",
+        ex("Incline Dumbbell Press", 4, "8-10"),
+        ex("Dumbbell Shoulder Press", 3, "10-12"),
+        ex("Cable Fly", 3, "12-15", 60),
+        ex("Lateral Raise", 3, "12-15", 60),
+        ex("Overhead Tricep Extension", 3, "10-12", 60)
+      ),
+      workout("Pull B",
+        ex("Barbell Row", 4, "8-10"),
+        ex("Lat Pulldown", 3, "10-12"),
+        ex("Cable Row", 3, "10-12"),
+        ex("Rear Delt Fly", 3, "15", 60),
+        ex("Hammer Curl", 3, "10-12", 60)
+      ),
+      workout("Legs B",
+        ex("Front Squat", 4, "8-10", 150),
+        ex("Leg Curl", 3, "12-15", 60),
+        ex("Leg Extension", 3, "12-15", 60),
         ex("Calf Raise", 4, "12-15", 60)
       ),
       rest()

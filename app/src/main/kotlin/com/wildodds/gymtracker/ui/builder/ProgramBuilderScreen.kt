@@ -192,7 +192,9 @@ fun ProgramBuilderScreen(
     ) {
       item(key = "topbar") {
         Row(
-          Modifier.fillMaxWidth().statusBarsPadding().padding(start = 4.dp, end = 8.dp, top = 4.dp),
+          // No statusBarsPadding() here — the Scaffold's own inset padding is already applied to
+          // this LazyColumn, and adding it again left a status-bar-sized gap above the back arrow.
+          Modifier.fillMaxWidth().padding(start = 4.dp, end = 8.dp, top = 4.dp),
           verticalAlignment = Alignment.CenterVertically
         ) {
           IconButton(onClick = { navController.popBackStack() }, modifier = Modifier.size(48.dp)) {

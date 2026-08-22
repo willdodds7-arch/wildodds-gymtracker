@@ -97,6 +97,9 @@ object ExerciseLibrary {
   lower.contains("curl")  -> LIBRARY["barbell curl"]
   lower.contains("skullcrusher") || lower.contains("skull crusher") || lower.contains("ez bar") -> LIBRARY["skullcrusher"]
   lower.contains("tricep") && (lower.contains("pushdown") || lower.contains("push-down")) -> LIBRARY["tricep pushdown"]
+  // "Rope Pushdown" / "Cable Pushdown" — a pushdown is a triceps movement whether or not the word
+  // "tricep" is in the name, and people rarely write it out.
+  lower.contains("pushdown") || lower.contains("push-down") -> LIBRARY["tricep pushdown"]
   lower.contains("tricep") && lower.contains("extension") -> LIBRARY["overhead tricep extension"]
   lower.contains("tricep") && lower.contains("dip")  -> LIBRARY["tricep dip"]
   lower.contains("dip")  -> LIBRARY["dip"]
