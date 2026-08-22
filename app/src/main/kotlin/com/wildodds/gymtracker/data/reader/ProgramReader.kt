@@ -81,7 +81,9 @@ class ProgramReader(
   ): Result {
     // 1. A known export beats every heuristic, so it is tried first.
     ExportAdapters.parse(doc, suggestedName)?.let { (adapter, draft) ->
-      val named = draft.copy(name = draft.name.ifBlank { suggestedName })
+      // A known export schema IS declared structure — the app that wrote it said what each column
+      // means, which is stronger evidence than any header a person could type.
+      val named = draft.copy(name = draft.name.ifBlank { suggestedName }, hasExplicitStructure = true)
       return finish(named, doc, kind, adapter.id, aliasLookup,
         extra = listOf(ImportFlag(FlagSeverity.INFO, "Read as a ${adapter.displayName} export.")))
     }
@@ -89,7 +91,9 @@ class ProgramReader(
     // 2. A grid-bearing document goes to the layout engine when one is available.
     if (doc.tables.isNotEmpty()) {
       gridReader.read(doc, suggestedName)?.let { (draft, route, flags) ->
-        return finish(draft, doc, kind, route, aliasLookup, flags)
+        // A layout the engine recognised is declared structure: a header row, a week label, a day
+        // divider. The scorer would not have won without one.
+        return finish(draft.copy(hasExplicitStructure = true), doc, kind, route, aliasLookup, flags)
       }
     }
 

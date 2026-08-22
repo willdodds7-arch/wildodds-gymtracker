@@ -80,6 +80,13 @@ object ColumnRoles {
   /** Below this, no role is claimed — an unassigned column is better than a wrong one. */
   private const val MIN_ROLE_SCORE = 0.35
 
+  /** Headings that name an exercise column unambiguously. */
+  private val STRONG_EXERCISE_HEADERS = setOf(
+    "exercise", "movement", "lift", "drill", "übung", "ubung", "ejercicio", "exercice")
+
+  /** Headings that MIGHT name an exercise column, and might name anything at all. */
+  private val WEAK_EXERCISE_HEADERS = setOf("name", "ex", "item", "title")
+
   /**
    * Header text and content statistics, combined. Content is weighted heavily on purpose: headers
    * lie ("Load" over a column of RPEs), get merged, get renamed, or are absent entirely, whereas a
@@ -99,7 +106,17 @@ object ColumnRoles {
       if (s > 0) out[role] = s.coerceIn(0.0, 1.0)
     }
 
-    put(ColumnRole.EXERCISE, 1.0, stats.exerciseLikeness)
+    // The exercise column is the anchor everything else hangs off, so a WEAK header hint is not
+    // enough on its own. "name" and "ex" are exercise headings in a coach's sheet and ordinary
+    // column names in arbitrary data; a JSON dump of users has a "name" column too, and reading it
+    // as the exercise column turns two people into two exercises with the id column as their set
+    // count. A weak hint therefore needs the CONTENT to agree.
+    val weakExerciseHeader = header.isNotBlank() &&
+      WEAK_EXERCISE_HEADERS.any { it == header } &&
+      !STRONG_EXERCISE_HEADERS.any { header.contains(it) }
+    if (!(weakExerciseHeader && stats.exerciseLikeness < 0.5)) {
+      put(ColumnRole.EXERCISE, 1.0, stats.exerciseLikeness)
+    }
     put(ColumnRole.SETS, 1.0, stats.setsLikeness)
     put(ColumnRole.REPS, 1.0, stats.repsLikeness)
     put(ColumnRole.LOAD, 1.0, stats.loadLikeness)

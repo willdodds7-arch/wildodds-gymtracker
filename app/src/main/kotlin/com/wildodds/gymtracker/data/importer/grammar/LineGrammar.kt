@@ -748,7 +748,9 @@ object LineGrammar {
     }
     if (s.reps == null) {
       s.reps = RepSpec(RepKind.AMRAP, text = "AMRAP")
-      if (s.count == null) s.count = 1
+      // NO set count. "Bench Press AMRAP" states one thing — do as many reps as possible — and says
+      // nothing about how many sets. Defaulting to 1 here put a number in the program that appears
+      // nowhere in the source, which is the one rule that outranks every accuracy target.
     }
     s.finalSetAmrap = true
     return at + 1

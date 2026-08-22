@@ -15,6 +15,12 @@ import com.wildodds.gymtracker.data.parser.ParsedProgram
  */
 object UniversalProgramImporter {
 
+  /** Below this many slots, a document is too short to judge by ratio. */
+  private const val MIN_SLOTS_FOR_PROGRAM_CHECK = 3
+
+  /** At least this fraction of lines must prescribe or name something known. */
+  private const val MIN_RECOGNISED_FRACTION = 0.25
+
   data class ImportResult(
     val draft: ProgramImportDraft,     // the rich model, for the review UI
     val program: ParsedProgram,        // the compiled, commit-ready program
@@ -100,6 +106,35 @@ object UniversalProgramImporter {
     val hasRestDays = draft.weeks.any { w -> w.sessions.any { it.type != SessionType.TRAINING } }
     if (slots.isEmpty() && !hasRestDays) {
       flags += ImportFlag(FlagSeverity.BLOCKER, "No exercises were found — this file may not be a training program.")
+      return flags
+    }
+
+    // A document can produce slots and still not be a program. A recipe yields "1 Whole Chicken",
+    // "2 Lemons", "200ml White Wine" — lines that look structurally like exercises and are not.
+    //
+    // The test is evidence-based rather than a keyword blocklist: a training program either
+    // PRESCRIBES something (a recognised sets/reps/time/distance token) or NAMES something the
+    // exercise library knows. A document where almost nothing does either is not a program,
+    // whatever its lines look like.
+    //
+    // The three-slot floor matters: a one-line paste of an exercise nobody has heard of is a
+    // legitimate thing to import, and blocking it would be worse than importing it unresolved.
+    val recognised = slots.count {
+      it.sets.firstOrNull()?.kind != SetKind.UNKNOWN ||
+        it.exercise.status == ResolutionStatus.EXACT || it.exercise.status == ResolutionStatus.ALIAS
+    }
+    val nothingRecognised = recognised == 0
+    val mostlyUnrecognised = slots.size >= MIN_SLOTS_FOR_PROGRAM_CHECK &&
+      recognised < slots.size * MIN_RECOGNISED_FRACTION
+    // A document that declared its own structure — a Day 1, a week header, a spreadsheet header
+    // row, a known export schema — gets the benefit of the doubt even when nothing in it resolves,
+    // because a one-line paste of a movement nobody has heard of is a legitimate import. A document
+    // with neither structure nor a single recognisable line is a shopping list.
+    if (mostlyUnrecognised || (nothingRecognised && !draft.hasExplicitStructure)) {
+      flags += ImportFlag(FlagSeverity.BLOCKER,
+        "Only $recognised of ${slots.size} lines look like exercises — this file may not be a " +
+        "training program.",
+        sourceLine = slots.take(3).joinToString(" / ") { it.rawText.take(40) })
       return flags
     }
     slots.filter { it.exercise.status == ResolutionStatus.UNRESOLVED || it.exercise.status == ResolutionStatus.INFERRED }

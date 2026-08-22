@@ -1,0 +1,3171 @@
+[
+    {
+        "doc": "archive/01-zip-of-csv.zip",
+        "outcome": "parsed",
+        "route": "grid:flat",
+        "name": "block",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a single flat table of exercises (35% confident).",
+            "INFO:The archive holds 2 readable files — “block.csv” was used."
+        ],
+        "rows": [
+            "Bench Press 3x8",
+            "Barbell Row 3x10"
+        ]
+    },
+    {
+        "doc": "archive/02-zip-two-programs.zip",
+        "outcome": "parsed",
+        "route": "grid:flat",
+        "name": "block-a",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a single flat table of exercises (35% confident).",
+            "INFO:The archive holds 2 readable files — “block-a.csv” was used.",
+            "INFO:“block-b.csv” looked almost as much like the program — check"
+        ],
+        "rows": [
+            "Bench Press 3x8"
+        ]
+    },
+    {
+        "doc": "chat/01-whatsapp.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "[21/03/2026\t19:04] Coach: Day 1",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 4,
+        "resolvedExactly": 0,
+        "confidenceBucket": 20,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "REVIEW:Couldn’t confidently match “[21/03/2026 19:04] Coach: Bench ",
+            "REVIEW:Couldn’t confidently match “[21/03/2026 19:04] Coach: Day 1”",
+            "REVIEW:Couldn’t confidently match “[21/03/2026 19:05] Coach: Back S",
+            "REVIEW:Couldn’t confidently match “[21/03/2026 19:05] Coach: Barbel",
+            "REVIEW:Part of “[21/03/2026 19:04] Coach: Bench Press 3x8” wasn't u",
+            "REVIEW:Part of “[21/03/2026 19:04] Coach: Day 1” wasn't understood ",
+            "REVIEW:Part of “[21/03/2026 19:05] Coach: Back Squat 5x5” wasn't un",
+            "REVIEW:Part of “[21/03/2026 19:05] Coach: Barbell Row 3x10” wasn't ",
+            "REVIEW:“[21/03/2026 19:04] Coach: Bench Press 3x8” looks like “Benc",
+            "REVIEW:“[21/03/2026 19:05] Coach: Back Squat 5x5” looks like “Back ",
+            "REVIEW:“[21/03/2026 19:05] Coach: Back Squat 5x5” says 5 sets but l",
+            "REVIEW:“[21/03/2026 19:05] Coach: Barbell Row 3x10” looks like “Bar"
+        ],
+        "rows": [
+            "21 03 2026 19 04 Coach Day 1 3x21 perSet=3",
+            "Bench Press 3x8 perSet=3",
+            "Barbell Row 3x10 perSet=3",
+            "Back Squat 5x5 perSet=3"
+        ]
+    },
+    {
+        "doc": "chat/02-email-quote.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "02 email quote",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Bench Press 3x8",
+            "Barbell Row 3x10"
+        ]
+    },
+    {
+        "doc": "delimited/01-basic.csv",
+        "outcome": "parsed",
+        "route": "grid:flat",
+        "name": "Exercise\tSets\tReps",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 3,
+        "resolvedExactly": 3,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a single flat table of exercises (35% confident)."
+        ],
+        "rows": [
+            "Bench Press 3x8",
+            "Barbell Row 3x10",
+            "Back Squat 5x5"
+        ]
+    },
+    {
+        "doc": "delimited/02-week-day.csv",
+        "outcome": "parsed",
+        "route": "grid:flat",
+        "name": "02-week-day.csv",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 4,
+        "resolvedExactly": 4,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a single flat table of exercises (35% confident)."
+        ],
+        "rows": [
+            "Back Squat 5x5 @RPE:8",
+            "Bench Press 5x5 @RPE:8",
+            "Deadlift 1x5 @RPE:9",
+            "Back Squat 5x3 @RPE:8"
+        ]
+    },
+    {
+        "doc": "delimited/03-quoted-newline.csv",
+        "outcome": "parsed",
+        "route": "grid:flat",
+        "name": "Exercise\tSets\tReps\tNotes",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a single flat table of exercises (35% confident)."
+        ],
+        "rows": [
+            "Bench Press 3x8",
+            "Barbell Row 3x10"
+        ]
+    },
+    {
+        "doc": "delimited/04-escaped-quotes.csv",
+        "outcome": "parsed",
+        "route": "grid:flat",
+        "name": "Exercise\tReps\tNotes",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 1,
+        "confidenceBucket": 75,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a single flat table of exercises (35% confident).",
+            "REVIEW:Couldn’t confidently match “Pin Press” — confirm the exercis",
+            "REVIEW:The source didn’t say how many sets of “Barbell Row” — confi",
+            "REVIEW:The source didn’t say how many sets of “Pin Press” — confirm",
+            "REVIEW:“Pin Press” looks like “Pin Bench Press” but wasn't certain "
+        ],
+        "rows": [
+            "Pin Bench Press 5",
+            "Barbell Row 10"
+        ]
+    },
+    {
+        "doc": "delimited/05-semicolon.csv",
+        "outcome": "parsed",
+        "route": "grid:flat",
+        "name": "Ubung\tSatze\tWdh",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 3,
+        "resolvedExactly": 0,
+        "confidenceBucket": 30,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a single flat table of exercises (35% confident).",
+            "REVIEW:Couldn’t confidently match “Bankdrucken” — confirm the exerc",
+            "REVIEW:Couldn’t confidently match “Kniebeuge” — confirm the exercis",
+            "REVIEW:Couldn’t confidently match “Rudern” — confirm the exercise."
+        ],
+        "rows": [
+            "Bankdrucken 8x3",
+            "Rudern 10x3",
+            "Kniebeuge 5x5"
+        ]
+    },
+    {
+        "doc": "delimited/06-tab.tsv",
+        "outcome": "parsed",
+        "route": "grid:flat",
+        "name": "Exercise\tSets\tReps\tNotes",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a single flat table of exercises (35% confident)."
+        ],
+        "rows": [
+            "Bench Press 3x8",
+            "Barbell Row 3x10"
+        ]
+    },
+    {
+        "doc": "delimited/07-ragged.csv",
+        "outcome": "parsed",
+        "route": "grid:flat",
+        "name": "Exercise\tSets\tReps",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 3,
+        "resolvedExactly": 3,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a single flat table of exercises (35% confident).",
+            "INFO:Rows have between 2 and 4 columns — some cells may be shifte",
+            "INFO:The columns in that file are inconsistent; it was read as co"
+        ],
+        "rows": [
+            "Bench Press 3x8",
+            "Barbell Row 3x",
+            "Back Squat 5x5"
+        ]
+    },
+    {
+        "doc": "delimited/08-no-header.csv",
+        "outcome": "parsed",
+        "route": "grid:flat",
+        "name": "Bench Press\t3\t8",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 3,
+        "resolvedExactly": 3,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a single flat table of exercises (35% confident)."
+        ],
+        "rows": [
+            "Bench Press 3x8",
+            "Barbell Row 3x10",
+            "Back Squat 5x5"
+        ]
+    },
+    {
+        "doc": "delimited/09-pipe.psv",
+        "outcome": "parsed",
+        "route": "grid:flat",
+        "name": "Exercise\tSets\tReps",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a single flat table of exercises (35% confident)."
+        ],
+        "rows": [
+            "Bench Press 3x8",
+            "Barbell Row 3x10"
+        ]
+    },
+    {
+        "doc": "delimited/10-percent-column.csv",
+        "outcome": "parsed",
+        "route": "grid:flat",
+        "name": "Exercise\tSets\tReps\tIntensity",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a single flat table of exercises (35% confident)."
+        ],
+        "rows": [
+            "Back Squat 5x5 @PCT_1RM:75",
+            "Bench Press 5x5 @PCT_1RM:70"
+        ]
+    },
+    {
+        "doc": "encoding/01-latin1.csv",
+        "outcome": "parsed",
+        "route": "grid:flat",
+        "name": "Übung\tSätze\tWdh",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 0,
+        "confidenceBucket": 30,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a single flat table of exercises (35% confident).",
+            "INFO:Read as windows-1252 rather than UTF-8.",
+            "REVIEW:Couldn’t confidently match “Bankdrücken” — confirm the exerc",
+            "REVIEW:Couldn’t confidently match “Kniebeuge” — confirm the exercis"
+        ],
+        "rows": [
+            "Kniebeuge 5x5",
+            "Bankdrücken 3x8"
+        ]
+    },
+    {
+        "doc": "encoding/02-utf16.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "02 utf16",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as UTF-16LE rather than UTF-8 — check for odd character"
+        ],
+        "rows": [
+            "Bench Press 3x8",
+            "Barbell Row 3x10"
+        ]
+    },
+    {
+        "doc": "encoding/03-utf8-bom.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "03 utf8 bom",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Bench Press 3x8"
+        ]
+    },
+    {
+        "doc": "exports/boostcamp.csv",
+        "outcome": "parsed",
+        "route": "boostcamp",
+        "name": "boostcamp",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a Boostcamp export."
+        ],
+        "rows": [
+            "Bench Press 3x5 @PCT_1RM:80",
+            "Barbell Row 3x8"
+        ]
+    },
+    {
+        "doc": "exports/everfit.csv",
+        "outcome": "parsed",
+        "route": "everfit",
+        "name": "Workout Title\tExercise Title\tSets\tReps\tWeight\tNote",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 1,
+        "confidenceBucket": 75,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a Everfit export.",
+            "REVIEW:Couldn’t confidently match “Cable Fly” — confirm the exercis",
+            "REVIEW:Weights were found but kg/lb is ambiguous — confirm units be",
+            "REVIEW:“Cable Fly” looks like “Cable Chest Fly” but wasn't certain "
+        ],
+        "rows": [
+            "Dumbbell Bench Press 4x10 @ABSOLUTE:30",
+            "Cable Chest Fly 3x15"
+        ]
+    },
+    {
+        "doc": "exports/fitnotes.csv",
+        "outcome": "parsed",
+        "route": "fitnotes",
+        "name": "2026-03-02\tBarbell Squat\tLegs\t225\tlbs\t5\t\t\t\tfelt heavy",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Read as a FitNotes export."
+        ],
+        "rows": [
+            "Back Squat 2x5 @ABSOLUTE:225LB",
+            "Leg Press 1x12 @ABSOLUTE:180LB"
+        ]
+    },
+    {
+        "doc": "exports/hevy.csv",
+        "outcome": "parsed",
+        "route": "hevy",
+        "name": "hevy",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Read as a Hevy export."
+        ],
+        "rows": [
+            "Incline Bench Press 2x10 @ABSOLUTE:60KG",
+            "Lat Pulldown 1x12 @ABSOLUTE:55KG ss=A"
+        ]
+    },
+    {
+        "doc": "exports/jefit.csv",
+        "outcome": "parsed",
+        "route": "jefit",
+        "name": "mydate\texercise\tbelongSys\tlogs\tunit",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Read as a JEFIT export."
+        ],
+        "rows": [
+            "Bench Press 2x",
+            "Barbell Row 1x"
+        ]
+    },
+    {
+        "doc": "exports/strong.csv",
+        "outcome": "parsed",
+        "route": "strong",
+        "name": "strong",
+        "weeks": 1,
+        "sessions": 2,
+        "restDays": 0,
+        "exercises": 3,
+        "resolvedExactly": 3,
+        "confidenceBucket": 90,
+        "flags": [
+            "INFO:Read as a Strong export.",
+            "REVIEW:Weights were found but kg/lb is ambiguous — confirm units be"
+        ],
+        "rows": [
+            "Bench Press 3x8 @ABSOLUTE:80",
+            "Overhead Press 1x10 @ABSOLUTE:45",
+            "Barbell Row 2x10 @ABSOLUTE:70 perSet=2"
+        ]
+    },
+    {
+        "doc": "exports/trainerize.csv",
+        "outcome": "parsed",
+        "route": "trainerize",
+        "name": "Workout Name\tExercise Name\tTarget Sets\tTarget Reps\tRest Time\tNotes",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a Trainerize export."
+        ],
+        "rows": [
+            "Goblet Squat 3x12 rest=60",
+            "Push Up 3x15 rest=45"
+        ]
+    },
+    {
+        "doc": "exports/trainheroic.csv",
+        "outcome": "parsed",
+        "route": "trainheroic",
+        "name": "trainheroic",
+        "weeks": 2,
+        "sessions": 2,
+        "restDays": 0,
+        "exercises": 3,
+        "resolvedExactly": 3,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Read as a TrainHeroic export."
+        ],
+        "rows": [
+            "Back Squat 5x5 @PCT_1RM:75",
+            "Romanian Deadlift 3x8",
+            "Back Squat 5x3 @PCT_1RM:85"
+        ]
+    },
+    {
+        "doc": "exports/wildodds.json",
+        "outcome": "parsed",
+        "route": "wildodds-json",
+        "name": "Winter Block",
+        "weeks": 1,
+        "sessions": 2,
+        "restDays": 1,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:1 rest day were read from the source and kept in place: Rest",
+            "INFO:One week was written out and repeated 6 times — the source s",
+            "INFO:Read as a Wild Odds export."
+        ],
+        "rows": [
+            "Bench Press 3x5 @RPE:8 rest=180"
+        ]
+    },
+    {
+        "doc": "hostile/01-recipe.txt",
+        "outcome": "blocked",
+        "route": "text",
+        "name": "Roast chicken",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 6,
+        "resolvedExactly": 0,
+        "confidenceBucket": 10,
+        "flags": [
+            "BLOCKER:Only 0 of 6 lines look like exercises — this file may not be",
+            "INFO:“sessionNotes” can't be stored as a field yet — it was kept "
+        ],
+        "rows": [
+            "Ingredient [UNKNOWN]",
+            "1 Whole Chicken [UNKNOWN]",
+            "2 Lemon [UNKNOWN]",
+            "4 Clove Of Garlic [UNKNOWN]",
+            "200ml White Wine [UNKNOWN]",
+            "Method [UNKNOWN]"
+        ]
+    },
+    {
+        "doc": "hostile/02-shopping-list.txt",
+        "outcome": "blocked",
+        "route": "text",
+        "name": "Shopping list",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 0,
+        "confidenceBucket": 0,
+        "flags": [
+            "BLOCKER:Only 0 of 1 lines look like exercises — this file may not be"
+        ],
+        "rows": [
+            "2 Avocado [UNKNOWN]"
+        ]
+    },
+    {
+        "doc": "hostile/03-empty.txt",
+        "outcome": "error:Empty",
+        "route": "",
+        "name": "",
+        "weeks": 0,
+        "sessions": 0,
+        "restDays": 0,
+        "exercises": 0,
+        "resolvedExactly": 0,
+        "confidenceBucket": 0,
+        "flags": [],
+        "rows": []
+    },
+    {
+        "doc": "hostile/04-whitespace.txt",
+        "outcome": "error:Unsupported",
+        "route": "",
+        "name": "",
+        "weeks": 0,
+        "sessions": 0,
+        "restDays": 0,
+        "exercises": 0,
+        "resolvedExactly": 0,
+        "confidenceBucket": 0,
+        "flags": [],
+        "rows": []
+    },
+    {
+        "doc": "hostile/05-lorem.txt",
+        "outcome": "blocked",
+        "route": "text",
+        "name": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
+        "weeks": 1,
+        "sessions": 0,
+        "restDays": 0,
+        "exercises": 0,
+        "resolvedExactly": 0,
+        "confidenceBucket": 0,
+        "flags": [
+            "BLOCKER:No exercises were found — this file may not be a training pr"
+        ],
+        "rows": []
+    },
+    {
+        "doc": "hostile/06-numbers-only.txt",
+        "outcome": "blocked",
+        "route": "text",
+        "name": "06 numbers only",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 3,
+        "resolvedExactly": 0,
+        "confidenceBucket": 5,
+        "flags": [
+            "BLOCKER:Only 0 of 3 lines look like exercises — this file may not be"
+        ],
+        "rows": [
+            "5 5 [UNKNOWN]",
+            "4 10 [UNKNOWN]",
+            "3 12 [UNKNOWN]"
+        ]
+    },
+    {
+        "doc": "hostile/07-rtl.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "תוכנית אימון",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 3,
+        "resolvedExactly": 1,
+        "confidenceBucket": 40,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "REVIEW:Couldn’t confidently match “יום 1” — confirm the exercise.",
+            "REVIEW:Couldn’t confidently match “סקוואט” — confirm the exercise.",
+            "REVIEW:No sets/reps recognised for “יום 1” — kept verbatim."
+        ],
+        "rows": [
+            "יום 1 [UNKNOWN]",
+            "סקוואט 5x5",
+            "Bench Press 3x8"
+        ]
+    },
+    {
+        "doc": "hostile/08-single-word.txt",
+        "outcome": "blocked",
+        "route": "text",
+        "name": "08 single word",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 0,
+        "resolvedExactly": 0,
+        "confidenceBucket": 0,
+        "flags": [
+            "BLOCKER:No exercises were found — this file may not be a training pr"
+        ],
+        "rows": []
+    },
+    {
+        "doc": "hostile/09-json-not-a-program.json",
+        "outcome": "blocked",
+        "route": "text",
+        "name": "users",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 0,
+        "confidenceBucket": 5,
+        "flags": [
+            "BLOCKER:Only 0 of 1 lines look like exercises — this file may not be",
+            "INFO:“sessionNotes” can't be stored as a field yet — it was kept "
+        ],
+        "rows": [
+            "User [UNKNOWN]"
+        ]
+    },
+    {
+        "doc": "hostile/10-html-blog.html",
+        "outcome": "blocked",
+        "route": "text",
+        "name": "Why I love training",
+        "weeks": 1,
+        "sessions": 0,
+        "restDays": 0,
+        "exercises": 0,
+        "resolvedExactly": 0,
+        "confidenceBucket": 0,
+        "flags": [
+            "BLOCKER:No exercises were found — this file may not be a training pr"
+        ],
+        "rows": []
+    },
+    {
+        "doc": "hostile/11-handwriting-note.txt",
+        "outcome": "blocked",
+        "route": "text",
+        "name": "(a photo of a whiteboard would go here)",
+        "weeks": 1,
+        "sessions": 0,
+        "restDays": 0,
+        "exercises": 0,
+        "resolvedExactly": 0,
+        "confidenceBucket": 0,
+        "flags": [
+            "BLOCKER:No exercises were found — this file may not be a training pr"
+        ],
+        "rows": []
+    },
+    {
+        "doc": "hostile/12-corrupt.zip",
+        "outcome": "error:Empty",
+        "route": "",
+        "name": "",
+        "weeks": 0,
+        "sessions": 0,
+        "restDays": 0,
+        "exercises": 0,
+        "resolvedExactly": 0,
+        "confidenceBucket": 0,
+        "flags": [],
+        "rows": []
+    },
+    {
+        "doc": "hostile/13-truncated.xlsx",
+        "outcome": "error:Corrupt",
+        "route": "",
+        "name": "",
+        "weeks": 0,
+        "sessions": 0,
+        "restDays": 0,
+        "exercises": 0,
+        "resolvedExactly": 0,
+        "confidenceBucket": 0,
+        "flags": [],
+        "rows": []
+    },
+    {
+        "doc": "hostile/14-mixed-content.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "Meeting notes 12 March",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 3,
+        "resolvedExactly": 2,
+        "confidenceBucket": 65,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "REVIEW:Couldn’t confidently match “Gym after” — confirm the exercis",
+            "REVIEW:No sets/reps recognised for “Gym after” — kept verbatim."
+        ],
+        "rows": [
+            "Gym After [UNKNOWN]",
+            "Bench Press 3x8",
+            "Barbell Row 3x10"
+        ]
+    },
+    {
+        "doc": "markdown/01-assistant.md",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "4-Week Strength Block",
+        "weeks": 1,
+        "sessions": 2,
+        "restDays": 0,
+        "exercises": 6,
+        "resolvedExactly": 6,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Back Squat 4x5 @PCT_1RM:80",
+            "Leg Press 3x10",
+            "Ab Wheel 3x12",
+            "Barbell Bench Press 3x5 @PCT_TM:85",
+            "Barbell Row 4x8",
+            "Tricep Pushdown 3x15"
+        ]
+    },
+    {
+        "doc": "markdown/02-table.md",
+        "outcome": "parsed",
+        "route": "grid:flat",
+        "name": "Push Pull Legs",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 4,
+        "resolvedExactly": 3,
+        "confidenceBucket": 75,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a single flat table of exercises (35% confident).",
+            "INFO:Rows have between 1 and 6 columns — some cells may be shifte",
+            "REVIEW:Couldn’t confidently match “x--- ---%” — confirm the exercis",
+            "REVIEW:No sets/reps recognised for “x--- ---%” — kept verbatim."
+        ],
+        "rows": [
+            "X % [UNKNOWN]",
+            "Back Squat 3x5 @PCT_TM:65",
+            "Leg Press 3x10 @PCT_1RM",
+            "Ab Wheel 3x12 @PCT_1RM"
+        ]
+    },
+    {
+        "doc": "markdown/03-nested-bullets.md",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "03 nested bullets",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 3,
+        "resolvedExactly": 3,
+        "confidenceBucket": 75,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "REVIEW:Part of “Back Squat 5x5 warm up to the working weight” wasn'"
+        ],
+        "rows": [
+            "Back Squat 5x5",
+            "Bench Press 5x5",
+            "Barbell Row 5x5"
+        ]
+    },
+    {
+        "doc": "markdown/04-emoji.md",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "04 emoji",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 75,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "REVIEW:Part of “Burpees 3x20 finisher” wasn't understood — check it"
+        ],
+        "rows": [
+            "Back Squat 5x5",
+            "Burpee 3x20"
+        ]
+    },
+    {
+        "doc": "notation/abbreviations.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "abbreviations",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 5,
+        "resolvedExactly": 5,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Romanian Deadlift 3x8",
+            "Overhead Press 3x5",
+            "Close Grip Bench Press 3x8",
+            "Bulgarian Split Squat 3x10 +each_side",
+            "Glute Ham Raise 3x8"
+        ]
+    },
+    {
+        "doc": "notation/absolute-hash.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "absolute hash",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Back Squat 3x5 @ABSOLUTE:225LB"
+        ]
+    },
+    {
+        "doc": "notation/absolute-kg.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "absolute kg",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Bench Press 5x5 @ABSOLUTE:100KG"
+        ]
+    },
+    {
+        "doc": "notation/absolute-lb.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "absolute lb",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Back Squat 3x5 @ABSOLUTE:225LB"
+        ]
+    },
+    {
+        "doc": "notation/alt-separators.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "alt separators",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 3,
+        "resolvedExactly": 2,
+        "confidenceBucket": 65,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "REVIEW:Couldn’t confidently match “Lat Pulldown 410” — confirm the ",
+            "REVIEW:No sets/reps recognised for “Lat Pulldown 410” — kept verbat",
+            "REVIEW:“Lat Pulldown 410” looks like “Lat Pulldown” but wasn't cert"
+        ],
+        "rows": [
+            "Barbell Row 4x10",
+            "Lat Pulldown [UNKNOWN]",
+            "Cable Row 3x12"
+        ]
+    },
+    {
+        "doc": "notation/amrap-final.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "amrap final",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Bench Press 1x5+ @PCT_TM:85"
+        ]
+    },
+    {
+        "doc": "notation/amrap-time.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "amrap time",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:“setKind” can't be stored as a field yet — it was kept in th"
+        ],
+        "rows": [
+            "Burpee 1x720+ [AMRAP_TIME] +amrap_in_time"
+        ]
+    },
+    {
+        "doc": "notation/band.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "band",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Bench Press 3x3 @PCT_1RM:60 +band"
+        ]
+    },
+    {
+        "doc": "notation/bbb.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "bbb",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Bench Press 5x10 @PCT_1RM:50 +bbb"
+        ]
+    },
+    {
+        "doc": "notation/bodyweight-minus.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "bodyweight minus",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Assisted Pull Up 3x8 @BODYWEIGHT_MINUS:20KG"
+        ]
+    },
+    {
+        "doc": "notation/bodyweight-plus.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "bodyweight plus",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Weighted Pull Up 3x5 @BODYWEIGHT_PLUS:25KG"
+        ]
+    },
+    {
+        "doc": "notation/calories.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "calories",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "REVIEW:The source didn’t say how many sets of “Assault Bike” — conf"
+        ],
+        "rows": [
+            "Assault Bike 15cal"
+        ]
+    },
+    {
+        "doc": "notation/chain.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "chain",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 90,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:“load.text” can't be stored as a field yet — it was kept in ",
+            "INFO:“setKind” can't be stored as a field yet — it was kept in th",
+            "REVIEW:“Back Squat” says 5 sets but lists 2 — check which is right."
+        ],
+        "rows": [
+            "Back Squat 5x22 @CHAIN perSet=2 [RESTPAUSE] +chain+rest_pause"
+        ]
+    },
+    {
+        "doc": "notation/cluster.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "cluster",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:“setKind” can't be stored as a field yet — it was kept in th"
+        ],
+        "rows": [
+            "Front Squat 3x9 perSet=3 [CLUSTER] +cluster rest=15"
+        ]
+    },
+    {
+        "doc": "notation/distance-km.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "distance km",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "REVIEW:The source didn’t say how many sets of “Treadmill Run” — con"
+        ],
+        "rows": [
+            "Treadmill Run 5000m [CARRY]"
+        ]
+    },
+    {
+        "doc": "notation/distance-metres.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "distance metres",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Sprint 5x400m [CARRY]"
+        ]
+    },
+    {
+        "doc": "notation/distance-row.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "distance row",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "REVIEW:The source didn’t say how many sets of “Row” — confirm the c"
+        ],
+        "rows": [
+            "Row 2000m [CARRY]"
+        ]
+    },
+    {
+        "doc": "notation/drop-set.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "drop set",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:“setKind” can't be stored as a field yet — it was kept in th"
+        ],
+        "rows": [
+            "Leg Extension 3x10 [DROP] +drop_set"
+        ]
+    },
+    {
+        "doc": "notation/e2mom.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "e2mom",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:“setKind” can't be stored as a field yet — it was kept in th"
+        ],
+        "rows": [
+            "Clean 16x [EMOM] +emom"
+        ]
+    },
+    {
+        "doc": "notation/each-side.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "each side",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Bulgarian Split Squat 3x10 +each_side"
+        ]
+    },
+    {
+        "doc": "notation/emom.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "emom",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:“setKind” can't be stored as a field yet — it was kept in th"
+        ],
+        "rows": [
+            "Power Clean 12x [EMOM] +emom"
+        ]
+    },
+    {
+        "doc": "notation/for-time.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "for time",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:“setKind” can't be stored as a field yet — it was kept in th"
+        ],
+        "rows": [
+            "Thruster 3x21 perSet=3 [FOR_TIME] +for_time"
+        ]
+    },
+    {
+        "doc": "notation/fsl.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "fsl",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Bench Press 5x5 +fsl"
+        ]
+    },
+    {
+        "doc": "notation/ladder.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "ladder",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:“setKind” can't be stored as a field yet — it was kept in th",
+            "REVIEW:“Pull Up” says 25 sets but lists 5 — check which is right."
+        ],
+        "rows": [
+            "Pull Up 25x1 perSet=5 [LADDER]"
+        ]
+    },
+    {
+        "doc": "notation/load-range.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "load range",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Bench Press 3x8 @ABSOLUTE:60-70KG"
+        ]
+    },
+    {
+        "doc": "notation/mixed-units.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "mixed units",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "REVIEW:Weights were found but kg/lb is ambiguous — confirm units be"
+        ],
+        "rows": [
+            "Back Squat 3x5 @ABSOLUTE:100KG",
+            "Bench Press 3x5 @ABSOLUTE:225LB"
+        ]
+    },
+    {
+        "doc": "notation/myo-reps.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "myo reps",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 0,
+        "confidenceBucket": 50,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:“setKind” can't be stored as a field yet — it was kept in th",
+            "REVIEW:Couldn’t confidently match “Cable Fly” — confirm the exercis",
+            "REVIEW:“Cable Fly” looks like “Cable Chest Fly” but wasn't certain "
+        ],
+        "rows": [
+            "Cable Chest Fly 1x15 [MYO] +myo_reps"
+        ]
+    },
+    {
+        "doc": "notation/name-with-number.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "name with number",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 0,
+        "confidenceBucket": 50,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "REVIEW:Couldn’t confidently match “Dumbbell Row 45 degree” — confir",
+            "REVIEW:“Dumbbell Row 45 degree” looks like “Dumbbell Row” but wasn'"
+        ],
+        "rows": [
+            "Dumbbell Row 3x10"
+        ]
+    },
+    {
+        "doc": "notation/otm.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "otm",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:“setKind” can't be stored as a field yet — it was kept in th"
+        ],
+        "rows": [
+            "Snatch 10x [EMOM] +emom"
+        ]
+    },
+    {
+        "doc": "notation/paused.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "paused",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Paused Bench Press 3x3 +paused"
+        ]
+    },
+    {
+        "doc": "notation/per-leg.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "per leg",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Step Up 3x12 +per_leg"
+        ]
+    },
+    {
+        "doc": "notation/per-set-comma.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "per set comma",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Front Squat 3x6 perSet=3"
+        ]
+    },
+    {
+        "doc": "notation/per-set-slash.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "per set slash",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:“setKind” can't be stored as a field yet — it was kept in th"
+        ],
+        "rows": [
+            "Deadlift 3x5 perSet=3 [PYRAMID]"
+        ]
+    },
+    {
+        "doc": "notation/percent-1rm.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "percent 1rm",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Back Squat 5x5 @PCT_1RM:75"
+        ]
+    },
+    {
+        "doc": "notation/percent-bw.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "percent bw",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Dip 3x8 @PCT_BODYWEIGHT:20"
+        ]
+    },
+    {
+        "doc": "notation/percent-e1rm.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "percent e1rm",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Back Squat 3x3 @PCT_E1RM:85"
+        ]
+    },
+    {
+        "doc": "notation/percent-range.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "percent range",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Deadlift 5x3 @PCT_1RM:70-80"
+        ]
+    },
+    {
+        "doc": "notation/percent-tm.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "percent tm",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Overhead Press 3x5 @PCT_TM:80"
+        ]
+    },
+    {
+        "doc": "notation/percent-wave.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "percent wave",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Back Squat 3x @PCT_TM:70 perSet=3"
+        ]
+    },
+    {
+        "doc": "notation/pyramid.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "pyramid",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:“setKind” can't be stored as a field yet — it was kept in th"
+        ],
+        "rows": [
+            "Bench Press 4x12 perSet=4 [PYRAMID]"
+        ]
+    },
+    {
+        "doc": "notation/rep-range.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "rep range",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Barbell Curl 3x8-12 [RANGE]"
+        ]
+    },
+    {
+        "doc": "notation/rest-as-needed.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "rest as needed",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:“restKind.asNeeded” can't be stored as a field yet — it was "
+        ],
+        "rows": [
+            "Deadlift 5x1"
+        ]
+    },
+    {
+        "doc": "notation/rest-clock.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "rest clock",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Bench Press 3x5 rest=90"
+        ]
+    },
+    {
+        "doc": "notation/rest-fixed.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "rest fixed",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Bench Press 3x5 rest=180"
+        ]
+    },
+    {
+        "doc": "notation/rest-pause.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "rest pause",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:“setKind” can't be stored as a field yet — it was kept in th",
+            "REVIEW:“Lat Pulldown” says 1 sets but lists 3 — check which is righ"
+        ],
+        "rows": [
+            "Lat Pulldown 1x12 perSet=3 [RESTPAUSE] +rest_pause"
+        ]
+    },
+    {
+        "doc": "notation/rest-range.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "rest range",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Bench Press 3x5 rest=120-180"
+        ]
+    },
+    {
+        "doc": "notation/rest-seconds-range.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "rest seconds range",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Bench Press 3x5 rest=90-120"
+        ]
+    },
+    {
+        "doc": "notation/rest-walk-back.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "rest walk back",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:“restKind.asNeeded” can't be stored as a field yet — it was "
+        ],
+        "rows": [
+            "Deadlift 5x1"
+        ]
+    },
+    {
+        "doc": "notation/rir.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "rir",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Barbell Curl 3x12 @RIR:2"
+        ]
+    },
+    {
+        "doc": "notation/rpe-range.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "rpe range",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Back Squat 3x5 @RPE:7-8"
+        ]
+    },
+    {
+        "doc": "notation/rpe.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "rpe",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Back Squat 3x5 @RPE:8"
+        ]
+    },
+    {
+        "doc": "notation/shorthand-es.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "shorthand es",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Farmer Carry 3x30m [CARRY] +each_side"
+        ]
+    },
+    {
+        "doc": "notation/straight-sets.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "straight sets",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Bench Press 3x8"
+        ]
+    },
+    {
+        "doc": "notation/superset-letter.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "superset letter",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Face Pull 3x15 ss=C"
+        ]
+    },
+    {
+        "doc": "notation/superset-no-rest.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "superset no rest",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:“restKind.supersetNone” can't be stored as a field yet — it "
+        ],
+        "rows": [
+            "Bench Press 3x10 ss=A1"
+        ]
+    },
+    {
+        "doc": "notation/superset-tag.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "superset tag",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Incline Dumbbell Bench Press 3x10 ss=A1",
+            "Cable Row 3x12 ss=A2"
+        ]
+    },
+    {
+        "doc": "notation/tempo-compact.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "tempo compact",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Back Squat 3x5 tempo=31X0"
+        ]
+    },
+    {
+        "doc": "notation/tempo-dashed.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "tempo dashed",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Back Squat 3x5 tempo=3-1-2-0"
+        ]
+    },
+    {
+        "doc": "notation/tempo-word.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "tempo word",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Back Squat 3x5 tempo=3010"
+        ]
+    },
+    {
+        "doc": "notation/time-clock.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "time clock",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Plank 3x120s [TIMED]"
+        ]
+    },
+    {
+        "doc": "notation/time-each-side.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "time each side",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "REVIEW:The source didn’t say how many sets of “Side Plank” — confir"
+        ],
+        "rows": [
+            "Side Plank 60s [TIMED] +each_side"
+        ]
+    },
+    {
+        "doc": "notation/time-seconds.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "time seconds",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Plank 3x45s [TIMED]"
+        ]
+    },
+    {
+        "doc": "notation/to-failure.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "to failure",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Push Up 3x +to_failure"
+        ]
+    },
+    {
+        "doc": "notation/total-reps.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "total reps",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "REVIEW:The source didn’t say how many sets of “Chin Up” — confirm t"
+        ],
+        "rows": [
+            "Chin Up 50 +total_reps"
+        ]
+    },
+    {
+        "doc": "notation/unparseable.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "unparseable",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 0,
+        "confidenceBucket": 0,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "REVIEW:Couldn’t confidently match “Some Weird Conditioning Finisher",
+            "REVIEW:No sets/reps recognised for “Some Weird Conditioning Finishe"
+        ],
+        "rows": [
+            "Some Weird Conditioning Finisher [UNKNOWN]"
+        ]
+    },
+    {
+        "doc": "office/01-paragraphs.docx",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "01 paragraphs",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Bench Press 3x8",
+            "Barbell Row 3x10"
+        ]
+    },
+    {
+        "doc": "office/02-table.docx",
+        "outcome": "parsed",
+        "route": "grid:flat",
+        "name": "table 1",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a single flat table of exercises (35% confident)."
+        ],
+        "rows": [
+            "Bench Press 3x8",
+            "Barbell Row 3x10"
+        ]
+    },
+    {
+        "doc": "office/03-spreadsheet.ods",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "Exercise\tSets\tReps",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Bench Press 3x8",
+            "Barbell Row 3x10"
+        ]
+    },
+    {
+        "doc": "office/04-document.odt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "04 document",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Bench Press 3x8",
+            "Barbell Row 3x10"
+        ]
+    },
+    {
+        "doc": "sheets/01-classic-template.xlsx",
+        "outcome": "parsed",
+        "route": "wildodds-template",
+        "name": "Winter Block",
+        "weeks": 1,
+        "sessions": 2,
+        "restDays": 0,
+        "exercises": 4,
+        "resolvedExactly": 4,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:One week was written out and repeated 8 times — the source s",
+            "INFO:Read as a Wild Odds template export."
+        ],
+        "rows": [
+            "Bench Press 5x5",
+            "Overhead Press 3x10",
+            "Barbell Row 4x8",
+            "Lat Pulldown 3x12"
+        ]
+    },
+    {
+        "doc": "sheets/02-sheet-per-week.xlsx",
+        "outcome": "parsed",
+        "route": "grid:sheet-per-week",
+        "name": "Week 1",
+        "weeks": 3,
+        "sessions": 3,
+        "restDays": 0,
+        "exercises": 6,
+        "resolvedExactly": 6,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Read as one sheet per week (95% confident)."
+        ],
+        "rows": [
+            "Back Squat 5x5",
+            "Bench Press 5x5",
+            "Back Squat 5x3",
+            "Bench Press 5x3",
+            "Back Squat 5x1",
+            "Bench Press 5x1"
+        ]
+    },
+    {
+        "doc": "sheets/03-week-labels.xlsx",
+        "outcome": "parsed",
+        "route": "grid:week-labels-in-sheet",
+        "name": "Block",
+        "weeks": 2,
+        "sessions": 2,
+        "restDays": 0,
+        "exercises": 4,
+        "resolvedExactly": 4,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Read as week labels inside one sheet (65% confident)."
+        ],
+        "rows": [
+            "Back Squat 5x5",
+            "Bench Press 3x8",
+            "Back Squat 5x3",
+            "Bench Press 3x8"
+        ]
+    },
+    {
+        "doc": "sheets/04-repeating-days.xlsx",
+        "outcome": "parsed",
+        "route": "grid:repeating-days",
+        "name": "Program",
+        "weeks": 2,
+        "sessions": 4,
+        "restDays": 0,
+        "exercises": 8,
+        "resolvedExactly": 8,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Read as a repeating sequence of day headings (70% confident)"
+        ],
+        "rows": [
+            "Bench Press 3x8",
+            "Overhead Press 3x8",
+            "Barbell Row 3x8",
+            "Lat Pulldown 3x8",
+            "Bench Press 3x8",
+            "Overhead Press 3x8",
+            "Barbell Row 3x8",
+            "Lat Pulldown 3x8"
+        ]
+    },
+    {
+        "doc": "sheets/05-column-groups.xlsx",
+        "outcome": "parsed",
+        "route": "grid:column-groups",
+        "name": "Block",
+        "weeks": 3,
+        "sessions": 3,
+        "restDays": 0,
+        "exercises": 6,
+        "resolvedExactly": 6,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Read as one block of columns per week (69% confident)."
+        ],
+        "rows": [
+            "Back Squat 5x3 @RPE:5",
+            "Bench Press 5x3 @RPE:5",
+            "Back Squat 5x3 @RPE:5",
+            "Bench Press 5x3 @RPE:5",
+            "Back Squat 5x3 @RPE:5",
+            "Bench Press 5x3 @RPE:5"
+        ]
+    },
+    {
+        "doc": "sheets/06-dates.xlsx",
+        "outcome": "parsed",
+        "route": "grid:dates",
+        "name": "Date\tExercise\tSets\tReps",
+        "weeks": 1,
+        "sessions": 2,
+        "restDays": 0,
+        "exercises": 4,
+        "resolvedExactly": 4,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Read as rows grouped by date (60% confident)."
+        ],
+        "rows": [
+            "Back Squat 5x5",
+            "Bench Press 3x8",
+            "Deadlift 1x5",
+            "Barbell Row 3x8"
+        ]
+    },
+    {
+        "doc": "sheets/07-flat.xlsx",
+        "outcome": "parsed",
+        "route": "grid:flat",
+        "name": "07 flat",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 3,
+        "resolvedExactly": 3,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a single flat table of exercises (35% confident)."
+        ],
+        "rows": [
+            "Back Squat 5x5",
+            "Bench Press 3x8",
+            "Barbell Row 3x8"
+        ]
+    },
+    {
+        "doc": "sheets/08-transposed.xlsx",
+        "outcome": "parsed",
+        "route": "grid:transposed",
+        "name": "Block",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 4,
+        "resolvedExactly": 4,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as transposed: exercises across the top (89% confident)"
+        ],
+        "rows": [
+            "Back Squat 5x5",
+            "Bench Press 3x8",
+            "Barbell Row 3x10",
+            "Deadlift 1x5"
+        ]
+    },
+    {
+        "doc": "sheets/09-one-row-per-set.xlsx",
+        "outcome": "parsed",
+        "route": "grid:one-row-per-set",
+        "name": "Imported log",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 0,
+        "confidenceBucket": 20,
+        "flags": [
+            "INFO:Read as a set log: one row per set (81% confident).",
+            "REVIEW:Couldn’t confidently match “Barbell Row 10 reps” — confirm t",
+            "REVIEW:Couldn’t confidently match “Bench Press 8 reps” — confirm th",
+            "REVIEW:No sets/reps recognised for “Barbell Row 10 reps” — kept ver",
+            "REVIEW:No sets/reps recognised for “Bench Press 8 reps” — kept verb",
+            "REVIEW:Weights were found but kg/lb is ambiguous — confirm units be",
+            "REVIEW:“Barbell Row 10 reps” looks like “Barbell Row” but wasn't ce",
+            "REVIEW:“Bench Press 8 reps” looks like “Bench Press” but wasn't cer"
+        ],
+        "rows": [
+            "Bench Press 3x @ABSOLUTE:80 [UNKNOWN]",
+            "Barbell Row 3x @ABSOLUTE:60 [UNKNOWN]"
+        ]
+    },
+    {
+        "doc": "sheets/10-calendar.xlsx",
+        "outcome": "parsed",
+        "route": "grid:month-calendar",
+        "name": "March",
+        "weeks": 1,
+        "sessions": 7,
+        "restDays": 3,
+        "exercises": 4,
+        "resolvedExactly": 4,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:3 rest days were read from the source and kept in place: Res",
+            "INFO:Read as a month calendar, one cell per day (75% confident).",
+            "REVIEW:This spreadsheet could also be read as one block of columns "
+        ],
+        "rows": [
+            "Bench Press 3x8",
+            "Back Squat 5x5",
+            "Barbell Row 3x10",
+            "Deadlift 1x5"
+        ]
+    },
+    {
+        "doc": "sheets/11-metadata-block.xlsx",
+        "outcome": "parsed",
+        "route": "grid:metadata-block",
+        "name": "Smith Off-Season",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a key/value block above the table (74% confident)."
+        ],
+        "rows": [
+            "Back Squat 5x5",
+            "Bench Press 3x8"
+        ]
+    },
+    {
+        "doc": "sheets/12-header-less.xlsx",
+        "outcome": "parsed",
+        "route": "grid:flat",
+        "name": "12 header less",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 3,
+        "resolvedExactly": 3,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a single flat table of exercises (35% confident).",
+            "REVIEW:Weights were found but kg/lb is ambiguous — confirm units be"
+        ],
+        "rows": [
+            "Back Squat 5x5 @ABSOLUTE:100",
+            "Bench Press 3x8 @ABSOLUTE:80",
+            "Barbell Row 3x10 @ABSOLUTE:60"
+        ]
+    },
+    {
+        "doc": "sheets/13-notes-with-exercise.xlsx",
+        "outcome": "parsed",
+        "route": "grid:flat",
+        "name": "13 notes with exercise",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a single flat table of exercises (35% confident)."
+        ],
+        "rows": [
+            "Back Squat 5x5",
+            "Bench Press 3x8"
+        ]
+    },
+    {
+        "doc": "sheets/14-two-days-one-tab.xlsx",
+        "outcome": "parsed",
+        "route": "grid:flat",
+        "name": "Both",
+        "weeks": 1,
+        "sessions": 2,
+        "restDays": 0,
+        "exercises": 4,
+        "resolvedExactly": 4,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a single flat table of exercises (35% confident)."
+        ],
+        "rows": [
+            "Back Squat 3x8",
+            "Bench Press 3x8",
+            "Deadlift 3x8",
+            "Barbell Row 3x8"
+        ]
+    },
+    {
+        "doc": "sheets/15-blank-first-sheet.xlsx",
+        "outcome": "parsed",
+        "route": "grid:flat",
+        "name": "Program",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a single flat table of exercises (35% confident)."
+        ],
+        "rows": [
+            "Back Squat 3x8",
+            "Bench Press 3x8"
+        ]
+    },
+    {
+        "doc": "sheets/16-forty-sheets.xlsx",
+        "outcome": "parsed",
+        "route": "grid:sheet-per-week",
+        "name": "Week 1",
+        "weeks": 40,
+        "sessions": 40,
+        "restDays": 0,
+        "exercises": 40,
+        "resolvedExactly": 40,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Read as one sheet per week (95% confident)."
+        ],
+        "rows": [
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5",
+            "Back Squat 5x5"
+        ]
+    },
+    {
+        "doc": "sheets/17-rtl.xlsx",
+        "outcome": "parsed",
+        "route": "grid:flat",
+        "name": "תוכנית",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 1,
+        "confidenceBucket": 65,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a single flat table of exercises (35% confident).",
+            "REVIEW:Couldn’t confidently match “סקוואט” — confirm the exercise."
+        ],
+        "rows": [
+            "סקוואט 5x5",
+            "Back Squat 3x8"
+        ]
+    },
+    {
+        "doc": "sheets/18-shopping-list.xlsx",
+        "outcome": "blocked",
+        "route": "text",
+        "name": "List",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 5,
+        "resolvedExactly": 0,
+        "confidenceBucket": 10,
+        "flags": [
+            "BLOCKER:Only 0 of 5 lines look like exercises — this file may not be"
+        ],
+        "rows": [
+            "# List [UNKNOWN]",
+            "Item Qty [UNKNOWN]",
+            "Egg 12 [UNKNOWN]",
+            "Milk 2 [UNKNOWN]",
+            "Oat 1 [UNKNOWN]"
+        ]
+    },
+    {
+        "doc": "sheets/19-words-for-numbers.xlsx",
+        "outcome": "parsed",
+        "route": "grid:flat",
+        "name": "19 words for numbers",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 0,
+        "confidenceBucket": 20,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a single flat table of exercises (35% confident).",
+            "REVIEW:Couldn’t confidently match “Back Squat fivex5” — confirm the",
+            "REVIEW:No sets/reps recognised for “Back Squat fivex5” — kept verba",
+            "REVIEW:“Back Squat fivex5” looks like “Back Squat” but wasn't certa"
+        ],
+        "rows": [
+            "Back Squat [UNKNOWN]"
+        ]
+    },
+    {
+        "doc": "sheets/20-big.xlsx",
+        "outcome": "parsed",
+        "route": "grid:one-row-per-set",
+        "name": "Imported log",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Read as a set log: one row per set (73% confident)."
+        ],
+        "rows": [
+            "Bench Press 2000x8"
+        ]
+    },
+    {
+        "doc": "sheets/21-superset-column.xlsx",
+        "outcome": "parsed",
+        "route": "grid:flat",
+        "name": "21 superset column",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 3,
+        "resolvedExactly": 3,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a single flat table of exercises (35% confident)."
+        ],
+        "rows": [
+            "Incline Dumbbell Bench Press 3x10 ss=A1",
+            "Cable Row 3x12 ss=A2",
+            "Back Squat 5x5"
+        ]
+    },
+    {
+        "doc": "sheets/22-tempo-column.xlsx",
+        "outcome": "parsed",
+        "route": "grid:flat",
+        "name": "22 tempo column",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a single flat table of exercises (35% confident).",
+            "REVIEW:Weights were found but kg/lb is ambiguous — confirm units be"
+        ],
+        "rows": [
+            "Back Squat 4x6 @ABSOLUTE:180 tempo=31X0",
+            "Romanian Deadlift 3x8 @ABSOLUTE:120"
+        ]
+    },
+    {
+        "doc": "structured/01-unknown.json",
+        "outcome": "parsed",
+        "route": "grid:flat",
+        "name": "program: Block A",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 3,
+        "resolvedExactly": 3,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a single flat table of exercises (35% confident)."
+        ],
+        "rows": [
+            "Bench Press 3x8",
+            "Barbell Row 3x10",
+            "Back Squat 5x5"
+        ]
+    },
+    {
+        "doc": "structured/02-program.yaml",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "name: Upper Lower",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 4,
+        "resolvedExactly": 4,
+        "confidenceBucket": 80,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "REVIEW:Part of “Barbell Row 4x6 name: Lower A exercises” wasn't und"
+        ],
+        "rows": [
+            "Bench Press 4x6",
+            "Barbell Row 4x6",
+            "Back Squat 4x5",
+            "Romanian Deadlift 3x8"
+        ]
+    },
+    {
+        "doc": "structured/03-program.xml",
+        "outcome": "parsed",
+        "route": "grid:flat",
+        "name": "Bench Press",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a single flat table of exercises (35% confident)."
+        ],
+        "rows": [
+            "Bench Press 3x8",
+            "Barbell Row 3x10"
+        ]
+    },
+    {
+        "doc": "text/01-simple-day.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "01 simple day",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 3,
+        "resolvedExactly": 3,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Bench Press 3x8",
+            "Barbell Row 3x10",
+            "Back Squat 5x5"
+        ]
+    },
+    {
+        "doc": "text/02-weeks-explicit.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "4-Week Strength Block",
+        "weeks": 2,
+        "sessions": 4,
+        "restDays": 0,
+        "exercises": 8,
+        "resolvedExactly": 8,
+        "confidenceBucket": 95,
+        "flags": [],
+        "rows": [
+            "Back Squat 3x5 @PCT_1RM:80",
+            "Leg Press 3x10",
+            "Bench Press 3x5 @PCT_1RM:80",
+            "Barbell Row 4x8",
+            "Back Squat 3x3 @PCT_1RM:85",
+            "Leg Press 3x10",
+            "Bench Press 3x3 @PCT_1RM:85",
+            "Barbell Row 4x8"
+        ]
+    },
+    {
+        "doc": "text/03-week-range.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "Weeks 1-4",
+        "weeks": 4,
+        "sessions": 4,
+        "restDays": 0,
+        "exercises": 8,
+        "resolvedExactly": 8,
+        "confidenceBucket": 95,
+        "flags": [],
+        "rows": [
+            "Back Squat 5x5",
+            "Bench Press 5x5",
+            "Back Squat 5x5",
+            "Bench Press 5x5",
+            "Back Squat 5x5",
+            "Bench Press 5x5",
+            "Back Squat 5x5",
+            "Bench Press 5x5"
+        ]
+    },
+    {
+        "doc": "text/04-week-list.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "Weeks 1,3,5",
+        "weeks": 3,
+        "sessions": 3,
+        "restDays": 0,
+        "exercises": 6,
+        "resolvedExactly": 6,
+        "confidenceBucket": 95,
+        "flags": [],
+        "rows": [
+            "Deadlift 1x5",
+            "Pull Up 3x8",
+            "Deadlift 1x5",
+            "Pull Up 3x8",
+            "Deadlift 1x5",
+            "Pull Up 3x8"
+        ]
+    },
+    {
+        "doc": "text/05-compact-w1d3.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "05 compact w1d3",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Overhead Press 5x3",
+            "Dip 3x10"
+        ]
+    },
+    {
+        "doc": "text/06-phase-header.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "06 phase header",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Power Clean 5x3",
+            "Front Squat 4x5"
+        ]
+    },
+    {
+        "doc": "text/07-weekdays.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "Monday - Upper Body (Heavy)",
+        "weeks": 1,
+        "sessions": 4,
+        "restDays": 1,
+        "exercises": 6,
+        "resolvedExactly": 6,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:1 rest day were read from the source and kept in place: REST",
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Bench Press 4x6 @RPE:8",
+            "Weighted Pull Up 4x6",
+            "Back Squat 4x5 @RPE:8",
+            "Romanian Deadlift 3x8",
+            "Incline Dumbbell Bench Press 4x10",
+            "Cable Row 4x12"
+        ]
+    },
+    {
+        "doc": "text/08-rest-day.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "08 rest day",
+        "weeks": 1,
+        "sessions": 3,
+        "restDays": 1,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:1 rest day were read from the source and kept in place: Rest",
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Bench Press 3x8",
+            "Barbell Row 3x8"
+        ]
+    },
+    {
+        "doc": "text/09-active-recovery.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "Sunday - Active Recovery",
+        "weeks": 1,
+        "sessions": 2,
+        "restDays": 1,
+        "exercises": 1,
+        "resolvedExactly": 1,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:1 rest day were read from the source and kept in place: Acti",
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Bench Press 3x8"
+        ]
+    },
+    {
+        "doc": "text/10-sections.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "10 sections",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 5,
+        "resolvedExactly": 5,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "REVIEW:The source didn’t say how many sets of “Assault Bike” — conf"
+        ],
+        "rows": [
+            "Assault Bike 300s [TIMED]",
+            "Back Squat 5x3 @PCT_1RM:85",
+            "Leg Press 3x12",
+            "Leg Curl 3x15",
+            "Couch Stretch 2x60s [TIMED] +each_side"
+        ]
+    },
+    {
+        "doc": "text/11-day-letters.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "Workout A",
+        "weeks": 1,
+        "sessions": 2,
+        "restDays": 0,
+        "exercises": 6,
+        "resolvedExactly": 6,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Back Squat 3x5",
+            "Bench Press 3x5",
+            "Barbell Row 3x5",
+            "Back Squat 3x5",
+            "Overhead Press 3x5",
+            "Deadlift 1x5"
+        ]
+    },
+    {
+        "doc": "text/12-session-with-focus.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "12 session with focus",
+        "weeks": 1,
+        "sessions": 2,
+        "restDays": 0,
+        "exercises": 4,
+        "resolvedExactly": 4,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Bench Press 4x6",
+            "Overhead Press 3x8",
+            "Barbell Row 4x6",
+            "Lat Pulldown 3x10"
+        ]
+    },
+    {
+        "doc": "text/13-deload.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "13 deload",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:“weekDeload” can't be stored as a field yet — it was kept in"
+        ],
+        "rows": [
+            "Back Squat 3x5 @PCT_1RM:50",
+            "Bench Press 3x5 @PCT_1RM:50"
+        ]
+    },
+    {
+        "doc": "text/14-notes-and-prose.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "This block focuses on building the squat through higher frequency.",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:“sessionNotes” can't be stored as a field yet — it was kept "
+        ],
+        "rows": [
+            "Back Squat 5x5 @PCT_1RM:75",
+            "Leg Press 3x12"
+        ]
+    },
+    {
+        "doc": "text/15-indented-set-detail.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "15 indented set detail",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 55,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "REVIEW:No sets/reps recognised for “Back Squat” — kept verbatim."
+        ],
+        "rows": [
+            "Back Squat [UNKNOWN]",
+            "Bench Press 3x8"
+        ]
+    },
+    {
+        "doc": "text/16-no-headers.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "16 no headers",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 4,
+        "resolvedExactly": 4,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Bench Press 3x8",
+            "Barbell Row 3x10",
+            "Overhead Press 3x8",
+            "Lat Pulldown 3x12"
+        ]
+    },
+    {
+        "doc": "text/17-title-split-keyword.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "Squat & Overhead Press - 3 Days per Week",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Back Squat 4x5 @PCT_1RM:80",
+            "Overhead Press 3x8 @PCT_1RM:70"
+        ]
+    },
+    {
+        "doc": "web/01-table.html",
+        "outcome": "parsed",
+        "route": "grid:flat",
+        "name": "Upper Lower Split",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 2,
+        "resolvedExactly": 2,
+        "confidenceBucket": 100,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as a single flat table of exercises (35% confident)."
+        ],
+        "rows": [
+            "Bench Press 4x6",
+            "Barbell Row 4x8"
+        ]
+    },
+    {
+        "doc": "web/02-list.html",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "02 list",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 3,
+        "resolvedExactly": 3,
+        "confidenceBucket": 95,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re"
+        ],
+        "rows": [
+            "Back Squat 5x5",
+            "Bench Press 5x5",
+            "Barbell Row 5x5"
+        ]
+    },
+    {
+        "doc": "web/03-word.rtf",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "03 word",
+        "weeks": 1,
+        "sessions": 1,
+        "restDays": 0,
+        "exercises": 3,
+        "resolvedExactly": 2,
+        "confidenceBucket": 70,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "REVIEW:Couldn’t confidently match “Week 1” — confirm the exercise.",
+            "REVIEW:No sets/reps recognised for “Week 1” — kept verbatim."
+        ],
+        "rows": [
+            "Week 1 [UNKNOWN]",
+            "Bench Press 3x8",
+            "Barbell Row 3x10"
+        ]
+    }
+]

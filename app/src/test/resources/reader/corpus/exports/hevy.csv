@@ -1,0 +1,4 @@
+title,start_time,end_time,description,exercise_title,superset_id,exercise_notes,set_index,set_type,weight_kg,reps,distance_km,duration_seconds,rpe
+Upper A,2026-03-02T18:00:00Z,2026-03-02T19:00:00Z,,Incline Bench Press,,,0,normal,60,10,,,7
+Upper A,2026-03-02T18:00:00Z,2026-03-02T19:00:00Z,,Incline Bench Press,,,1,normal,60,10,,,7
+Upper A,2026-03-02T18:00:00Z,2026-03-02T19:00:00Z,,Lat Pulldown,A,,0,normal,55,12,,,

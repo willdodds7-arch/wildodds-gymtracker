@@ -256,5 +256,13 @@ data class ProgramImportDraft(
   val repeatWeeks: Int = 1,
   val notes: List<String> = emptyList(),
   val unresolvedProgression: List<String> = emptyList(),
+  /**
+   * True when the SOURCE declared structure of its own — a week header, a day header, a rest day,
+   * a spreadsheet header row, or a known export schema.
+   *
+   * It is the difference between a document that says "this is a program" and one the reader merely
+   * carved into lines. A shopping list produces slots too; what it never produces is a Day 1.
+   */
+  val hasExplicitStructure: Boolean = false,
   val flags: List<ImportFlag> = emptyList()
 )

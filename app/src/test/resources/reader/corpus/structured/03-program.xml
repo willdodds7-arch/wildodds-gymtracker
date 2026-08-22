@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<program name="Block A">
+  <exercise><name>Bench Press</name><sets>3</sets><reps>8</reps></exercise>
+  <exercise><name>Barbell Row</name><sets>3</sets><reps>10</reps></exercise>
+</program>

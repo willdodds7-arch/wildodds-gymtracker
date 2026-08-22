@@ -111,6 +111,15 @@ android {
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
+            all {
+                // Gradle does not forward -D properties to the test JVM. The reader corpus needs
+                // one (`-Dreader.corpus.update=true` regenerates its golden snapshots), so it is
+                // passed through explicitly.
+                it.systemProperty(
+                    "reader.corpus.update",
+                    System.getProperty("reader.corpus.update") ?: "false"
+                )
+            }
         }
     }
 

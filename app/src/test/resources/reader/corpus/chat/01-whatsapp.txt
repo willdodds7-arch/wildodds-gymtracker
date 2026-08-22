@@ -1,0 +1,4 @@
+[21/03/2026, 19:04] Coach: Day 1
+[21/03/2026, 19:04] Coach: Bench Press 3x8
+[21/03/2026, 19:05] Coach: Barbell Row 3x10
+[21/03/2026, 19:05] Coach: Back Squat 5x5

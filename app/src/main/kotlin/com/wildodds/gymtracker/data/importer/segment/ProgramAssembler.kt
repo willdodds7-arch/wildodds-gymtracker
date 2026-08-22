@@ -40,11 +40,13 @@ object ProgramAssembler {
         LineRole.PROGRAM_TITLE -> builder.title = builder.title.ifBlank { l.features.text }
 
         LineRole.PHASE_HEADER -> {
+          builder.sawHeader = true
           builder.phase = l.features.phaseNumber
           builder.phaseLabel = l.features.text
         }
 
         LineRole.WEEK_HEADER -> {
+          builder.sawHeader = true
           val weeks = l.features.weekNumbers.ifEmpty { listOf(builder.nextWeekNumber()) }
           builder.startWeeks(weeks, isDeload = looksLikeDeload(l.features.text))
           // "W1D3" names a week AND a day in one line.
@@ -54,6 +56,7 @@ object ProgramAssembler {
         }
 
         LineRole.SESSION_HEADER -> {
+          builder.sawHeader = true
           val (label, weekday) = sessionName(l.features)
           builder.startSession(label, null, weekday, SessionType.TRAINING)
           pendingSection = null
@@ -62,6 +65,7 @@ object ProgramAssembler {
         }
 
         LineRole.REST_DAY -> {
+          builder.sawHeader = true
           val (label, weekday) = sessionName(l.features)
           val type = if (isActiveRecovery(l.features.text)) SessionType.ACTIVE_RECOVERY else SessionType.REST
           builder.startSession(label.ifBlank { "Rest" }, null, weekday, type)
@@ -129,6 +133,8 @@ object ProgramAssembler {
     var title: String = ""
     var phase: Int? = null
     var phaseLabel: String = ""
+    /** True once any week / day / phase / rest-day header has been seen. */
+    var sawHeader = false
     val notes = ArrayList<String>()
 
     /** week index -> ordered sessions. LinkedHashMap so week order is the document's order. */
@@ -224,6 +230,7 @@ object ProgramAssembler {
         weeks = weekDrafts,
         structure = if (multiWeek) ProgramStructure.WEEK_BY_WEEK else ProgramStructure.SINGLE_WEEK_REPEATED,
         repeatWeeks = 1,
+        hasExplicitStructure = sawHeader,
         notes = notes.toList()
       )
     }

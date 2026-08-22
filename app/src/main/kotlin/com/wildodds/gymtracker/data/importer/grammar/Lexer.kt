@@ -189,7 +189,17 @@ object Lexer {
       i = m.range.last + 1
     }
 
+    // A tokeniser that cannot terminate is a crash in production, on a file the user was told to
+    // try. Every branch below is meant to advance `i`, but "meant to" is not a guarantee across
+    // future edits, so position is checked explicitly: if a pass produces no progress the loop
+    // stops and what was read so far stands. Downstream, the unconsumed remainder shows up as low
+    // coverage — which is exactly the signal for "we did not understand this line".
+    var guard = 0
+    var lastPos = -1
     while (i < line.length) {
+      if (i == lastPos) {
+        if (++guard > 2) break
+      } else { guard = 0; lastPos = i }
       val c = line[i]
       if (c.isWhitespace()) { i++; continue }
 
@@ -227,7 +237,12 @@ object Lexer {
           out += if (isTempo(line, start)) {
             val te = tempoEnd(line, start)
             Token(TokenType.TEMPO, line.substring(start, te), start, te).also { i = te }
-          } else if (end + 1 < line.length && line[end] == ':' && line.getOrNull(end + 1)?.isDigit() == true) {
+          } else if (end + 1 < line.length && line[end] == ':' &&
+                     line.getOrNull(end + 1)?.isDigit() == true && clockEnd(line, start) > start) {
+            // The colon-then-digit test is a cheap prefilter, not the whole rule: "0:8" has a colon
+            // and a digit and is NOT a clock (a clock needs two digits after the colon). Requiring
+            // clockEnd to actually advance is what stops a zero-length token being emitted at the
+            // same position forever.
             val ce = clockEnd(line, start)
             Token(TokenType.CLOCK, line.substring(start, ce), start, ce).also { i = ce }
           } else {

@@ -1,0 +1,11 @@
+name: Upper Lower
+weeks: 4
+days:
+  - name: Upper A
+    exercises:
+      - Bench Press 4x6
+      - Barbell Row 4x6
+  - name: Lower A
+    exercises:
+      - Back Squat 4x5
+      - Romanian Deadlift 3x8

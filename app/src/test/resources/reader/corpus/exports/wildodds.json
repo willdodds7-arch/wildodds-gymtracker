@@ -1,0 +1,9 @@
+{"schemaVersion":1,"kind":"wildodds.program","name":"Winter Block","durationWeeks":6,
+ "description":"Six weeks of upper/lower",
+ "workouts":[
+   {"name":"Upper A","kind":"TRAINING","exercises":[
+      {"name":"Bench Press","notes":"tuck the elbows","sets":[
+         {"type":"WORKING","reps":"5","rpe":"8","restSeconds":"180"},
+         {"type":"WORKING","reps":"5","rpe":"8","restSeconds":"180"},
+         {"type":"WORKING","reps":"5","rpe":"8","restSeconds":"180"}]}]},
+   {"name":"Rest","kind":"REST","exercises":[]}]}
