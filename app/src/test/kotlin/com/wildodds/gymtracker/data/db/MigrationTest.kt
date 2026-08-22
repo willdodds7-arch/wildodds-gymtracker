@@ -7,6 +7,7 @@ import androidx.room.testing.MigrationTestHelper
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -185,6 +186,77 @@ class MigrationTest {
   }
 
   /** Creates [TEST_DB] at user_version 1 with the original core schema. */
+  /**
+   * v25→v26 makes the reader's prescription detail first-class (rest, tempo, superset, load kind,
+   * per-set JSON, modifiers, the verbatim source line) and gives a session a type so a rest day can
+   * exist. It ships to users with real training history, so: purely additive, nothing backfilled,
+   * and every pre-existing row must read back byte-identical with NULLs in the new columns.
+   */
+  @Test
+  fun migration25To26IsAdditiveAndBackfillsNothing() {
+  seedVersion1Database()
+  val upTo25 = AppDatabase.ALL_MIGRATIONS.filter { it.startVersion in 1 until 25 }.toTypedArray()
+  val db = helper.runMigrationsAndValidate(TEST_DB, 25, true, *upTo25)
+  db.execSQL("INSERT INTO programs (id, name, totalWeeks, createdAt) VALUES (1, 'Old', 4, 1)")
+  db.execSQL("INSERT INTO sessions (id, programId, weekNumber, dayNumber, name, muscleGroups) " +
+  "VALUES (1, 1, 1, 1, 'Push', 'Chest')")
+  db.execSQL("INSERT INTO exercises (id, sessionId, name, sets, repsTarget, notes, orderIndex) " +
+  "VALUES (1, 1, 'Bench Press', 3, '8-12', 'tuck the elbows', 0)")
+  db.close()
+
+  val migration = AppDatabase.ALL_MIGRATIONS.first { it.startVersion == 25 }
+  val migrated = helper.runMigrationsAndValidate(TEST_DB, 26, true, migration)
+
+  // Existing data is intact and unchanged.
+  migrated.query("SELECT name, sets, repsTarget, notes FROM exercises WHERE id = 1").use { c ->
+  c.moveToFirst()
+  assertEquals("Bench Press", c.getString(0))
+  assertEquals(3, c.getInt(1))
+  assertEquals("8-12", c.getString(2))
+  assertEquals("tuck the elbows", c.getString(3))
+  }
+
+  // NOTHING is backfilled: null still means "unknown", not "zero" and not "90 seconds".
+  migrated.query("""SELECT setsStated, restSeconds, restRangeSecondsMax, tempo, supersetGroup,
+  supersetOrder, loadKind, loadValue, loadValueMax, loadUnit, rawSourceLine
+  FROM exercises WHERE id = 1""").use { c ->
+  c.moveToFirst()
+  for (i in 0 until c.columnCount) {
+  assertTrue("column ${c.getColumnName(i)} must stay NULL on a pre-v26 row", c.isNull(i))
+  }
+  }
+  // The two non-null new columns take their documented defaults.
+  migrated.query("SELECT isFinalSetAmrap, perSet, modifiers FROM exercises WHERE id = 1").use { c ->
+  c.moveToFirst()
+  assertEquals(0, c.getInt(0))
+  assertEquals("", c.getString(1))
+  assertEquals("", c.getString(2))
+  }
+  // Every pre-existing session is a training session, so nothing disappears from the day list.
+  migrated.query("SELECT sessionType FROM sessions WHERE id = 1").use { c ->
+  c.moveToFirst(); assertEquals("TRAINING", c.getString(0))
+  }
+
+  // And the new columns actually take the values the reader writes.
+  migrated.execSQL("""INSERT INTO exercises
+  (id, sessionId, name, sets, repsTarget, notes, orderIndex, setsStated, restSeconds,
+  restRangeSecondsMax, tempo, supersetGroup, supersetOrder, loadKind, loadValue, loadValueMax,
+  loadUnit, perSet, isFinalSetAmrap, modifiers, rawSourceLine)
+  VALUES (2, 1, 'Front Squat', 3, '5', '', 1, 3, 90, 120, '31X0', 'A', 1, 'PCT_TM', 75.0, 85.0,
+  'PERCENT', '[{"setNumber":1,"reps":"5"}]', 1, 'each_side,paused', 'A1) Front Squat 3x5 @75% TM')""")
+  migrated.execSQL("INSERT INTO sessions (id, programId, weekNumber, dayNumber, name, muscleGroups, sessionType) " +
+  "VALUES (2, 1, 1, 2, 'Rest', '', 'REST')")
+  migrated.query("SELECT COUNT(*) FROM sessions WHERE sessionType = 'REST'").use { c ->
+  c.moveToFirst(); assertEquals(1, c.getInt(0))
+  }
+  migrated.query("SELECT rawSourceLine, modifiers FROM exercises WHERE id = 2").use { c ->
+  c.moveToFirst()
+  assertEquals("A1) Front Squat 3x5 @75% TM", c.getString(0))
+  assertEquals("each_side,paused", c.getString(1))
+  }
+  migrated.close()
+  }
+
   private fun seedVersion1Database() {
   val context = ApplicationProvider.getApplicationContext<android.content.Context>()
   context.deleteDatabase(TEST_DB)
@@ -211,7 +283,7 @@ class MigrationTest {
    * Must track [AppDatabase]'s `version`. Bump it in the same change as a new migration —
    * otherwise the 1→N test silently stops covering everything past the old number.
    */
-  private const val LATEST_VERSION = 25
+  private const val LATEST_VERSION = 26
 
   /**
    * The schema as it existed at version 1 — i.e. the v13 entities minus every column/table

@@ -2,6 +2,7 @@ package com.wildodds.gymtracker.data.importer
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -51,8 +52,11 @@ class UniversalImportTest {
     val r = UniversalProgramImporter.import("Conditioning", text)
     val ex = r.program.sessions.first().exercises
     assertEquals("", ex.first().repsTarget)        // NOT the old parser's fabricated "8-10"
-    assertTrue("verbatim source is preserved in notes",
-      ex.first().notes.contains("Prowler Sprints"))
+    // The verbatim source now has its own column rather than being appended to notes, and it is
+    // kept at EVERY confidence level, not just on low-confidence slots.
+    assertEquals("Prowler Sprints", ex.first().rawSourceLine)
+    // And the set count the source never stated is null, not 1.
+    assertNull(ex.first().setsStated)
   }
 
   @Test fun textWithCommaPerSet_isNotMisdetectedAsCsv() {

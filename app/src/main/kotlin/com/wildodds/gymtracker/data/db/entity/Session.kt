@@ -25,6 +25,14 @@ data class Session(
   val muscleGroups: String,
   // Which phase this session belongs to. Single-block programs use phase 1 for all.
   val phaseNumber: Int = 1,
+  /**
+   * Name of a [com.wildodds.gymtracker.data.importer.SessionType]; unknown values read as TRAINING.
+   *
+   * A program that says "Wed — off" is a 5-day week containing a rest day, not a 4-day week. Before
+   * v26 the schema had no way to say that, so every import quietly dropped the rest days and came
+   * back as a different program from the one the coach wrote.
+   */
+  @ColumnInfo(defaultValue = "TRAINING") val sessionType: String = "TRAINING",
   // ── Sync metadata (Phase 3, online-first) ────────────────────────────────────
   // syncId: globally-unique row identity across devices ('' until the insert trigger fills it).
   // updatedAt: last local modification (epoch ms), maintained by SQLite triggers — the

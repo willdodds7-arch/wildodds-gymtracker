@@ -86,7 +86,11 @@ data class PlanGroup(
   val restAfterRoundSeconds: Int = 90
 )
 
-enum class WorkoutKind { TRAINING, REST, DELOAD }
+/**
+ * What a day in the plan is. Mirrors [com.wildodds.gymtracker.data.importer.SessionType] 1:1 so a
+ * rest day round-trips import -> storage -> builder -> plan view without a lossy step in the middle.
+ */
+enum class WorkoutKind { TRAINING, REST, ACTIVE_RECOVERY, DELOAD }
 
 data class PlanWorkout(
   val id: String = UUID.randomUUID().toString(),
@@ -100,7 +104,7 @@ data class PlanWorkout(
   /** Optional workouts are offered but not required to complete the week. */
   val isOptional: Boolean = false
 ) {
-  val isRest: Boolean get() = kind == WorkoutKind.REST
+  val isRest: Boolean get() = kind == WorkoutKind.REST || kind == WorkoutKind.ACTIVE_RECOVERY
   val exerciseCount: Int get() = exercises.size
   /** A training workout with no exercises, or with exercises nobody gave targets to. */
   val isEmpty: Boolean get() = kind == WorkoutKind.TRAINING && exercises.isEmpty()

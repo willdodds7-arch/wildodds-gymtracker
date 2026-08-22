@@ -28,9 +28,10 @@ import com.wildodds.gymtracker.data.db.entity.*
   PlannedSet::class,
   ExerciseAlternative::class
   ],
-  version = 25,
+  version = 26,
   exportSchema = true
 )
+@androidx.room.TypeConverters(ReaderConverters::class)
 abstract class AppDatabase : RoomDatabase() {
   abstract fun programDao(): ProgramDao
   abstract fun sessionDao(): SessionDao
@@ -394,13 +395,42 @@ abstract class AppDatabase : RoomDatabase() {
   }
   }
 
+  private val MIGRATION_25_26 = object : Migration(25, 26) {
+  override fun migrate(db: SupportSQLiteDatabase) {
+  // Reader v2, phase 2: end the lossy import step. Everything the importer understood but could
+  // only fold into `notes` — rest, tempo, superset grouping and order, load kind, per-set detail,
+  // modifiers, the verbatim source line — becomes a first-class column, and a session gains a type
+  // so a rest day can exist at all.
+  //
+  // Purely ADDITIVE with safe defaults. NOTHING IS BACKFILLED: old rows keep their NULLs, and NULL
+  // continues to mean "unknown", not "zero". Inferring a rest of 90s (or one set) for a program
+  // imported before this migration would be inventing data about a real user's training.
+  db.execSQL("ALTER TABLE exercises ADD COLUMN setsStated INTEGER DEFAULT NULL")
+  db.execSQL("ALTER TABLE exercises ADD COLUMN restSeconds INTEGER DEFAULT NULL")
+  db.execSQL("ALTER TABLE exercises ADD COLUMN restRangeSecondsMax INTEGER DEFAULT NULL")
+  db.execSQL("ALTER TABLE exercises ADD COLUMN tempo TEXT DEFAULT NULL")
+  db.execSQL("ALTER TABLE exercises ADD COLUMN supersetGroup TEXT DEFAULT NULL")
+  db.execSQL("ALTER TABLE exercises ADD COLUMN supersetOrder INTEGER DEFAULT NULL")
+  db.execSQL("ALTER TABLE exercises ADD COLUMN loadKind TEXT DEFAULT NULL")
+  db.execSQL("ALTER TABLE exercises ADD COLUMN loadValue REAL DEFAULT NULL")
+  db.execSQL("ALTER TABLE exercises ADD COLUMN loadValueMax REAL DEFAULT NULL")
+  db.execSQL("ALTER TABLE exercises ADD COLUMN loadUnit TEXT DEFAULT NULL")
+  db.execSQL("ALTER TABLE exercises ADD COLUMN perSet TEXT NOT NULL DEFAULT ''")
+  db.execSQL("ALTER TABLE exercises ADD COLUMN isFinalSetAmrap INTEGER NOT NULL DEFAULT 0")
+  db.execSQL("ALTER TABLE exercises ADD COLUMN modifiers TEXT NOT NULL DEFAULT ''")
+  db.execSQL("ALTER TABLE exercises ADD COLUMN rawSourceLine TEXT DEFAULT NULL")
+  db.execSQL("ALTER TABLE sessions ADD COLUMN sessionType TEXT NOT NULL DEFAULT 'TRAINING'")
+  }
+  }
+
   /** Every migration, in order, as applied by the app. Exposed so tests can run the
    *  identical 1→N chain against a seed database. */
   val ALL_MIGRATIONS: Array<Migration> = arrayOf(
   MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7,
   MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13,
   MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19,
-  MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25
+  MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25,
+  MIGRATION_25_26
   )
 
   fun getInstance(context: Context): AppDatabase =

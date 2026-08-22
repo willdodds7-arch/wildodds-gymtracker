@@ -1,5 +1,6 @@
 ﻿package com.wildodds.gymtracker.data.repository
 
+import androidx.room.withTransaction
 import com.wildodds.gymtracker.data.db.AppDatabase
 import com.wildodds.gymtracker.data.db.dao.SetLogWithWeek
 import com.wildodds.gymtracker.data.db.entity.*
@@ -105,7 +106,8 @@ class GymRepository(private val db: AppDatabase) {
 
   val sessions = materialisedSessions.map { ps ->
   Session(programId = programId, weekNumber = ps.weekNumber, dayNumber = ps.dayNumber,
-  name = ps.name, muscleGroups = ps.muscleGroups, phaseNumber = ps.phaseNumber)
+  name = ps.name, muscleGroups = ps.muscleGroups, phaseNumber = ps.phaseNumber,
+  sessionType = ps.sessionType)
   }
   db.sessionDao().insertAll(sessions)
 
@@ -116,11 +118,30 @@ class GymRepository(private val db: AppDatabase) {
   db.exerciseDao().insertAll(ps.exercises.map { pe ->
   Exercise(sessionId = dbSession.id, name = pe.name, sets = pe.sets,
   repsTarget = pe.repsTarget, notes = pe.notes, orderIndex = pe.orderIndex,
-  rpeTarget = pe.rpeTarget, pct1rmTarget = pe.pct1rmTarget, cap3Tag = pe.cap3Tag)
+  rpeTarget = pe.rpeTarget, pct1rmTarget = pe.pct1rmTarget, cap3Tag = pe.cap3Tag,
+  // Reader v2 (v26): what the source actually said. Null throughout means "didn't say".
+  setsStated = pe.setsStated, restSeconds = pe.restSeconds,
+  restRangeSecondsMax = pe.restRangeSecondsMax, tempo = pe.tempo,
+  supersetGroup = pe.supersetGroup, supersetOrder = pe.supersetOrder,
+  loadKind = pe.loadKind, loadValue = pe.loadValue, loadValueMax = pe.loadValueMax,
+  loadUnit = pe.loadUnit, perSet = pe.perSet, isFinalSetAmrap = pe.isFinalSetAmrap,
+  modifiers = pe.modifiers, rawSourceLine = pe.rawSourceLine)
   })
   }
   programId
   }
+
+  /**
+   * [importProgram], but as a single database transaction: either the whole program lands or none
+   * of it does. Half-imported programs used to be possible — the program row, some sessions and
+   * some exercises could commit before a failure — which left the user with a plausible-looking
+   * program missing its last two days and no way to tell.
+   *
+   * Room's `withTransaction` is re-entrant and dispatches on its own transaction executor, so the
+   * inner `withContext(Dispatchers.IO)` in [importProgram] is harmless.
+   */
+  suspend fun importProgramTransactionally(parsed: ParsedProgram, activate: Boolean = true): Long =
+  db.withTransaction { importProgram(parsed, activate) }
 
   /** Save without activating. */
   suspend fun addToLibrary(parsed: ParsedProgram) = importProgram(parsed, activate = false)
@@ -164,7 +185,9 @@ class GymRepository(private val db: AppDatabase) {
   suspend fun loadProgramPlan(programId: Long): com.wildodds.gymtracker.data.builder.PlanProgram? =
   withContext(Dispatchers.IO) {
   val program = db.programDao().getProgramById(programId) ?: return@withContext null
-  val week1 = db.sessionDao().getSessionsForWeek(1, programId)
+  // Rest days included: the builder edits the SHAPE of a week, and a week whose rest days were
+  // filtered out on the way in comes back one day short and silently renumbered.
+  val week1 = db.sessionDao().getSessionsForWeekIncludingRest(1, programId)
   val exercises = week1.associate { it.id to db.exerciseDao().getExercisesForSession(it.id) }
   val planned = db.plannedSetDao().forProgram(programId).groupBy { it.exerciseId }
   val alts = db.plannedSetDao().alternativesForProgram(programId).groupBy { it.exerciseId }

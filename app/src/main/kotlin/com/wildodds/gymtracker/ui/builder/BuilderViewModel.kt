@@ -183,6 +183,7 @@ class BuilderViewModel(app: Application) : AndroidViewModel(app) {
 
   private fun defaultWorkoutName(kind: WorkoutKind): String = when (kind) {
     WorkoutKind.REST -> "Rest"
+    WorkoutKind.ACTIVE_RECOVERY -> "Active recovery"
     WorkoutKind.DELOAD -> "Deload"
     WorkoutKind.TRAINING -> {
       val n = _plan.value.workouts.count { !it.isRest } + 1

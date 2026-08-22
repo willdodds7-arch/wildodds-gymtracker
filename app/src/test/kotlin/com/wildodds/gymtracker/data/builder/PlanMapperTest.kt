@@ -50,15 +50,48 @@ class PlanMapperTest {
       PlanWorkout(name = "Pull", exercises = listOf(PlanExercise(name = "Barbell Row", sets = working(3)))),
       weeks = 1
     )
-    val days = PlanMapper.toParsed(p).sessions.map { it.dayNumber }.sorted()
-    // Push is day 1 and Pull is day 3 — the rest day is not written, but it isn't collapsed either.
-    assertEquals(listOf(1, 3), days)
+    val sessions = PlanMapper.toParsed(p).sessions.sortedBy { it.dayNumber }
+    // Push day 1, Rest day 2, Pull day 3 — the rest day holds its slot AND is written, so a
+    // save/reload gives back the week the user actually built.
+    assertEquals(listOf(1, 2, 3), sessions.map { it.dayNumber })
+    assertEquals(listOf("TRAINING", "REST", "TRAINING"), sessions.map { it.sessionType })
   }
 
   @Test
-  fun `rest days are not written as sessions`() {
+  fun `rest days are written as REST sessions with no exercises`() {
     val p = plan(PlanWorkout(name = "Rest", kind = WorkoutKind.REST), weeks = 2)
-    assertTrue(PlanMapper.toParsed(p).sessions.isEmpty())
+    val sessions = PlanMapper.toParsed(p).sessions
+    // Two weeks x one rest day. Before v26 these were dropped entirely and a rest-only plan
+    // round-tripped as an empty program.
+    assertEquals(2, sessions.size)
+    assertTrue(sessions.all { it.sessionType == "REST" && it.exercises.isEmpty() })
+  }
+
+  @Test
+  fun `rest days come back from a parsed program as rest workouts`() {
+    val p = plan(
+      PlanWorkout(name = "Push", exercises = listOf(PlanExercise(name = "Bench Press", sets = working(3)))),
+      PlanWorkout(name = "Rest", kind = WorkoutKind.REST),
+      weeks = 1
+    )
+    val back = PlanMapper.workoutsFromParsed(PlanMapper.toParsed(p))
+    assertEquals(listOf(WorkoutKind.TRAINING, WorkoutKind.REST), back.map { it.kind })
+  }
+
+  @Test
+  fun `heaviest seed week picks the week with the most working sets`() {
+    val light = com.wildodds.gymtracker.data.parser.ParsedSession(
+      weekNumber = 1, dayNumber = 1, name = "A", muscleGroups = "",
+      exercises = listOf(com.wildodds.gymtracker.data.parser.ParsedExercise("Squat", 3, "5", "", 0)))
+    val heavy = light.copy(weekNumber = 2,
+      exercises = listOf(com.wildodds.gymtracker.data.parser.ParsedExercise("Squat", 8, "3", "", 0)))
+    val parsed = com.wildodds.gymtracker.data.parser.ParsedProgram(
+      name = "P", totalWeeks = 2, sessions = listOf(light, heavy))
+    assertEquals(3, PlanMapper.workoutsFromParsed(parsed).first().exercises.first().sets.size)
+    assertEquals(8, PlanMapper.workoutsFromParsed(parsed, PlanMapper.SeedWeek.HEAVIEST)
+      .first().exercises.first().sets.size)
+    assertEquals(8, PlanMapper.workoutsFromParsed(parsed, seedWeekNumber = 2)
+      .first().exercises.first().sets.size)
   }
 
   @Test

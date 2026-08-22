@@ -7,6 +7,7 @@ import com.wildodds.gymtracker.data.db.entity.PlannedSet
 import com.wildodds.gymtracker.data.db.entity.Session
 import com.wildodds.gymtracker.data.parser.ParsedExercise
 import com.wildodds.gymtracker.data.parser.ParsedProgram
+import com.wildodds.gymtracker.data.importer.SessionType
 import com.wildodds.gymtracker.data.parser.ParsedSession
 
 /**
@@ -33,19 +34,21 @@ object PlanMapper {
     val weeks = if (plan.isOngoing) ONGOING_WEEKS else plan.durationWeeks
 
     // Day numbers follow the plan order INCLUDING rest days, so a rest day between Push and Pull
-    // keeps Pull on day 3 rather than silently sliding it up to day 2.
-    val training = plan.workouts.mapIndexedNotNull { index, w ->
-      if (w.isRest) null else (index + 1) to w
-    }
+    // keeps Pull on day 3 rather than silently sliding it up to day 2. Since v26 the rest days are
+    // WRITTEN too, as sessions with a non-TRAINING `sessionType` and no exercises, so the shape of
+    // the week survives a save/reload instead of coming back as pure training days. Every existing
+    // query filters them out (see SessionDao), so nothing that counts training days changes.
+    val ordered = plan.workouts.mapIndexed { index, w -> (index + 1) to w }
 
     val sessions = (1..weeks).flatMap { week ->
-      training.map { (dayNumber, w) ->
+      ordered.map { (dayNumber, w) ->
         ParsedSession(
           weekNumber = week,
           dayNumber = dayNumber,
-          name = w.name.ifBlank { "Day $dayNumber" },
-          muscleGroups = muscleSummary(w),
-          exercises = w.exercises.mapIndexed { i, ex -> toParsedExercise(ex, i) }
+          name = w.name.ifBlank { if (w.isRest) "Rest" else "Day $dayNumber" },
+          muscleGroups = if (w.isRest) "" else muscleSummary(w),
+          exercises = if (w.isRest) emptyList() else w.exercises.mapIndexed { i, ex -> toParsedExercise(ex, i) },
+          sessionType = sessionTypeOf(w)
         )
       }
     }
@@ -64,6 +67,23 @@ object PlanMapper {
       style = plan.goal.display
     )
   }
+
+  /** [WorkoutKind] -> the stored `sessions.sessionType`. The two vocabularies are deliberately 1:1. */
+  private fun sessionTypeOf(w: PlanWorkout): String = when (w.kind) {
+    WorkoutKind.TRAINING -> SessionType.TRAINING.name
+    WorkoutKind.REST -> SessionType.REST.name
+    WorkoutKind.ACTIVE_RECOVERY -> SessionType.ACTIVE_RECOVERY.name
+    WorkoutKind.DELOAD -> SessionType.DELOAD_NOTE.name
+  }
+
+  /** The stored `sessions.sessionType` -> [WorkoutKind]. Unknown values read as TRAINING. */
+  internal fun workoutKindOf(sessionType: String): WorkoutKind =
+    when (runCatching { SessionType.valueOf(sessionType) }.getOrNull()) {
+      SessionType.REST -> WorkoutKind.REST
+      SessionType.ACTIVE_RECOVERY -> WorkoutKind.ACTIVE_RECOVERY
+      SessionType.DELOAD_NOTE -> WorkoutKind.DELOAD
+      else -> WorkoutKind.TRAINING
+    }
 
   /**
    * Collapse a plan exercise into the legacy single-row shape every existing screen reads.
@@ -141,42 +161,112 @@ object PlanMapper {
       ExerciseAlternative(exerciseId = exerciseId, name = name, orderIndex = i)
     }
 
+  /** Which week of a multi-week import seeds the builder. */
+  enum class SeedWeek {
+    /** The program as written in its first week. The default, and what the builder always did. */
+    FIRST,
+    /** The week with the most prescribed working sets — usually the peak, sometimes the one to edit. */
+    HEAVIEST
+  }
+
   /**
    * Convert a freshly-imported [ParsedProgram] into builder workouts.
    *
-   * Only week 1 is read: the importer materialises every week, but a `PlanWorkout` is one
-   * definition, so pulling in all of them would produce N copies of each day. Rest days aren't
-   * represented in [ParsedProgram] at all, so an imported plan comes back as pure training days.
+   * Only ONE week is read, and that is deliberate rather than a limitation of convenience: a
+   * `PlanWorkout` is a single definition that the save step expands across every week, so reading
+   * all N weeks would produce N copies of each day. [seed] chooses which week that is — first
+   * (default), heaviest, or a specific one via [seedWeekNumber].
+   *
+   * Weeks 2..N carry progression a single plan definition cannot hold. That is not silently
+   * dropped: `ImportReviewViewModel` tells the user plainly, and the per-week detail stays in the
+   * imported program itself, which is committed in full.
+   *
+   * Rest days DO come through, as `WorkoutKind.REST` workouts in their original day positions.
    */
-  fun workoutsFromParsed(parsed: ParsedProgram): List<PlanWorkout> {
-    val firstWeek = parsed.sessions.minOfOrNull { it.weekNumber } ?: 1
+  fun workoutsFromParsed(
+    parsed: ParsedProgram,
+    seed: SeedWeek = SeedWeek.FIRST,
+    seedWeekNumber: Int? = null
+  ): List<PlanWorkout> {
+    val week = seedWeekNumber
+      ?: when (seed) {
+        SeedWeek.FIRST -> parsed.sessions.minOfOrNull { it.weekNumber } ?: 1
+        SeedWeek.HEAVIEST -> parsed.sessions
+          .groupBy { it.weekNumber }
+          // Ties go to the earliest week, so the choice is deterministic on every device.
+          .entries.sortedWith(compareByDescending<Map.Entry<Int, List<ParsedSession>>> { (_, ss) ->
+            ss.sumOf { s -> s.exercises.sumOf { it.sets } }
+          }.thenBy { it.key })
+          .firstOrNull()?.key ?: 1
+      }
     return parsed.sessions
-      .filter { it.weekNumber == firstWeek }
+      .filter { it.weekNumber == week }
       .sortedBy { it.dayNumber }
       .map { session ->
+        val kind = workoutKindOf(session.sessionType)
         PlanWorkout(
           name = session.name,
-          kind = WorkoutKind.TRAINING,
-          exercises = session.exercises.sortedBy { it.orderIndex }.map { ex ->
-            PlanExercise(
-              name = ex.name,
-              notes = ex.notes,
-              // The importer's flat model carries one target for the whole exercise, so expand it
-              // into that many identical working sets. The user can re-shape it afterwards.
-              sets = List(ex.sets.coerceAtLeast(1)) {
-                PlanSet(type = SetType.WORKING, reps = ex.repsTarget, rpe = ex.rpeTarget)
-              }
-            )
-          }
+          kind = kind,
+          exercises = if (kind == WorkoutKind.REST || kind == WorkoutKind.ACTIVE_RECOVERY) emptyList()
+          else session.exercises.sortedBy { it.orderIndex }.map(::toPlanExerciseFromParsed)
         )
       }
   }
+
+  /**
+   * One imported exercise -> builder exercise. Prefers the per-set detail the importer recorded
+   * (so "5/3/1" arrives as three sets with three rep counts rather than three identical ones) and
+   * falls back to expanding the flat target when the source really did prescribe uniform sets.
+   */
+  private fun toPlanExerciseFromParsed(ex: ParsedExercise): PlanExercise {
+    val sets = if (ex.perSet.isNotEmpty()) {
+      ex.perSet.sortedBy { it.setNumber }.map { p ->
+        PlanSet(
+          type = SetType.WORKING,
+          reps = p.reps,
+          restSeconds = p.restSeconds ?: ex.restSeconds ?: DEFAULT_REST_SECONDS,
+          rpe = if (p.loadKind == "RPE") fmtLoad(p.loadValue) else ex.rpeTarget,
+          tempo = p.tempo.ifBlank { ex.tempo.orEmpty() }
+        )
+      }
+    } else {
+      List(ex.sets.coerceAtLeast(1)) {
+        PlanSet(
+          type = SetType.WORKING,
+          reps = ex.repsTarget,
+          restSeconds = ex.restSeconds ?: DEFAULT_REST_SECONDS,
+          rpe = ex.rpeTarget,
+          tempo = ex.tempo.orEmpty()
+        )
+      }
+    }
+    return PlanExercise(
+      name = ex.name,
+      notes = ex.notes,
+      sets = sets,
+      supersetGroupId = ex.supersetGroup,
+      isOptional = ex.modifiers.contains(com.wildodds.gymtracker.data.importer.Modifier.OPTIONAL)
+    )
+  }
+
+  /**
+   * The rest the builder shows when the source didn't state one. It is a UI default, not a claim
+   * about the program: the stored `Exercise.restSeconds` stays NULL, so nothing downstream reads
+   * this back as "the coach said 90 seconds".
+   */
+  const val DEFAULT_REST_SECONDS = 90
+
+  private fun fmtLoad(d: Double?): String =
+    d?.let { if (it % 1.0 == 0.0) it.toInt().toString() else it.toString() }.orEmpty()
 
   // ── Storage → plan ─────────────────────────────────────────────────────────
 
   /**
    * Rebuild an editable plan from week 1 of a stored program. Later weeks are ignored: they are
    * copies of the same definition, and reading them would produce N duplicate workouts.
+   *
+   * Pass [week1Sessions] from `SessionDao.getSessionsForWeekIncludingRest` so rest days come back
+   * as rest days; the training-only query would silently reshape the week.
    */
   fun fromStored(
     program: com.wildodds.gymtracker.data.db.entity.Program,
@@ -187,12 +277,14 @@ object PlanMapper {
   ): PlanProgram {
     val ordered = week1Sessions.sortedBy { it.dayNumber }
     val workouts = ordered.map { session ->
-      val exercises = (exercisesBySession[session.id] ?: emptyList())
-        .sortedBy { it.orderIndex }
-        .map { ex -> toPlanExercise(ex, plannedSets[ex.id], alternatives[ex.id]) }
+      val kind = workoutKindOf(session.sessionType)
+      val exercises = if (kind == WorkoutKind.REST || kind == WorkoutKind.ACTIVE_RECOVERY) emptyList()
+        else (exercisesBySession[session.id] ?: emptyList())
+          .sortedBy { it.orderIndex }
+          .map { ex -> toPlanExercise(ex, plannedSets[ex.id], alternatives[ex.id]) }
       PlanWorkout(
         name = session.name,
-        kind = WorkoutKind.TRAINING,
+        kind = kind,
         exercises = exercises,
         weekday = 0
       )

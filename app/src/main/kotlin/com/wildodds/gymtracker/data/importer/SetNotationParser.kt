@@ -72,12 +72,13 @@ object SetNotationParser {
     }
     absWeight.find(working)?.let { m ->
       val unit = if (m.groupValues[2].startsWith("kg")) WeightUnit.KG else WeightUnit.LB
-      loads += LoadSpec(LoadKind.ABSOLUTE, m.groupValues[1].toDoubleOrNull(), unit, m.value.trim())
+      loads += LoadSpec(LoadKind.ABSOLUTE, m.groupValues[1].toDoubleOrNull(), unit = unit, text = m.value.trim())
     }
     bodyweight.find(working)?.let { m ->
       val extra = m.groupValues[2]
       loads += LoadSpec(LoadKind.BODYWEIGHT, extra.toDoubleOrNull(),
-        if (m.groupValues[3].startsWith("lb")) WeightUnit.LB else WeightUnit.KG, m.value.trim())
+        unit = if (m.groupValues[3].startsWith("lb")) WeightUnit.LB else WeightUnit.KG,
+        text = m.value.trim())
     }
 
     // 4) rest (range beats single)

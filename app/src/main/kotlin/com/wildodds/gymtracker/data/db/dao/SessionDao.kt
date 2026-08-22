@@ -12,14 +12,27 @@ data class ProgramDayCount(val programId: Long, val dayCount: Int)
 
 @Dao
 interface SessionDao {
-  @Query("SELECT * FROM sessions WHERE programId = :programId ORDER BY weekNumber, dayNumber")
+  /**
+   * Every query below that does NOT say `IncludingRest` filters to training sessions only.
+   *
+   * Since v26 a program can contain rest days, stored as sessions with `sessionType = 'REST'` (or
+   * ACTIVE_RECOVERY / DELOAD_NOTE) and no exercises, so that "Wed - off" survives import instead of
+   * being silently dropped. Every pre-existing caller means "the days you train" — home screen day
+   * list, week progress, day counts, propagation, program-complete detection — so the filter lives
+   * here rather than at 20 call sites, and those callers keep behaving exactly as they did.
+   */
+  @Query("SELECT * FROM sessions WHERE programId = :programId AND sessionType = 'TRAINING' ORDER BY weekNumber, dayNumber")
   fun getAllSessions(programId: Long): Flow<List<Session>>
 
-  @Query("SELECT * FROM sessions WHERE programId = :programId ORDER BY weekNumber, dayNumber")
+  @Query("SELECT * FROM sessions WHERE programId = :programId AND sessionType = 'TRAINING' ORDER BY weekNumber, dayNumber")
   suspend fun getAllSessionsOnce(programId: Long): List<Session>
 
-  @Query("SELECT * FROM sessions WHERE weekNumber = :weekNumber AND programId = :programId ORDER BY dayNumber")
+  @Query("SELECT * FROM sessions WHERE weekNumber = :weekNumber AND programId = :programId AND sessionType = 'TRAINING' ORDER BY dayNumber")
   suspend fun getSessionsForWeek(weekNumber: Int, programId: Long): List<Session>
+
+  /** Rest days included, in day order — the plan view and the builder need the real shape of a week. */
+  @Query("SELECT * FROM sessions WHERE weekNumber = :weekNumber AND programId = :programId ORDER BY dayNumber")
+  suspend fun getSessionsForWeekIncludingRest(weekNumber: Int, programId: Long): List<Session>
 
   /**
    * Distinct week-1 day count for EVERY program in one query. The Library shows a "N days" badge
@@ -27,22 +40,22 @@ interface SessionDao {
    * (and materialised every Session object just to count distinct dayNumbers).
    */
   @Query("""SELECT programId, COUNT(DISTINCT dayNumber) AS dayCount FROM sessions
-    WHERE weekNumber = 1 GROUP BY programId""")
+    WHERE weekNumber = 1 AND sessionType = 'TRAINING' GROUP BY programId""")
   suspend fun getDayCountsForAllPrograms(): List<ProgramDayCount>
 
   @Query("SELECT * FROM sessions WHERE id = :sessionId")
   suspend fun getSessionById(sessionId: Long): Session?
 
   // All sessions for a day from a given week onwards (used for exercise propagation)
-  @Query("SELECT * FROM sessions WHERE programId = :programId AND dayNumber = :dayNumber AND weekNumber >= :fromWeek ORDER BY weekNumber")
+  @Query("SELECT * FROM sessions WHERE programId = :programId AND dayNumber = :dayNumber AND weekNumber >= :fromWeek AND sessionType = 'TRAINING' ORDER BY weekNumber")
   suspend fun getSessionsFromWeek(programId: Long, dayNumber: Int, fromWeek: Int): List<Session>
 
   // Count of total sessions and completions for a program - used for program-complete detection
-  @Query("SELECT COUNT(*) FROM sessions WHERE programId = :programId")
+  @Query("SELECT COUNT(*) FROM sessions WHERE programId = :programId AND sessionType = 'TRAINING'")
   suspend fun countForProgram(programId: Long): Int
 
   /** Planned session count per week (for consistency trends). */
-  @Query("SELECT weekNumber AS week, COUNT(*) AS count FROM sessions WHERE programId = :programId GROUP BY weekNumber")
+  @Query("SELECT weekNumber AS week, COUNT(*) AS count FROM sessions WHERE programId = :programId AND sessionType = 'TRAINING' GROUP BY weekNumber")
   suspend fun getSessionCountsPerWeek(programId: Long): List<com.wildodds.gymtracker.data.db.dao.WeekSessionCount>
 
   @Insert(onConflict = OnConflictStrategy.REPLACE)

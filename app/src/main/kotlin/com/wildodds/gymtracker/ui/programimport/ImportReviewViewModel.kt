@@ -21,7 +21,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-/** One editable exercise row in the review screen. [original] is the verbatim parsed name. */
+/**
+ * One editable exercise row in the review screen. [original] is the verbatim parsed name.
+ *
+ * [parsed] is the full compiled exercise, carried through untouched so that committing does not
+ * silently drop everything the v26 schema can now hold (rest, tempo, superset, load kind, per-set
+ * detail, modifiers, the source line). Rebuilding a `ParsedExercise` from the visible fields alone
+ * was exactly the lossy step phase 2 removed from the compiler, and it would have crept straight
+ * back in here.
+ */
 data class EditExercise(
   val original: String,
   val name: String,
@@ -30,14 +38,19 @@ data class EditExercise(
   val rpe: String,
   val pct: String,
   val notes: String,
-  val needsReview: Boolean
+  val needsReview: Boolean,
+  val parsed: ParsedExercise,
+  /** The verbatim source line, shown beside the parsed fields so the user can see what was read. */
+  val sourceLine: String = ""
 )
 
 data class EditSession(
   val label: String,
   val week: Int,
   val day: Int,
-  val exercises: List<EditExercise>
+  val exercises: List<EditExercise>,
+  /** Name of a [com.wildodds.gymtracker.data.importer.SessionType]; a REST day has no exercises. */
+  val sessionType: String = "TRAINING"
 )
 
 data class ImportReviewState(
@@ -94,7 +107,7 @@ class ImportReviewViewModel(app: Application) : AndroidViewModel(app) {
           .sortedWith(compareBy({ it.key.first }, { it.key.second }))
           .map { (key, group) ->
             val ps = group.first()
-            EditSession(ps.name, key.first, key.second, ps.exercises.map(::toEdit))
+            EditSession(ps.name, key.first, key.second, ps.exercises.map(::toEdit), ps.sessionType)
           },
         flags = result.flags,
         overallConfidence = result.overallConfidence,
@@ -146,10 +159,12 @@ class ImportReviewViewModel(app: Application) : AndroidViewModel(app) {
 
   private fun toEdit(pe: ParsedExercise): EditExercise {
     val ref = com.wildodds.gymtracker.data.importer.ExerciseResolver.resolve(pe.name, alias.asLookup)
-    val needsReview = ref.status == ResolutionStatus.INFERRED || ref.status == ResolutionStatus.UNRESOLVED
+    val needsReview = ref.status == ResolutionStatus.INFERRED || ref.status == ResolutionStatus.UNRESOLVED ||
+      pe.setsStated == null
     return EditExercise(
       original = pe.name, name = pe.name, sets = pe.sets, reps = pe.repsTarget,
-      rpe = pe.rpeTarget, pct = pe.pct1rmTarget, notes = pe.notes, needsReview = needsReview
+      rpe = pe.rpeTarget, pct = pe.pct1rmTarget, notes = pe.notes, needsReview = needsReview,
+      parsed = pe, sourceLine = pe.rawSourceLine.orEmpty()
     )
   }
 
@@ -197,9 +212,18 @@ class ImportReviewViewModel(app: Application) : AndroidViewModel(app) {
       val parsedSessions = s.sessions.map { es ->
         ParsedSession(
           weekNumber = es.week, dayNumber = es.day, name = es.label, muscleGroups = "",
+          // Copy the user's edits ONTO the compiled exercise rather than building a fresh one, so
+          // every field they didn't touch survives the commit exactly as parsed.
           exercises = es.exercises.mapIndexed { i, e ->
-            ParsedExercise(e.name, e.sets, e.reps, e.notes, i, e.rpe, e.pct)
-          }
+            e.parsed.copy(
+              name = e.name, sets = e.sets, repsTarget = e.reps, notes = e.notes,
+              orderIndex = i, rpeTarget = e.rpe, pct1rmTarget = e.pct,
+              // An edited set count is now stated — by the user, in review. That is a statement of
+              // fact, not a guess, so it is recorded as one.
+              setsStated = if (e.sets != e.parsed.sets) e.sets else e.parsed.setsStated
+            )
+          },
+          sessionType = es.sessionType
         )
       }
       val allEx = parsedSessions.flatMap { it.exercises }
@@ -211,9 +235,13 @@ class ImportReviewViewModel(app: Application) : AndroidViewModel(app) {
         trackRpe = allEx.any { it.rpeTarget.isNotBlank() },
         trackOneRm = allEx.any { it.pct1rmTarget.isNotBlank() },
         repeatWeeks = if (s.multiWeek) 1 else s.weeksToRun.coerceAtLeast(1),
-        daysPerWeek = s.sessions.filter { it.week == (s.sessions.minOfOrNull { x -> x.week } ?: 1) }.size
+        daysPerWeek = s.sessions
+          .filter { it.week == (s.sessions.minOfOrNull { x -> x.week } ?: 1) && it.sessionType == "TRAINING" }
+          .size
       )
-      val id = repo.importProgram(program, activate)
+      // Transactional: a half-imported program that looks complete but is missing its last two
+      // days is worse than a failed import the user can retry.
+      val id = repo.importProgramTransactionally(program, activate)
       _state.value = _state.value.copy(committing = false, committedProgramId = id)
       onDone(id)
     }

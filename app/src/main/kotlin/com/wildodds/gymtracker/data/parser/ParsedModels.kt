@@ -8,7 +8,26 @@ data class ParsedExercise(
   val orderIndex: Int,
   val rpeTarget: String = "",  // Prescribed RPE from program (e.g. "8", "7-8")
   val pct1rmTarget: String = "",  // Prescribed %1RM from program (e.g. "75%", "70-80%")
-  val cap3Tag: String = ""  // nSuns CAP3 main lifts only — see Exercise.cap3Tag
+  val cap3Tag: String = "",  // nSuns CAP3 main lifts only — see Exercise.cap3Tag
+  // ── Reader v2 prescription detail (v26) ─────────────────────────────────────
+  // What the SOURCE said, carried straight through to the matching Exercise columns. Every one of
+  // these is null/empty when the source didn't say — see Exercise for the field-by-field notes.
+  // Defaulted throughout so every existing construction site (catalogue, builder, CAP3, templates)
+  // is unaffected and simply supplies nothing.
+  val setsStated: Int? = null,
+  val restSeconds: Int? = null,
+  val restRangeSecondsMax: Int? = null,
+  val tempo: String? = null,
+  val supersetGroup: String? = null,
+  val supersetOrder: Int? = null,
+  val loadKind: String? = null,
+  val loadValue: Double? = null,
+  val loadValueMax: Double? = null,
+  val loadUnit: String? = null,
+  val perSet: List<com.wildodds.gymtracker.data.db.entity.StoredSetPrescription> = emptyList(),
+  val isFinalSetAmrap: Boolean = false,
+  val modifiers: List<String> = emptyList(),
+  val rawSourceLine: String? = null
 )
 
 data class ParsedSession(
@@ -17,7 +36,13 @@ data class ParsedSession(
   val name: String,
   val muscleGroups: String,
   val exercises: List<ParsedExercise>,
-  val phaseNumber: Int = 1
+  val phaseNumber: Int = 1,
+  /**
+   * Name of a [com.wildodds.gymtracker.data.importer.SessionType]. Defaults to TRAINING so every
+   * existing producer is unchanged; the importer sets REST / ACTIVE_RECOVERY / DELOAD_NOTE when the
+   * source says so, and a REST session legitimately carries zero exercises.
+   */
+  val sessionType: String = "TRAINING"
 )
 
 /** One block of a multi-phase program. weekNumber on sessions stays global (continuous). */
