@@ -1,0 +1,32 @@
+# The reader's golden corpus and its snapshots must be byte-identical on every machine.
+#
+# Git's autocrlf would hand a Windows checkout CRLF line endings, which changes the SOURCE BYTES of
+# every corpus document. The reader normalises CRLF to LF before parsing, so the drafts would still
+# be correct — but the snapshots are generated from those bytes, and the import idempotency hash is
+# taken over them, so a CRLF checkout would produce a different hash for the same file and the
+# corpus test would fail for everyone except whoever generated it.
+app/src/test/resources/reader/**            -text
+app/src/test/resources/reader/**/*.txt      text eol=lf
+app/src/test/resources/reader/**/*.csv      text eol=lf
+app/src/test/resources/reader/**/*.tsv      text eol=lf
+app/src/test/resources/reader/**/*.psv      text eol=lf
+app/src/test/resources/reader/**/*.md       text eol=lf
+app/src/test/resources/reader/**/*.json     text eol=lf
+app/src/test/resources/reader/**/*.yaml     text eol=lf
+app/src/test/resources/reader/**/*.xml      text eol=lf
+app/src/test/resources/reader/**/*.html     text eol=lf
+
+# Binary corpus documents, and the fixtures the older tests use.
+*.xlsx  binary
+*.xls   binary
+*.docx  binary
+*.ods   binary
+*.odt   binary
+*.rtf   binary
+*.zip   binary
+*.pdf   binary
+*.apk   binary
+
+# The bundled reader data is read byte-for-byte at runtime and diffed by humans; keep it LF.
+app/src/main/resources/reader/vocabulary.json  text eol=lf
+app/src/main/resources/reader/exercises.tsv    text eol=lf
