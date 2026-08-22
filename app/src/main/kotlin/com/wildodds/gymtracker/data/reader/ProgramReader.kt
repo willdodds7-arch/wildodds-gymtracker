@@ -36,7 +36,7 @@ import com.wildodds.gymtracker.data.reader.ingest.SourceKind
 class ProgramReader(
   registry: ExtractorRegistry = ExtractorRegistry.pureOnly(),
   private val limits: IngestLimits = IngestLimits.DEFAULT,
-  private val gridReader: GridProgramReader = GridProgramReader.NONE
+  private val gridReader: GridProgramReader = com.wildodds.gymtracker.data.importer.layout.LayoutDetector
 ) {
 
   private val pipeline = IngestPipeline(registry, limits)

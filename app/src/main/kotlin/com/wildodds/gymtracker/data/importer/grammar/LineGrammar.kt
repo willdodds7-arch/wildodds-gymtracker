@@ -581,6 +581,19 @@ object LineGrammar {
       return at + 3
     }
 
+    // "@ 100" with no unit. Extremely common in spreadsheets, where the unit lives in the column
+    // heading or nowhere at all. It IS an absolute load; the unit stays null so review asks rather
+    // than assuming kg and silently halving every American import.
+    val claimedByNext = t.getOrNull(at + 1)?.type in setOf(
+      TokenType.PERCENT, TokenType.RPE, TokenType.RIR, TokenType.WEIGHT_UNIT,
+      TokenType.TIME_UNIT, TokenType.DISTANCE_UNIT, TokenType.CALORIE_UNIT,
+      TokenType.X, TokenType.RANGE, TokenType.SETS_WORD, TokenType.REPS_WORD)
+    if (t.getOrNull(at - 1)?.type == TokenType.AT && s.load == null && !claimedByNext) {
+      claim(t[at])
+      s.load = LoadSpec(LoadKind.ABSOLUTE, n, unit = null, text = t[at].text)
+      return at + 1
+    }
+
     // A number the grammar cannot place is left UNCLAIMED on purpose: that is what makes the
     // coverage metric able to say "31% of this line was not understood".
     return at + 1

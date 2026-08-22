@@ -217,6 +217,8 @@ data class SessionDraft(
   val weekdayHint: String = "",
   val notes: String = "",
   val type: SessionType = SessionType.TRAINING,
+  /** "Chest, Shoulders" — stated by the source, never inferred from the exercises. */
+  val muscleGroups: String = "",
   val slots: List<SlotDraft>
 )
 

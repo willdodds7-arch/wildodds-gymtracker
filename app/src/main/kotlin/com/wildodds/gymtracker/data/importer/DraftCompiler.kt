@@ -86,7 +86,7 @@ object DraftCompiler {
       weekNumber = week,
       dayNumber = s.dayNumber,
       name = s.label,
-      muscleGroups = "",
+      muscleGroups = s.muscleGroups,
       // A rest day genuinely has no exercises; that is what makes it a rest day, not an empty bug.
       exercises = s.slots.map { toExercise(it, lossy) },
       sessionType = s.type.name

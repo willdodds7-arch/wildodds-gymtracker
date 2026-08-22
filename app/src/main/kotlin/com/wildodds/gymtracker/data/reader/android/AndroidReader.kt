@@ -44,7 +44,8 @@ object AndroidReader {
   }
 
   fun reader(context: Context, limits: IngestLimits = IngestLimits.DEFAULT,
-             gridReader: GridProgramReader = GridProgramReader.NONE): ProgramReader {
+             gridReader: GridProgramReader =
+               com.wildodds.gymtracker.data.importer.layout.LayoutDetector): ProgramReader {
     ensurePdfBox(context)
     return ProgramReader(registry(context), limits, gridReader)
   }

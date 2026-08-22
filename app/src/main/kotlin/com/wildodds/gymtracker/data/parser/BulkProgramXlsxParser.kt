@@ -1,9 +1,6 @@
 package com.wildodds.gymtracker.data.parser
 
-import android.util.Xml
-import org.xmlpull.v1.XmlPullParser
 import java.io.InputStream
-import java.util.zip.ZipInputStream
 
 /**
  * Parses the "bulk upload" workbook into many [ParsedProgram]s, with phase support.
@@ -214,11 +211,15 @@ class BulkProgramXlsxParser {
   if (curPhaseWeeks > 0) phase.declaredWeeks = curPhaseWeeks
   val day = phase.days.getOrPut(curDay) { DayAcc(curDay) }
 
-  val sets = cell("sets", row).split(Regex("[ \\-/]")).firstOrNull()?.toIntOrNull() ?: 3
+  // NEVER invented. This used to default to 3 sets of "8-12" for any row that did not say,
+  // which put numbers into users' programs that appear nowhere in their spreadsheet. A
+  // missing set count renders as one set (the schema needs something to show) and a missing
+  // rep target stays EMPTY, which is what the source actually said.
+  val sets = cell("sets", row).split(Regex("[ \\-/]")).firstOrNull()?.toIntOrNull()
   day.exercises.add(ExAcc(
   name = exName,
-  sets = sets,
-  reps = cell("reps", row).ifBlank { "8-12" },
+  sets = sets ?: 1,
+  reps = cell("reps", row),
   rpe = cell("rpe", row),
   pct1rm = cell("pct1rm", row),
   rest = cell("rest", row),
@@ -238,141 +239,43 @@ class BulkProgramXlsxParser {
   val second = ('A' + (idx - 1) % 26)
   return "$first$second"
   }
-
-  // ── XLSX reading (folded onto SheetGrid in Phase 6) ────────────────────────
+  // ── Sheet reading, folded onto the shared engine ──────────────────────────
+  //
+  // This used to be a second hand-rolled zip + XML reader, one of THREE in the codebase, and it
+  // drifted: it had no number formats (a percent-formatted 0.85 read as "0.85"), no merged cells,
+  // no inline strings (so Google Sheets exports lost every label), no cached formula values and no
+  // hidden-row awareness. Delegating to XlsxExtractor means bulk import inherits all of that, and
+  // every future fix, without a second place to maintain.
 
   private fun loadSheets(stream: InputStream): Map<String, Map<String, String>> {
-  val entries = mutableMapOf<String, ByteArray>()
-  ZipInputStream(stream.buffered()).use { zip ->
-  var entry = zip.nextEntry
-  while (entry != null) {
-  entries[entry.name] = zip.readBytes()
-  entry = zip.nextEntry
+  val bytes = stream.readBytes()
+  val zip = try {
+  com.wildodds.gymtracker.data.reader.ingest.ZipReader.read(
+  bytes, com.wildodds.gymtracker.data.reader.ingest.IngestLimits.DEFAULT)
+  } catch (e: com.wildodds.gymtracker.data.reader.ingest.IngestError) {
+  return emptyMap()
   }
-  }
-  val sharedStrings = parseSharedStrings(entries["xl/sharedStrings.xml"])
-  val workbookRels = parseWorkbookRels(entries["xl/_rels/workbook.xml.rels"] ?: byteArrayOf())
-  val workbook = parseWorkbook(entries["xl/workbook.xml"] ?: return emptyMap())
-
-  val sheets = LinkedHashMap<String, Map<String, String>>()
-  for ((name, rId) in workbook) {
-  val target = workbookRels[rId] ?: continue
-  val normTarget = target.trimStart('/')
-  val path = when {
-  normTarget.startsWith("xl/worksheets/") -> normTarget
-  normTarget.startsWith("worksheets/") -> "xl/$normTarget"
-  else -> "xl/worksheets/$normTarget"
-  }
-  val data = entries[path] ?: entries[normTarget] ?: continue
-  sheets[name] = parseSheetXml(data, sharedStrings)
-  }
-  return sheets
+  val book = try {
+  com.wildodds.gymtracker.data.reader.ingest.XlsxExtractor.read(
+  zip, com.wildodds.gymtracker.data.reader.ingest.IngestLimits.DEFAULT)
+  } catch (e: com.wildodds.gymtracker.data.reader.ingest.IngestError) {
+  return emptyMap()
   }
 
-  private fun parseSharedStrings(data: ByteArray?): List<String> {
-  if (data == null) return emptyList()
-  val strings = mutableListOf<String>()
-  val parser = Xml.newPullParser()
-  parser.setInput(data.inputStream(), "UTF-8")
-  var inT = false
-  val sb = StringBuilder()
-  var eventType = parser.eventType
-  while (eventType != XmlPullParser.END_DOCUMENT) {
-  when (eventType) {
-  XmlPullParser.START_TAG -> {
-  if (parser.name == "t") { inT = true; sb.clear() }
-  else if (parser.name == "si") sb.clear()
-  }
-  XmlPullParser.TEXT -> if (inT) sb.append(parser.text)
-  XmlPullParser.END_TAG -> {
-  if (parser.name == "t") inT = false
-  else if (parser.name == "si") strings.add(sb.toString())
-  }
-  }
-  eventType = parser.next()
-  }
-  return strings
-  }
-
-  private fun parseWorkbook(data: ByteArray): Map<String, String> {
-  val map = LinkedHashMap<String, String>()
-  val parser = Xml.newPullParser()
-  parser.setInput(data.inputStream(), "UTF-8")
-  var eventType = parser.eventType
-  while (eventType != XmlPullParser.END_DOCUMENT) {
-  if (eventType == XmlPullParser.START_TAG && parser.name == "sheet") {
-  val name = parser.getAttributeValue(null, "name") ?: ""
-  val rId = parser.getAttributeValue(null, "r:id")
-  ?: parser.getAttributeValue("http://schemas.openxmlformats.org/officeDocument/2006/relationships", "id")
-  ?: ""
-  if (name.isNotEmpty() && rId.isNotEmpty()) map[name] = rId
-  }
-  eventType = parser.next()
-  }
-  return map
-  }
-
-  private fun parseWorkbookRels(data: ByteArray): Map<String, String> {
-  if (data.isEmpty()) return emptyMap()
-  val map = mutableMapOf<String, String>()
-  val parser = Xml.newPullParser()
-  parser.setInput(data.inputStream(), "UTF-8")
-  var eventType = parser.eventType
-  while (eventType != XmlPullParser.END_DOCUMENT) {
-  if (eventType == XmlPullParser.START_TAG && parser.name == "Relationship") {
-  val id = parser.getAttributeValue(null, "Id") ?: ""
-  val target = parser.getAttributeValue(null, "Target") ?: ""
-  if (id.isNotEmpty()) map[id] = target
-  }
-  eventType = parser.next()
-  }
-  return map
-  }
-
-  private fun parseSheetXml(data: ByteArray, sharedStrings: List<String>): Map<String, String> {
-  val cells = mutableMapOf<String, String>()
-  val parser = Xml.newPullParser()
-  parser.setInput(data.inputStream(), "UTF-8")
-
-  var currentCell = ""
-  var currentType = ""
-  var inV = false
-  var inIs = false
-  val text = StringBuilder()
-  var eventType = parser.eventType
-
-  while (eventType != XmlPullParser.END_DOCUMENT) {
-  when (eventType) {
-  XmlPullParser.START_TAG -> when (parser.name) {
-  "c" -> {
-  currentCell = parser.getAttributeValue(null, "r") ?: ""
-  currentType = parser.getAttributeValue(null, "t") ?: ""
-  inV = false
-  }
-  "v" -> { inV = true; text.clear() }
-  "is" -> { inIs = true; text.clear() }
-  "t" -> if (inIs) text.clear()
-  }
-  XmlPullParser.TEXT -> if (inV || inIs) text.append(parser.text)
-  XmlPullParser.END_TAG -> when (parser.name) {
-  "v" -> {
-  inV = false
-  val raw = text.toString().trim()
-  if (currentCell.isNotEmpty()) {
-  cells[currentCell] = when (currentType) {
-  "s" -> sharedStrings.getOrNull(raw.toIntOrNull() ?: -1) ?: raw
-  else -> raw
+  // The accumulation logic below is genuinely this parser's own — multi-program workbooks with
+  // phases are a shape no other path handles — so the grid is presented in the A1-keyed form it
+  // already expects rather than being rewritten around it.
+  return book.grids.associate { g ->
+  g.name to buildMap {
+  for (r in 0 until g.rowCount) {
+  if (r in g.hiddenRows) continue
+  for (c in 0 until g.colCount) {
+  val v = g.cell(r, c)
+  if (v.isNotBlank()) put(
+  com.wildodds.gymtracker.data.reader.ingest.A1.letters(c) + (r + 1), v)
   }
   }
   }
-  "is" -> {
-  inIs = false
-  if (currentCell.isNotEmpty()) cells[currentCell] = text.toString().trim()
   }
-  }
-  }
-  eventType = parser.next()
-  }
-  return cells
   }
 }
