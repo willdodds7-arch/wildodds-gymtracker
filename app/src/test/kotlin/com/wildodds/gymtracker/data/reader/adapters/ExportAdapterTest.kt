@@ -123,7 +123,10 @@ class ExportAdapterTest {
     val r = read(fitnotes, "FitNotes_Export.csv")
     assertEquals("fitnotes", r.route)
     val squat = r.importResult.program.sessions.single().exercises.first()
-    assertEquals("Barbell Squat", squat.name)
+    // The resolver canonicalises "Barbell Squat" to the movement it names. The VERBATIM source is
+    // still kept on rawSourceLine, so nothing is lost by the rename.
+    assertEquals("Back Squat", squat.name)
+    assertTrue(squat.rawSourceLine!!.contains("Barbell Squat"))
     assertEquals("LB", squat.loadUnit)
     assertEquals(2, squat.setsStated)
     assertTrue(squat.notes.contains("felt heavy"))
