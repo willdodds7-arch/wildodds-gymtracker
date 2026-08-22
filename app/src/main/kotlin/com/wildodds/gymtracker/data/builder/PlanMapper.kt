@@ -141,6 +141,37 @@ object PlanMapper {
       ExerciseAlternative(exerciseId = exerciseId, name = name, orderIndex = i)
     }
 
+  /**
+   * Convert a freshly-imported [ParsedProgram] into builder workouts.
+   *
+   * Only week 1 is read: the importer materialises every week, but a `PlanWorkout` is one
+   * definition, so pulling in all of them would produce N copies of each day. Rest days aren't
+   * represented in [ParsedProgram] at all, so an imported plan comes back as pure training days.
+   */
+  fun workoutsFromParsed(parsed: ParsedProgram): List<PlanWorkout> {
+    val firstWeek = parsed.sessions.minOfOrNull { it.weekNumber } ?: 1
+    return parsed.sessions
+      .filter { it.weekNumber == firstWeek }
+      .sortedBy { it.dayNumber }
+      .map { session ->
+        PlanWorkout(
+          name = session.name,
+          kind = WorkoutKind.TRAINING,
+          exercises = session.exercises.sortedBy { it.orderIndex }.map { ex ->
+            PlanExercise(
+              name = ex.name,
+              notes = ex.notes,
+              // The importer's flat model carries one target for the whole exercise, so expand it
+              // into that many identical working sets. The user can re-shape it afterwards.
+              sets = List(ex.sets.coerceAtLeast(1)) {
+                PlanSet(type = SetType.WORKING, reps = ex.repsTarget, rpe = ex.rpeTarget)
+              }
+            )
+          }
+        )
+      }
+  }
+
   // ── Storage → plan ─────────────────────────────────────────────────────────
 
   /**

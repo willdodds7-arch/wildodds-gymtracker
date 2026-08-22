@@ -124,27 +124,38 @@ fun PasteProgramSheet(
       Spacer(Modifier.height(12.dp))
 
       Button(
-        onClick = { if (looksLikeJson) onImport(text) else onOpenFullImporter() },
+        onClick = { onImport(text) },
         enabled = text.isNotBlank(),
         modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
         shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.buttonColors(containerColor = accent)
       ) {
-        Text(if (looksLikeJson) "Import program" else "Review and import", fontWeight = FontWeight.Bold)
+        Text("Import into this program", fontWeight = FontWeight.Bold)
       }
 
       if (!looksLikeJson) {
-        Spacer(Modifier.height(6.dp))
-        Text(
-          "Plain text and CSV go through a review step so you can fix any exercise it wasn't sure about.",
-          style = MaterialTheme.typography.labelSmall, color = c.textTertiary
-        )
+        Spacer(Modifier.height(8.dp))
+        // The standalone reviewer is still there for anyone who wants to correct exercise names
+        // one by one before committing — but it starts a SEPARATE program, so it is the secondary
+        // path now that the builder can import in place.
+        TextButton(
+          onClick = onOpenFullImporter,
+          enabled = text.isNotBlank(),
+          modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+        ) { Text("Open the full importer instead", color = c.textSecondary) }
       }
     }
   }
 }
 
-/** §3.5 — import validates and previews before writing anything. */
+/**
+ * §3.5 — import validates and previews before writing anything.
+ *
+ * Handles both formats the builder accepts: a Wild Odds JSON export, and free text (a pasted
+ * program, CSV, or the text pulled out of a file) run through the same deterministic importer the
+ * standalone review screen uses. JSON is tried first because it is exact; anything else falls
+ * through to the text importer rather than being rejected.
+ */
 @Composable
 fun ImportPreviewDialog(
   raw: String,
@@ -152,7 +163,22 @@ fun ImportPreviewDialog(
   onConfirm: (replace: Boolean) -> Unit,
   onDismiss: () -> Unit
 ) {
-  val decoded = remember(raw) { ProgramPlanJson.decode(raw) }
+  val decoded = remember(raw) {
+    val asJson = ProgramPlanJson.decode(raw)
+    if (asJson is ProgramPlanJson.Result.Ok) asJson
+    else runCatching {
+      val imported = com.wildodds.gymtracker.data.importer.UniversalProgramImporter.import("", raw)
+      val workouts = PlanMapper.workoutsFromParsed(imported.program)
+      if (workouts.isEmpty()) asJson
+      else ProgramPlanJson.Result.Ok(
+        PlanProgram(name = imported.program.name, workouts = workouts),
+        imported.flags
+          .filter { it.severity == com.wildodds.gymtracker.data.importer.FlagSeverity.REVIEW }
+          .map { it.message }
+          .take(3)
+      )
+    }.getOrDefault(asJson)
+  }
 
   when (decoded) {
     is ProgramPlanJson.Result.Invalid -> AlertDialog(

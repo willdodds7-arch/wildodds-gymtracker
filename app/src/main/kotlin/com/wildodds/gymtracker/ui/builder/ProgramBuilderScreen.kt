@@ -77,7 +77,8 @@ fun ProgramBuilderScreen(
   var showScheduling by remember { mutableStateOf(false) }
   var showProgression by remember { mutableStateOf(false) }
   var confirmDelete by remember { mutableStateOf<String?>(null) }
-  var pendingJson by remember { mutableStateOf<String?>(null) }
+  // Text awaiting the import preview — pasted or read from a file, any supported format.
+  var pendingText by remember { mutableStateOf<String?>(null) }
 
   // Export writes through the platform file picker — a local file operation, nothing uploaded.
   val exportLauncher = rememberLauncherForActivityResult(
@@ -92,7 +93,7 @@ fun ProgramBuilderScreen(
   }
   val importLauncher = rememberLauncherForActivityResult(
     ActivityResultContracts.OpenDocument()
-  ) { uri -> uri?.let { u -> vm.readUri(u) { text -> pendingJson = text } } }
+  ) { uri -> uri?.let { u -> vm.readUri(u) { text -> pendingText = text } } }
 
   LaunchedEffect(committed) {
     committed?.let {
@@ -132,7 +133,7 @@ fun ProgramBuilderScreen(
 
   if (showPasteImport) {
     PasteProgramSheet(
-      onImport = { text -> pendingJson = text; showPasteImport = false },
+      onImport = { text -> pendingText = text; showPasteImport = false },
       onOpenFullImporter = {
         showPasteImport = false
         navController.navigate("import_program")
@@ -141,12 +142,14 @@ fun ProgramBuilderScreen(
     )
   }
 
-  pendingJson?.let { raw ->
+  pendingText?.let { raw ->
     ImportPreviewDialog(
       raw = raw,
       hasExisting = plan.workouts.isNotEmpty(),
-      onConfirm = { replace -> vm.importJson(raw, replace); pendingJson = null },
-      onDismiss = { pendingJson = null }
+      // Imports INTO the program being built rather than navigating away and starting a new one,
+      // so pasting a day part-way through never costs the user their draft.
+      onConfirm = { replace -> vm.importText(raw, replace); pendingText = null },
+      onDismiss = { pendingText = null }
     )
   }
 
@@ -276,6 +279,40 @@ fun ProgramBuilderScreen(
           onRename = { id, name -> vm.renameWorkout(id, name) },
           onAssignDay = { id, day -> vm.setWorkoutWeekday(id, day) }
         )
+      }
+
+      // Paste / upload stays available for the WHOLE life of the program, not just while it is
+      // empty. Pulling a day out of a coach's message or a spreadsheet is something people do
+      // part-way through building, and burying it in the overflow menu made it undiscoverable
+      // the moment the first workout was added.
+      // Only once the start options are gone — while the program is empty they already offer both,
+      // and showing them twice on one screen is just noise.
+      if (plan.workouts.isNotEmpty()) item(key = "paste_upload") {
+        Row(
+          Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 12.dp),
+          horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+          OutlinedButton(
+            onClick = { showPasteImport = true },
+            modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = accent)
+          ) {
+            Icon(Icons.Default.ContentPaste, null, modifier = Modifier.size(16.dp))
+            Spacer(Modifier.width(6.dp))
+            Text("Paste text", fontWeight = FontWeight.Bold)
+          }
+          OutlinedButton(
+            onClick = { importLauncher.launch(arrayOf("*/*")) },
+            modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = accent)
+          ) {
+            Icon(Icons.Default.FolderOpen, null, modifier = Modifier.size(16.dp))
+            Spacer(Modifier.width(6.dp))
+            Text("Upload file", fontWeight = FontWeight.Bold)
+          }
+        }
       }
 
       item(key = "add_workout") {

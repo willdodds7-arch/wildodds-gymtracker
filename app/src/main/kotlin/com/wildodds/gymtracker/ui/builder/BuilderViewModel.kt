@@ -17,7 +17,10 @@ import com.wildodds.gymtracker.data.builder.ProgramSummary
 import com.wildodds.gymtracker.data.builder.ProgressionSettings
 import com.wildodds.gymtracker.data.builder.SetShape
 import com.wildodds.gymtracker.data.builder.SetType
+import com.wildodds.gymtracker.data.builder.PlanMapper
 import com.wildodds.gymtracker.data.builder.WorkoutKind
+import com.wildodds.gymtracker.data.importer.FlagSeverity
+import com.wildodds.gymtracker.data.importer.UniversalProgramImporter
 import com.wildodds.gymtracker.data.db.AppDatabase
 import com.wildodds.gymtracker.data.repository.GymRepository
 import kotlinx.coroutines.Dispatchers
@@ -492,6 +495,46 @@ class BuilderViewModel(app: Application) : AndroidViewModel(app) {
           if (r.program.workouts.size != 1) append("s")
           if (r.notes.isNotEmpty()) append(" · ${r.notes.first()}")
         }
+      }
+    }
+  }
+
+  /**
+   * Import pasted text or an opened file INTO the program being built, rather than sending the user
+   * off to the standalone importer and abandoning their draft.
+   *
+   * Wild Odds JSON is applied directly; anything else (a coach's message, a forum post, CSV) goes
+   * through the same deterministic [UniversalProgramImporter] the standalone screen uses, so the
+   * markdown/notation handling is identical. Nothing leaves the device.
+   */
+  fun importText(raw: String, replace: Boolean) {
+    if (raw.isBlank()) return
+    if (raw.trimStart().startsWith("{")) { importJson(raw, replace); return }
+
+    viewModelScope.launch {
+      val result = withContext(Dispatchers.Default) {
+        runCatching { UniversalProgramImporter.import("", raw) }.getOrNull()
+      }
+      val workouts = result?.let { PlanMapper.workoutsFromParsed(it.program) }.orEmpty()
+      if (workouts.isEmpty()) {
+        _message.value = "Couldn't find any workouts in that text."
+        return@launch
+      }
+
+      snapshotFor(if (replace) "Replaced program" else "Added ${workouts.size} workouts")
+      mutate { plan ->
+        plan.copy(
+          // Adopt the imported name only when the user hasn't titled their program yet.
+          name = plan.name.ifBlank { result!!.program.name },
+          workouts = if (replace) workouts else plan.workouts + workouts
+        )
+      }
+
+      val needingReview = result!!.flags.count { it.severity == FlagSeverity.REVIEW }
+      _message.value = buildString {
+        append("Imported ${workouts.size} workout")
+        if (workouts.size != 1) append("s")
+        if (needingReview > 0) append(" · $needingReview to check")
       }
     }
   }

@@ -154,7 +154,7 @@ fun LibraryScreen(
   val libraryPrograms = activePrograms.filter { !it.isActive }
   // Day filters were removed from this page: the library is the user's OWN programs, usually a
   // handful, where search alone is enough — the chips mostly filtered a list down to nothing. The
-  // days facet still exists in the "Select Program" browse sheet, where the ~800-block catalogue
+  // days facet still exists in the "Select a program" browse sheet, where the ~800-block catalogue
   // genuinely needs narrowing.
   val filtered = libraryPrograms.filter { prog ->
   query.isBlank() || prog.name.contains(query.trim(), ignoreCase = true)
@@ -252,7 +252,7 @@ fun LibraryScreen(
   ) {
   Icon(Icons.Default.Add, null, modifier = Modifier.size(16.dp))
   Spacer(Modifier.width(8.dp))
-  Text("Create and import program", fontWeight = FontWeight.Bold)
+  Text("Create or Upload", fontWeight = FontWeight.Bold)
   }
   Spacer(Modifier.height(8.dp))
   OutlinedButton(
@@ -264,7 +264,7 @@ fun LibraryScreen(
   ) {
   Icon(Icons.Default.FitnessCenter, null, modifier = Modifier.size(16.dp))
   Spacer(Modifier.width(8.dp))
-  Text("Select Program", fontWeight = FontWeight.Bold)
+  Text("Select a program", fontWeight = FontWeight.Bold)
   }
 
   // Pasting or uploading a program is a primary way in, not a hidden extra — it sits directly
@@ -456,7 +456,7 @@ fun LibraryScreen(
 
 
 /**
- * Pill filter chip. Now used only by the "Select Program" browse sheet — the copy of this row that
+ * Pill filter chip. Now used only by the "Select a program" browse sheet — the copy of this row that
  * filtered the user's own library by training days was removed (a personal library is small enough
  * that search covers it).
  */
