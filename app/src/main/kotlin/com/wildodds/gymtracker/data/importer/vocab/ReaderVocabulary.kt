@@ -68,6 +68,21 @@ object ReaderVocabulary {
   val amrapWords: List<String> by lazy { strings(data["amrapWords"]).map(::lower) }
   val genericSheetNames: List<String> by lazy { strings(data["genericSheetNames"]).map(::lower) }
   val columnRoleHints: Map<String, List<String>> by lazy { stringMap(data["columnRoleHints"]) }
+
+  /**
+   * ISO code -> concept -> words, for the languages the vocabulary knows. Read by
+   * [LanguageDetector], which is the only thing that decides whether they apply.
+   */
+  val languages: Map<String, Map<String, List<String>>> by lazy {
+    val obj = (data["languages"] as? JsonObject).orEmptyObject()
+    LinkedHashMap<String, Map<String, List<String>>>().apply {
+      for ((code, value) in obj) {
+        if (code.startsWith("_")) continue          // "_note" is documentation, not a language
+        val concepts = stringMap(value)
+        if (concepts.isNotEmpty()) put(code, concepts)
+      }
+    }
+  }
   val appExportSignatures: Map<String, List<String>> by lazy { stringMap(data["appExportSignatures"]) }
 
   /** `monday` for any of "mon", "Montag", "lunes". Null when the token is not a weekday. */

@@ -1,6 +1,7 @@
 package com.wildodds.gymtracker.data.importer
 
 import com.wildodds.gymtracker.data.importer.segment.ProgramAssembler
+import com.wildodds.gymtracker.data.importer.vocab.LanguageDetector
 import com.wildodds.gymtracker.data.importer.segment.Segmenter
 
 /**
@@ -23,12 +24,23 @@ import com.wildodds.gymtracker.data.importer.segment.Segmenter
 object TextProgramImporter {
 
   fun import(name: String, raw: String): ProgramImportDraft {
-    val normalised = TextNormalizer.normalize(raw)
+    val detection = LanguageDetector.detect(raw)
+    val normalised = TextNormalizer.normalize(raw, detection)
     // Blank lines are kept: "is there a blank line before this" is real evidence about whether a
     // short line is a header, and dropping them throws that away before it can be used.
     val lines = normalised.lines()
     val segmented = Segmenter.segment(lines)
-    return ProgramAssembler.assemble(name, segmented.lines)
+    val draft = ProgramAssembler.assemble(name, segmented.lines)
+    return if (!detection.detected) draft else draft.copy(
+      // Surfaced, never silent: the user's file said "Woche" and their program says "Week", and
+      // they are entitled to know which words were swapped and why.
+      flags = draft.flags + ImportFlag(
+        FlagSeverity.INFO,
+        "Read as ${LanguageDetector.displayName(detection.code)} - " +
+          "${detection.words.joinToString(", ")} read as their English equivalents",
+        sourceLine = detection.words.joinToString(", ")
+      )
+    )
   }
 
   /** Exposed for tests and the corpus runner: the labelling, without assembling a program. */

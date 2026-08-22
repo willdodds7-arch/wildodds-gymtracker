@@ -1,5 +1,6 @@
 package com.wildodds.gymtracker.data.importer
 
+import com.wildodds.gymtracker.data.importer.vocab.LanguageDetector
 import com.wildodds.gymtracker.data.importer.vocab.ReaderVocabulary
 import java.text.Normalizer
 
@@ -47,8 +48,17 @@ object TextNormalizer {
 
   // ── entry point ──────────────────────────────────────────────────────────────
 
-  fun normalize(raw: String): String {
-    val unicode = normalizeUnicode(raw)
+  fun normalize(raw: String): String = normalize(raw, LanguageDetector.detect(raw))
+
+  /**
+   * @param detection the language this document is written in, from [LanguageDetector]. Structural
+   *   words are rewritten into English here so that every rule downstream — the tokeniser, the line
+   *   classifier, the segmenter, the layout scorers — keeps working unchanged instead of each
+   *   learning four more languages.
+   */
+  fun normalize(raw: String, detection: LanguageDetector.Detection): String {
+    val dialect = LanguageDetector.dialectFor(detection)
+    val unicode = dialect?.translate(normalizeUnicode(raw)) ?: normalizeUnicode(raw)
     val out = mutableListOf<String>()
     val lines = unicode.split("\n")
 

@@ -128,15 +128,38 @@ editable view that collapses.
 
 ---
 
-## 9. Non-English support is shallow
+## 9. Non-English support stops at the structure
 
-The vocabulary carries German, Spanish, French and Portuguese words for sets, reps, session, week,
-day and rest, plus weekday names — but they are applied only behind an explicit language hint, and
-nothing sets that hint yet. In practice a German program parses because `3x8` is universal and the
-exercise names often are too, not because the reader understands German.
+`LanguageDetector` now sets the hint the vocabulary was always waiting for. It reads the document,
+and if German, Spanish, French or Portuguese is named by at least three distinct structural words
+that are not also English gym words, it rewrites those words into English before anything else runs
+— `Woche` to `Week`, `Sätze` to `Sets`, `Wdh` to `Reps`. Translation at the boundary rather than a
+second grammar: every rule downstream keeps working unchanged instead of learning four languages.
+The swap is surfaced as an INFO flag naming the words, and the program keeps the user's own title.
 
-RTL documents are read (the corpus has two) and names in other scripts are kept verbatim, but they
-will not resolve against the index, so every one costs a confirmation tap.
+Detection is deliberately hard to trigger, because the risk is asymmetric. An English program read
+as Spanish is a corrupted import; a Spanish program read as English is only the behaviour we had
+before. So words that appear in a foreign list *and* in ordinary English — `series`, `reps`,
+`training`, `pause` — can never be the evidence that settles a language, and a tie between two
+languages detects nothing.
+
+What is still shallow is the **vocabulary**, which is the harder half:
+
+- Only six concepts are translated (sets, reps, session, week, day, rest). A German program that
+  says `Steigerungssatz` or `Ausfallschritt` keeps those words.
+- **Exercise names are not translated at all**, and the index is English. `Kniebeuge` will not
+  resolve to `Back Squat`, so every non-English movement costs a confirmation tap. The corpus's two
+  new documents (`text/18-german.txt`, `text/19-spanish.txt`) parse their weeks, days, sets, reps
+  and loads correctly and resolve **none** of their twelve exercises — which is why adding them
+  moved the scoreboard's resolution rate down from 0.896 to 0.868. The number got worse because it
+  started measuring something real.
+- Italian, Dutch, Polish and the Nordic languages are not in the vocabulary at all.
+
+RTL documents are read (the corpus has two) and names in other scripts are kept verbatim, with the
+same consequence: no resolution, one tap each.
+
+**To fix:** foreign-language aliases in `tools/build_exercise_index.py`, which is where the index's
+other names already live.
 
 ---
 
@@ -187,4 +210,5 @@ The corpus scoreboard sits at 91% parse rate / 89% resolution. Ranked by expecte
 
 1. **Real photos in the corpus** (§2) — the only completely unmeasured path.
 2. **Real app exports** (§1) — turns four "probably" adapters into four "yes" adapters.
-3. **A language hint** (§9) — everything needed is already in the vocabulary.
+3. **Foreign exercise-name aliases** (§9) — the structure now reads in four languages; the
+   movement names do not, and that is the whole remaining cost of a non-English import.

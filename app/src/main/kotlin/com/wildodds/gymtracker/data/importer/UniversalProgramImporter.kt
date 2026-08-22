@@ -74,7 +74,10 @@ object UniversalProgramImporter {
     val allSlots = resolved.weeks.flatMap { w -> w.sessions.flatMap { s -> s.slots } }
     val unit = detectUnit(allSlots)
     val compiled = DraftCompiler.compile(resolved.copy(canonicalUnit = unit))
-    val flags = buildFlags(resolved, allSlots, unit) + compiled.flags
+    // The incoming draft's own flags come FIRST and are kept: an importer that already knows
+    // something about this document - that it was read as German, say - has said so on the draft,
+    // and dropping that here made the knowledge unreachable.
+    val flags = (base.flags + buildFlags(resolved, allSlots, unit) + compiled.flags).distinct()
     val withMeta = resolved.copy(canonicalUnit = unit, flags = flags)
 
     val overall = if (allSlots.isEmpty()) 0.0 else allSlots.map { it.confidence }.average()

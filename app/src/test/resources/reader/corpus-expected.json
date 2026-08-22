@@ -3102,6 +3102,68 @@
         ]
     },
     {
+        "doc": "text/18-german.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "Trainingsplan - Woche 1",
+        "weeks": 1,
+        "sessions": 2,
+        "restDays": 0,
+        "exercises": 6,
+        "resolvedExactly": 0,
+        "confidenceBucket": 25,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as German - saetze, tag, wdh, woche read as their Engli",
+            "INFO:“sessionNotes” can't be stored as a field yet — it was kept ",
+            "REVIEW:Couldn’t confidently match “Bankdruecken” — confirm the exer",
+            "REVIEW:Couldn’t confidently match “Beinpresse” — confirm the exerci",
+            "REVIEW:Couldn’t confidently match “Kniebeuge” — confirm the exercis",
+            "REVIEW:Couldn’t confidently match “Langhantelrudern” — confirm the ",
+            "REVIEW:Couldn’t confidently match “Rumaenisches Kreuzheben” — confi",
+            "REVIEW:Couldn’t confidently match “Schulterdruecken” — confirm the "
+        ],
+        "rows": [
+            "Kniebeuge 4x6 @ABSOLUTE:100KG",
+            "Rumaenisch Kreuzheben 3x8 @ABSOLUTE:80KG",
+            "Beinpresse 3x12",
+            "Bankdruecken 4x6 @ABSOLUTE:80KG",
+            "Langhantelrudern 4x8 @ABSOLUTE:60KG",
+            "Schulterdruecken 3x10"
+        ]
+    },
+    {
+        "doc": "text/19-spanish.txt",
+        "outcome": "parsed",
+        "route": "text",
+        "name": "Programa de fuerza - Semana 1",
+        "weeks": 1,
+        "sessions": 2,
+        "restDays": 0,
+        "exercises": 6,
+        "resolvedExactly": 0,
+        "confidenceBucket": 25,
+        "flags": [
+            "INFO:Only one week was detected. Set how many weeks it runs in re",
+            "INFO:Read as Spanish - descanso, dia, repeticiones, semana read a",
+            "INFO:“sessionNotes” can't be stored as a field yet — it was kept ",
+            "REVIEW:Couldn’t confidently match “Fondos” — confirm the exercise.",
+            "REVIEW:Couldn’t confidently match “Peso Muerto Rumano” — confirm th",
+            "REVIEW:Couldn’t confidently match “Prensa de piernas” — confirm the",
+            "REVIEW:Couldn’t confidently match “Press Banca” — confirm the exerc",
+            "REVIEW:Couldn’t confidently match “Press Militar” — confirm the exe",
+            "REVIEW:Couldn’t confidently match “Sentadilla” — confirm the exerci"
+        ],
+        "rows": [
+            "Press Banca 4x6 @ABSOLUTE:80KG",
+            "Press Militar 3x8 @ABSOLUTE:45KG",
+            "Fondo 3x10",
+            "Sentadilla 5x5 @ABSOLUTE:110KG",
+            "Peso Muerto Rumano 3x8 @ABSOLUTE:90KG",
+            "Prensa De Pierna 3x12"
+        ]
+    },
+    {
         "doc": "web/01-table.html",
         "outcome": "parsed",
         "route": "grid:flat",
