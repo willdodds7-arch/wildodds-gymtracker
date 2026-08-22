@@ -126,9 +126,79 @@ object UniversalProgramImporter {
     }
     val hasAbsolute = slots.any { it.sets.firstOrNull()?.load?.kind == LoadKind.ABSOLUTE }
     if (hasAbsolute && unit == null)
-      flags += ImportFlag(FlagSeverity.REVIEW, "Weights were found but kg/lb is ambiguous — confirm units before committing.")
+      flags += ImportFlag(FlagSeverity.REVIEW,
+        "Weights were found but kg/lb is ambiguous — confirm units before committing.")
+
+    // ── an exercise matched below the trust threshold ─────────────────────────
+    slots.filter {
+      it.exercise.status == ResolutionStatus.INFERRED && it.exercise.candidates.isNotEmpty()
+    }.forEach { s ->
+      val best = s.exercise.candidates.first()
+      flags += ImportFlag(FlagSeverity.REVIEW,
+        "“${s.exercise.original}” looks like “${best.name}” but wasn't certain — confirm it.",
+        s.exercise.original, s.rawText)
+    }
+
+    // ── a line the parser only half-read ──────────────────────────────────────
+    // The single best signal that something was misunderstood: a large fraction of the source
+    // characters that no recognised token consumed.
+    slots.filter { it.breakdown.notationCoverage < 0.7 && it.sets.firstOrNull()?.kind != SetKind.UNKNOWN }
+      .forEach {
+        flags += ImportFlag(FlagSeverity.REVIEW,
+          "Part of “${it.rawText.take(60)}” wasn't understood — check it read correctly.",
+          it.exercise.original, it.rawText)
+      }
+
+    // ── duplicate sessions ────────────────────────────────────────────────────
+    // Two days with the same name AND the same exercises inside one week is almost always a
+    // segmentation mistake — a day header read twice, or a block pasted in twice.
+    for (w in draft.weeks) {
+      val seen = HashMap<String, SessionDraft>()
+      for (s in w.sessions) {
+        val key = s.label.lowercase(java.util.Locale.ROOT) + "|" +
+          s.slots.joinToString(",") { it.exercise.original.lowercase(java.util.Locale.ROOT) }
+        val prev = seen.put(key, s)
+        if (prev != null && s.slots.isNotEmpty()) {
+          flags += ImportFlag(FlagSeverity.REVIEW,
+            "Week ${w.index} has two identical “${s.label}” days — one may be a duplicate.",
+            "week${w.index}.${s.dayNumber}")
+        }
+      }
+    }
+
+    // ── week count inferred ───────────────────────────────────────────────────
     if (draft.structure == ProgramStructure.SINGLE_WEEK_REPEATED && draft.repeatWeeks <= 1)
-      flags += ImportFlag(FlagSeverity.INFO, "Only one week was detected. Set how many weeks it runs in review.")
+      flags += ImportFlag(FlagSeverity.INFO,
+        "Only one week was detected. Set how many weeks it runs in review.")
+    else if (draft.structure == ProgramStructure.SINGLE_WEEK_REPEATED)
+      flags += ImportFlag(FlagSeverity.INFO,
+        "One week was written out and repeated ${draft.repeatWeeks} times — the source said how " +
+        "long the block runs but not what changes week to week.")
+
+    // ── rest days ─────────────────────────────────────────────────────────────
+    val restDays = draft.weeks.flatMap { it.sessions }.filter { it.type != SessionType.TRAINING }
+    if (restDays.isNotEmpty())
+      flags += ImportFlag(FlagSeverity.INFO,
+        "${restDays.size} rest day${if (restDays.size == 1) "" else "s"} were read from the source " +
+        "and kept in place: ${restDays.joinToString(", ") { it.label }}.")
+
+    // ── a per-set list longer than the stated count ───────────────────────────
+    slots.forEach { s ->
+      val p = s.sets.firstOrNull() ?: return@forEach
+      if (p.perSet.size > 1 && p.count != null && p.count != p.perSet.size) {
+        flags += ImportFlag(FlagSeverity.REVIEW,
+          "“${s.exercise.original}” says ${p.count} sets but lists ${p.perSet.size} — check which is right.",
+          s.exercise.original, s.rawText)
+      }
+    }
+
+    // ── a progression rule the model cannot hold ──────────────────────────────
+    draft.unresolvedProgression.forEach {
+      flags += ImportFlag(FlagSeverity.REVIEW,
+        "“$it” is a progression rule, which a program definition can't carry — it's kept in the notes.",
+        sourceLine = it)
+    }
+
     return flags
   }
 }

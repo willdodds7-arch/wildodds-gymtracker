@@ -3,6 +3,8 @@ package com.wildodds.gymtracker.data.reader
 import com.wildodds.gymtracker.data.importer.FlagSeverity
 import com.wildodds.gymtracker.data.importer.ImportFlag
 import com.wildodds.gymtracker.data.importer.ProgramImportDraft
+import com.wildodds.gymtracker.data.importer.CsvProgramImporter
+import com.wildodds.gymtracker.data.importer.TextProgramImporter
 import com.wildodds.gymtracker.data.importer.UniversalProgramImporter
 import com.wildodds.gymtracker.data.reader.adapters.ExportAdapters
 import com.wildodds.gymtracker.data.reader.ingest.ExtractedDocument
@@ -93,10 +95,16 @@ class ProgramReader(
 
     // 3. Text. Note the flat rendering of a grid ALSO lands here when the layout engine declined,
     // which is deliberate: a one-column spreadsheet is a pasted program with extra steps.
-    val result = UniversalProgramImporter.import(suggestedName, doc.text, aliasLookup)
+    val textDraft = com.wildodds.gymtracker.data.importer.Confidence.applyDocumentConfidence(
+      if (CsvProgramImporter.looksLikeCsv(doc.text)) CsvProgramImporter.import(suggestedName, doc.text)
+      else TextProgramImporter.import(suggestedName, doc.text),
+      extractorConfidence = doc.confidence,
+      extractorReason = if (doc.confidence < 0.95) "read at ${(doc.confidence * 100).toInt()}% confidence" else null
+    )
+    val result = UniversalProgramImporter.fromDraft(textDraft, aliasLookup)
+    val flags = result.flags + extractorFlags(doc)
     return Result(
-      result.copy(flags = result.flags + extractorFlags(doc), draft = result.draft.copy(
-        flags = result.draft.flags + extractorFlags(doc))),
+      result.copy(flags = flags, draft = result.draft.copy(flags = flags)),
       doc, kind, "text")
   }
 
@@ -108,7 +116,15 @@ class ProgramReader(
     aliasLookup: (String) -> String?,
     extra: List<ImportFlag>
   ): Result {
-    val result = UniversalProgramImporter.fromDraft(draft, aliasLookup)
+    // The extractor's own doubt applies uniformly to everything it produced, so it is folded in
+    // once here rather than threaded through every parser. A 0.6-confidence OCR page can never
+    // produce a 0.90 slot.
+    val weighted = com.wildodds.gymtracker.data.importer.Confidence.applyDocumentConfidence(
+      draft,
+      extractorConfidence = doc.confidence,
+      extractorReason = if (doc.confidence < 0.95) "read at ${(doc.confidence * 100).toInt()}% confidence" else null
+    )
+    val result = UniversalProgramImporter.fromDraft(weighted, aliasLookup)
     val flags = result.flags + extra + extractorFlags(doc)
     return Result(
       result.copy(flags = flags, draft = result.draft.copy(flags = flags)),

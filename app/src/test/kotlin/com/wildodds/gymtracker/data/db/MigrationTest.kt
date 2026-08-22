@@ -257,6 +257,46 @@ class MigrationTest {
   migrated.close()
   }
 
+  /**
+   * v26→v27 adds the import-record table. Purely additive: one new table, nothing altered, and
+   * every pre-existing program keeps working with no record — which reads correctly as "we do not
+   * know where this program came from".
+   */
+  @Test
+  fun migration26To27AddsImportRecordsWithoutTouchingExistingData() {
+  seedVersion1Database()
+  val upTo26 = AppDatabase.ALL_MIGRATIONS.filter { it.startVersion in 1 until 26 }.toTypedArray()
+  val db = helper.runMigrationsAndValidate(TEST_DB, 26, true, *upTo26)
+  db.execSQL("INSERT INTO programs (id, name, totalWeeks, createdAt) VALUES (1, 'Old', 4, 1)")
+  db.execSQL("INSERT INTO sessions (id, programId, weekNumber, dayNumber, name, muscleGroups) " +
+  "VALUES (1, 1, 1, 1, 'Push', 'Chest')")
+  db.execSQL("INSERT INTO exercises (id, sessionId, name, sets, repsTarget, notes, orderIndex) " +
+  "VALUES (1, 1, 'Bench Press', 3, '8-12', '', 0)")
+  db.close()
+
+  val migration = AppDatabase.ALL_MIGRATIONS.first { it.startVersion == 26 }
+  val migrated = helper.runMigrationsAndValidate(TEST_DB, 27, true, migration)
+
+  migrated.query("SELECT name, sets FROM exercises WHERE id = 1").use { c ->
+  c.moveToFirst()
+  assertEquals("Bench Press", c.getString(0))
+  assertEquals(3, c.getInt(1))
+  }
+  migrated.query("SELECT COUNT(*) FROM import_records").use { c ->
+  c.moveToFirst(); assertEquals(0, c.getInt(0))
+  }
+  migrated.execSQL("""INSERT INTO import_records
+  (programId, sourceHash, sourceName, sourceKind, route, readerVersion, exerciseCount,
+  overallConfidence, sourceText, truncated, createdAt)
+  VALUES (1, 'abc123', 'block.csv', 'DELIMITED', 'strong', 2, 12, 0.94, 'Exercise,Sets', 0, 1)""")
+  migrated.query("SELECT sourceHash, route FROM import_records WHERE programId = 1").use { c ->
+  c.moveToFirst()
+  assertEquals("abc123", c.getString(0))
+  assertEquals("strong", c.getString(1))
+  }
+  migrated.close()
+  }
+
   private fun seedVersion1Database() {
   val context = ApplicationProvider.getApplicationContext<android.content.Context>()
   context.deleteDatabase(TEST_DB)
@@ -283,7 +323,7 @@ class MigrationTest {
    * Must track [AppDatabase]'s `version`. Bump it in the same change as a new migration —
    * otherwise the 1→N test silently stops covering everything past the old number.
    */
-  private const val LATEST_VERSION = 26
+  private const val LATEST_VERSION = 27
 
   /**
    * The schema as it existed at version 1 — i.e. the v13 entities minus every column/table

@@ -26,9 +26,10 @@ import com.wildodds.gymtracker.data.db.entity.*
   SyncTombstone::class,
   AnalyticsOutboxEntry::class,
   PlannedSet::class,
-  ExerciseAlternative::class
+  ExerciseAlternative::class,
+  ImportRecord::class
   ],
-  version = 26,
+  version = 27,
   exportSchema = true
 )
 @androidx.room.TypeConverters(ReaderConverters::class)
@@ -47,6 +48,7 @@ abstract class AppDatabase : RoomDatabase() {
   abstract fun syncDao(): SyncDao
   abstract fun analyticsOutboxDao(): AnalyticsOutboxDao
   abstract fun plannedSetDao(): PlannedSetDao
+  abstract fun importRecordDao(): ImportRecordDao
 
   companion object {
   @Volatile private var INSTANCE: AppDatabase? = null
@@ -423,6 +425,37 @@ abstract class AppDatabase : RoomDatabase() {
   }
   }
 
+  private val MIGRATION_26_27 = object : Migration(26, 27) {
+  override fun migrate(db: SupportSQLiteDatabase) {
+  // Reader v2, phase 7: remember what was imported and from what.
+  //
+  // This is what makes three things possible that were not before: undoing an import, RE-PARSING
+  // one with a newer reader (so a future parser fix retroactively improves programs users already
+  // have), and recognising a re-import of the same file instead of silently making a second copy.
+  //
+  // Purely additive: one new table, nothing altered. Programs imported before this migration
+  // simply have no record, which reads correctly as "we do not know where this came from".
+  db.execSQL(
+  """CREATE TABLE IF NOT EXISTS import_records (
+  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  programId INTEGER,
+  sourceHash TEXT NOT NULL,
+  sourceName TEXT NOT NULL,
+  sourceKind TEXT NOT NULL,
+  route TEXT NOT NULL,
+  readerVersion INTEGER NOT NULL,
+  exerciseCount INTEGER NOT NULL,
+  overallConfidence REAL NOT NULL,
+  sourceText TEXT NOT NULL,
+  truncated INTEGER NOT NULL DEFAULT 0,
+  createdAt INTEGER NOT NULL
+  )"""
+  )
+  db.execSQL("CREATE INDEX IF NOT EXISTS index_import_records_programId ON import_records (programId)")
+  db.execSQL("CREATE INDEX IF NOT EXISTS index_import_records_sourceHash ON import_records (sourceHash)")
+  }
+  }
+
   /** Every migration, in order, as applied by the app. Exposed so tests can run the
    *  identical 1→N chain against a seed database. */
   val ALL_MIGRATIONS: Array<Migration> = arrayOf(
@@ -430,7 +463,7 @@ abstract class AppDatabase : RoomDatabase() {
   MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13,
   MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19,
   MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25,
-  MIGRATION_25_26
+  MIGRATION_25_26, MIGRATION_26_27
   )
 
   fun getInstance(context: Context): AppDatabase =

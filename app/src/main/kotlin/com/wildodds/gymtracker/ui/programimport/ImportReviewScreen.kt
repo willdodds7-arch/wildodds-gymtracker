@@ -30,9 +30,24 @@ import com.wildodds.gymtracker.ui.components.GlassCard
 import com.wildodds.gymtracker.ui.theme.*
 
 /**
- * Review & confirm screen for Universal Import (spec §7). Paste text/CSV → parse → review the
- * structured result with confidence flags → edit inline → commit. Nothing is saved until the user
- * presses Start / Save, and every ambiguity is surfaced rather than silently resolved.
+ * The review screen — where import accuracy is actually won.
+ *
+ * Everything upstream is a best reading of a document; this is where the user confirms it. So the
+ * screen is built around showing its working rather than showing a result:
+ *
+ *  - the **source line** sits beside every parsed row, always, so what was read and what was
+ *    ignored are both visible;
+ *  - a low-confidence row says WHY ("62% - exercise inferred, 31% of line unparsed"), because a
+ *    bare number is something users learn to ignore;
+ *  - correcting a name applies to every occurrence AND learns the alias, so the same coach's next
+ *    sheet needs no correction;
+ *  - "jump to the next problem" and a remaining count make reviewing forty exercises tractable,
+ *    and bulk-accept covers only the rows above the threshold — bulk-accepting the uncertain ones
+ *    would be the same as not reviewing at all;
+ *  - the import is reversible from here, and a re-import of the same file offers a choice instead
+ *    of silently making a second copy.
+ *
+ * Nothing is saved until Start / Save, and every ambiguity is surfaced rather than resolved.
  */
 @Composable
 fun ImportReviewScreen(navController: NavController, vm: ImportReviewViewModel = viewModel()) {
@@ -72,16 +87,25 @@ private fun PasteStep(vm: ImportReviewViewModel, s: ImportReviewState, c: AppCol
     verticalArrangement = Arrangement.spacedBy(Space.md)
   ) {
     Spacer(Modifier.height(Space.sm))
-    Text("Paste a program as plain text or CSV, or choose a file. Day/Week headings and set notation " +
-      "like “3x8”, “5/3/1”, “@RPE8”, “1x5+ @85% TM” are understood. Runs on your device.",
+    Text("Paste a program, or choose a file — spreadsheet, PDF, Word, a chat export, or a photo of " +
+      "a printout. Week and day headings, rest days, supersets and notation like “3x8”, “5/3/1”, " +
+      "“@RPE 7-8”, “1x5+ @85% TM” are all understood. Everything runs on your device, offline.",
       style = AppType.body, color = c.textSecondary)
     OutlinedButton(
       onClick = {
+        // Every MIME type the pipeline can read. `*/*` is included last because the sniffer works
+        // from magic bytes anyway, and content providers are unreliable about the type they report
+        // - refusing a file at the picker for a MIME type we would have ignored is a poor trade.
         filePicker.launch(arrayOf(
           "text/*", "text/csv", "text/comma-separated-values", "text/tab-separated-values",
-          "application/pdf",
+          "text/markdown", "text/html", "application/json", "application/xml", "text/xml",
+          "application/pdf", "application/rtf", "text/rtf",
           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-          "application/vnd.ms-excel"
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          "application/vnd.ms-excel",
+          "application/vnd.oasis.opendocument.spreadsheet",
+          "application/vnd.oasis.opendocument.text",
+          "application/zip", "image/*", "*/*"
         ))
       },
       enabled = !s.parsing,
@@ -91,7 +115,7 @@ private fun PasteStep(vm: ImportReviewViewModel, s: ImportReviewState, c: AppCol
     ) {
       Icon(Icons.Default.FolderOpen, null, modifier = Modifier.size(18.dp))
       Spacer(Modifier.width(Space.sm))
-      Text("Choose a file  ·  .csv .txt .pdf .xlsx", fontWeight = FontWeight.SemiBold)
+      Text("Choose a file  ·  csv, xlsx, pdf, docx, photo…", fontWeight = FontWeight.SemiBold)
     }
     OutlinedTextField(
       value = s.programName, onValueChange = vm::setName,
@@ -106,6 +130,16 @@ private fun PasteStep(vm: ImportReviewViewModel, s: ImportReviewState, c: AppCol
       shape = Radii.smShape,
       colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = c.text)
     )
+    if (s.parsing && s.progress.isNotBlank()) {
+      // A 12-page PDF or an OCR pass takes real time. A named stage and a cancel button beat an
+      // indeterminate spinner, which tells the user nothing and cannot be escaped.
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp, color = c.accent)
+        Spacer(Modifier.width(Space.sm))
+        Text(s.progress, style = AppType.body, color = c.textSecondary, modifier = Modifier.weight(1f))
+        TextButton(onClick = vm::cancelParsing) { Text("Cancel") }
+      }
+    }
     s.error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = AppType.body) }
     Button(
       onClick = vm::parse, enabled = !s.parsing && s.rawInput.isNotBlank(),
@@ -134,22 +168,59 @@ private fun ReviewStep(vm: ImportReviewViewModel, s: ImportReviewState, c: AppCo
         colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = c.text)
       )
 
-      // Confidence + flags summary — honest about what needs a look.
-      val reviewFlags = s.flags.count { it.severity != FlagSeverity.INFO }
+      // The same document, imported before. Offer a choice rather than silently making a copy.
+      s.duplicateOf?.let { dup ->
+        GlassCard(Modifier.fillMaxWidth()) {
+          Column {
+            Text("You've imported this file before", style = AppType.title, color = c.accent)
+            Spacer(Modifier.height(Space.xs))
+            Text("It became “${dup.programName}”. Replace that program, or keep both?",
+              style = AppType.body, color = c.textSecondary)
+            Spacer(Modifier.height(Space.sm))
+            Row(horizontalArrangement = Arrangement.spacedBy(Space.sm)) {
+              OutlinedButton(onClick = { vm.replaceDuplicate(onCommitted) }) { Text("Replace it") }
+              TextButton(onClick = vm::dismissDuplicate) { Text("Keep both") }
+            }
+          }
+        }
+      }
+
+      // Confidence, EXPLAINED. A bare percentage is something users learn to ignore.
       GlassCard(Modifier.fillMaxWidth()) {
         Column {
           Text(
-            "${s.exerciseCount} exercises · ${s.sessions.size} sessions · ${(s.overallConfidence * 100).toInt()}% confidence",
+            "${s.exerciseCount} exercises · ${s.sessions.count { it.sessionType == "TRAINING" }} sessions",
             style = AppType.title, color = c.text
           )
-          if (reviewFlags > 0) {
-            Spacer(Modifier.height(Space.xs))
-            Text("$reviewFlags item(s) need review — highlighted below.", style = AppType.body, color = c.accent)
+          Spacer(Modifier.height(2.dp))
+          Text(s.confidenceExplanation.ifBlank { "${(s.overallConfidence * 100).toInt()}%" },
+            style = AppType.body,
+            color = if (s.overallConfidence < 0.75) c.accent else c.textSecondary)
+
+          val remaining = vm.remainingProblems()
+          if (remaining > 0) {
+            Spacer(Modifier.height(Space.sm))
+            Row(verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(Space.sm)) {
+              Text("$remaining need a look", style = AppType.body, color = c.accent,
+                modifier = Modifier.weight(1f))
+              TextButton(onClick = { vm.acceptAllAboveThreshold() }) { Text("Accept the rest") }
+            }
           }
-          s.flags.take(6).forEach { f ->
-            Spacer(Modifier.height(2.dp))
+
+          s.flags.take(8).forEach { f ->
+            Spacer(Modifier.height(3.dp))
             Text("• ${f.message}", style = AppType.label,
               color = if (f.severity == FlagSeverity.INFO) c.textSecondary else c.accent)
+            // The EVIDENCE, verbatim. A flag the user cannot check is a flag they cannot act on.
+            if (f.sourceLine.isNotBlank()) {
+              Text("   ${f.sourceLine.take(120)}", style = AppType.label,
+                color = c.textSecondary, maxLines = 2)
+            }
+          }
+          if (s.route.isNotBlank()) {
+            Spacer(Modifier.height(Space.xs))
+            Text("Read as: ${s.route}", style = AppType.label, color = c.textSecondary)
           }
         }
       }
@@ -175,6 +246,17 @@ private fun ReviewStep(vm: ImportReviewViewModel, s: ImportReviewState, c: AppCo
 
     // Commit bar
     AppDivider()
+    if (s.lastCommittedProgramId != null) {
+      // The moment someone realises an import is wrong is the moment they are looking at it, so
+      // undo lives here rather than three screens away.
+      Row(
+        Modifier.fillMaxWidth().padding(horizontal = Space.screenEdge, vertical = Space.xs),
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Text("Saved.", style = AppType.body, color = c.textSecondary, modifier = Modifier.weight(1f))
+        TextButton(onClick = { vm.undoLastCommit { } }) { Text("Undo this import") }
+      }
+    }
     Row(
       Modifier.fillMaxWidth().padding(horizontal = Space.screenEdge, vertical = Space.sm),
       horizontalArrangement = Arrangement.spacedBy(Space.sm)
@@ -249,8 +331,47 @@ private fun ExerciseRow(ex: EditExercise, si: Int, ei: Int, vm: ImportReviewView
       Spacer(Modifier.height(2.dp))
       Text(ex.notes, style = AppType.label, color = c.textSecondary, maxLines = 3)
     }
+
+    // The SOURCE LINE, always, at every confidence level. This is the difference between a screen
+    // that asserts and a screen that shows its working.
+    if (ex.sourceLine.isNotBlank()) {
+      Spacer(Modifier.height(3.dp))
+      Surface(color = c.textSecondary.copy(alpha = 0.06f), shape = RoundedCornerShape(4.dp)) {
+        Text(ex.sourceLine, modifier = Modifier.fillMaxWidth().padding(6.dp),
+          style = AppType.label, color = c.textSecondary, maxLines = 3)
+      }
+    }
+
+    // Why this row scored what it did.
+    if (ex.confidenceReasons.isNotEmpty()) {
+      Spacer(Modifier.height(2.dp))
+      Text("${(ex.confidence * 100).toInt()}% — ${ex.confidenceReasons.joinToString(", ")}",
+        style = AppType.label, color = c.accent)
+    }
+
+    // Ranked alternatives: one tap, not a search. Choosing one applies it EVERYWHERE and learns it.
+    if (ex.needsReview && ex.candidates.isNotEmpty()) {
+      Spacer(Modifier.height(4.dp))
+      Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        ex.candidates.take(3).forEach { candidate ->
+          SuggestionChip(
+            // Choosing a candidate applies it to EVERY occurrence and learns the alias, so the
+            // same coach's next sheet needs no correction at all.
+            onClick = { vm.applyMappingEverywhere(ex.original, candidate) },
+            label = { Text(candidate, style = AppType.label) }
+          )
+        }
+      }
+    }
+    if (ex.needsReview && !ex.accepted) {
+      Spacer(Modifier.height(2.dp))
+      TextButton(onClick = { vm.acceptRow(si, ei) }, contentPadding = PaddingValues(0.dp)) {
+        Text("Looks right", style = AppType.label, color = c.textSecondary)
+      }
+    }
   }
 }
+
 
 @Composable
 private fun Chip(text: String, c: AppColors) {
