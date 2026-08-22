@@ -42,6 +42,68 @@ class MigrationTest {
   helper.runMigrationsAndValidate(TEST_DB, LATEST_VERSION, true, *AppDatabase.ALL_MIGRATIONS).close()
   }
 
+  /**
+   * v23→v24 adds per-set prescription + exercise alternatives. It must be purely additive: the new
+   * tables exist and accept rows, and — critically — every pre-existing program/session/exercise
+   * row survives untouched, since this migration ships to users with real training history.
+   */
+  @Test
+  fun migration23To24AddsPlannedSetsWithoutTouchingExistingData() {
+  seedVersion1Database()
+  val upToV23 = AppDatabase.ALL_MIGRATIONS.filter { it.startVersion in 1 until 23 }.toTypedArray()
+  val db = helper.runMigrationsAndValidate(TEST_DB, 23, true, *upToV23)
+  db.execSQL("INSERT INTO programs (id, name, totalWeeks, createdAt) VALUES (1, 'Old', 4, 1)")
+  db.execSQL("INSERT INTO sessions (id, programId, weekNumber, dayNumber, name, muscleGroups) " +
+  "VALUES (1, 1, 1, 1, 'Push', 'Chest')")
+  db.execSQL("INSERT INTO exercises (id, sessionId, name, sets, repsTarget, notes, orderIndex) " +
+  "VALUES (1, 1, 'Bench Press', 3, '8-12', '', 0)")
+  db.close()
+
+  val migration = AppDatabase.ALL_MIGRATIONS.first { it.startVersion == 23 }
+  val migrated = helper.runMigrationsAndValidate(TEST_DB, 24, true, migration)
+
+  // Existing data is intact and unchanged.
+  migrated.query("SELECT name, sets, repsTarget FROM exercises WHERE id = 1").use { c ->
+  c.moveToFirst()
+  assertEquals("Bench Press", c.getString(0))
+  assertEquals(3, c.getInt(1))
+  assertEquals("8-12", c.getString(2))
+  }
+
+  // The new tables exist and take rows.
+  migrated.execSQL("INSERT INTO planned_sets (exerciseId, setNumber, type, load, reps, restSeconds) " +
+  "VALUES (1, 1, 'WARMUP', '20', '10', 60)")
+  migrated.execSQL("INSERT INTO exercise_alternatives (exerciseId, name, orderIndex, note) " +
+  "VALUES (1, 'Dumbbell Bench Press', 0, 'if the rack is busy')")
+  migrated.query("SELECT COUNT(*) FROM planned_sets").use { c ->
+  c.moveToFirst(); assertEquals(1, c.getInt(0))
+  }
+  migrated.query("SELECT COUNT(*) FROM exercise_alternatives").use { c ->
+  c.moveToFirst(); assertEquals(1, c.getInt(0))
+  }
+  migrated.close()
+  }
+
+  /** Deleting an exercise must take its planned sets and alternatives with it (FK cascade). */
+  @Test
+  fun migration23To24CascadesPlannedSetsOnExerciseDelete() {
+  seedVersion1Database()
+  val db = helper.runMigrationsAndValidate(TEST_DB, 24, true, *AppDatabase.ALL_MIGRATIONS)
+  db.execSQL("PRAGMA foreign_keys = ON")
+  db.execSQL("INSERT INTO programs (id, name, totalWeeks, createdAt) VALUES (1, 'P', 4, 1)")
+  db.execSQL("INSERT INTO sessions (id, programId, weekNumber, dayNumber, name, muscleGroups) " +
+  "VALUES (1, 1, 1, 1, 'Push', '')")
+  db.execSQL("INSERT INTO exercises (id, sessionId, name, sets, repsTarget, notes, orderIndex) " +
+  "VALUES (1, 1, 'Bench Press', 3, '8-12', '', 0)")
+  db.execSQL("INSERT INTO planned_sets (exerciseId, setNumber, reps) VALUES (1, 1, '8')")
+  db.execSQL("DELETE FROM exercises WHERE id = 1")
+
+  db.query("SELECT COUNT(*) FROM planned_sets").use { c ->
+  c.moveToFirst(); assertEquals(0, c.getInt(0))
+  }
+  db.close()
+  }
+
   /** v20→v21 backfills sync metadata: every pre-existing row must get a unique, non-blank syncId. */
   @Test
   fun migration20To21BackfillsSyncIds() {
@@ -114,7 +176,7 @@ class MigrationTest {
    * Must track [AppDatabase]'s `version`. Bump it in the same change as a new migration —
    * otherwise the 1→N test silently stops covering everything past the old number.
    */
-  private const val LATEST_VERSION = 23
+  private const val LATEST_VERSION = 24
 
   /**
    * The schema as it existed at version 1 — i.e. the v13 entities minus every column/table

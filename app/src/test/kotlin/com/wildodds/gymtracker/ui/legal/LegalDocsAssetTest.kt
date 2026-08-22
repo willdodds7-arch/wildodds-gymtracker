@@ -59,21 +59,31 @@ class LegalDocsAssetTest {
 
   @Test
   fun docsDoNotMakeDishonestNoCollectionClaims() {
-    // Rule 8: no doc may claim no data collection / fully offline / no tracking.
-    val banned = listOf("no data collection", "fully offline", "no tracking", "does not collect")
+    // Rule 8: no doc may claim it collects nothing at all, or that it is offline WITHOUT naming the
+    // one thing that isn't. AI Import posts the text you give it to Anthropic using your own key, so
+    // "works fully offline" is honest only when that exception is stated alongside it.
+    val alwaysBanned = listOf("no data collection", "no tracking", "does not collect")
     LegalDoc.entries.forEach { doc ->
       val text = read(doc).lowercase()
-      banned.forEach { phrase ->
+      alwaysBanned.forEach { phrase ->
         assertFalse("${doc.asset} must not claim '$phrase'", text.contains(phrase))
+      }
+      if (text.contains("fully offline")) {
+        assertTrue(
+          "${doc.asset} says 'fully offline' without naming the AI Import exception",
+          text.contains("ai import") || text.contains("anthropic")
+        )
       }
     }
   }
 
   @Test
   fun privacyPolicyDescribesTheRealPipeline() {
+    // The Supabase-backed Friends layer was removed — the app now ships no backend at all, and the
+    // only third party that can ever receive data is Anthropic, via opt-in AI Import with the
+    // user's own API key. This asserts the policy describes THAT pipeline, not the retired one.
     val privacy = read(LegalDoc.PRIVACY).lowercase()
-    assertTrue("names the processor", privacy.contains("supabase"))
-    assertTrue("states retention", privacy.contains("18 months"))
+    assertTrue("names the only third-party processor", privacy.contains("anthropic"))
     assertTrue("covers deletion", privacy.contains("delete"))
     assertTrue("covers export", privacy.contains("export"))
     assertTrue("13+ statement", privacy.contains("13"))

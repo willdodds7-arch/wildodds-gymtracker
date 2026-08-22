@@ -287,11 +287,13 @@ object SettingsRegistry {
   control = SettingControl.API_KEY
   ),
   SettingsEntry(
-  key = UNIVERSAL_IMPORT, title = "Universal program import (beta)",
-  summary = "Paste a program as plain text or CSV and turn it into a structured, editable program. Runs fully on-device; more formats (Excel, PDF, photos) coming.",
-  group = "AI Import",
-  keywords = listOf("import", "universal", "parse", "text", "csv", "paste", "program", "spreadsheet", "reddit"),
-  default = false
+  key = UNIVERSAL_IMPORT, title = "Paste or upload a program",
+  summary = "Paste a program as plain text or CSV — or open a file — and turn it into a structured, editable program. Runs fully on-device; nothing is uploaded anywhere.",
+  group = "Programs",
+  keywords = listOf("import", "universal", "parse", "text", "csv", "paste", "upload", "program", "spreadsheet", "reddit"),
+  // On by default: pasting a program is one of the main ways people get started, so it is a
+  // primary entry point on the Library and in the builder rather than a hidden beta toggle.
+  default = true
   ),
   SettingsEntry(
   key = EXPORT_DATA, title = "Export data",

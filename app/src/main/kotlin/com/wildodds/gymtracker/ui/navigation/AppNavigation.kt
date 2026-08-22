@@ -88,7 +88,12 @@ fun AppNavigation() {
         ) {
             SessionInfoScreen(navController = navController)
         }
+        // The rebuilt single-page builder. The old two-step wizard (CreateProgramScreen) is still
+        // reachable at "create_program_legacy" for the xlsx-import path it owns.
         composable("create_program") {
+            com.wildodds.gymtracker.ui.builder.ProgramBuilderScreen(navController = navController)
+        }
+        composable("create_program_legacy") {
             CreateProgramScreen(navController = navController)
         }
         composable("import_program") {

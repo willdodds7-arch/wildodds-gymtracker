@@ -125,6 +125,52 @@ class GymRepository(private val db: AppDatabase) {
   /** Save without activating. */
   suspend fun addToLibrary(parsed: ParsedProgram) = importProgram(parsed, activate = false)
 
+  // ── Program builder ─────────────────────────────────────────────────────────
+
+  /**
+   * Persist a builder [com.wildodds.gymtracker.data.builder.PlanProgram].
+   *
+   * Goes through [importProgram] so the legacy columns every other screen reads are written
+   * exactly as before, then attaches the per-set prescription and alternatives that only the new
+   * schema can hold. An incomplete plan saves fine — nothing here validates or rejects.
+   */
+  suspend fun saveProgramPlan(
+  plan: com.wildodds.gymtracker.data.builder.PlanProgram,
+  activate: Boolean = true
+  ): Long = withContext(Dispatchers.IO) {
+  val parsed = com.wildodds.gymtracker.data.builder.PlanMapper.toParsed(plan)
+  val programId = importProgram(parsed, activate = activate)
+
+  // Attach the detail rows to week 1 only. Later weeks are materialised copies; the session
+  // screen reads its prescription from the legacy columns, which every week already carries.
+  val week1 = db.sessionDao().getSessionsForWeek(1, programId)
+  val training = plan.workouts.withIndex().filter { !it.value.isRest }
+
+  for ((slot, workout) in training) {
+  val session = week1.find { it.dayNumber == slot + 1 } ?: continue
+  val stored = db.exerciseDao().getExercisesForSession(session.id).sortedBy { it.orderIndex }
+  workout.exercises.forEachIndexed { i, planned ->
+  val row = stored.getOrNull(i) ?: return@forEachIndexed
+  val sets = com.wildodds.gymtracker.data.builder.PlanMapper.plannedSetsFor(row.id, planned)
+  if (sets.isNotEmpty()) db.plannedSetDao().insertAll(sets)
+  val alts = com.wildodds.gymtracker.data.builder.PlanMapper.alternativesFor(row.id, planned)
+  if (alts.isNotEmpty()) db.plannedSetDao().insertAlternatives(alts)
+  }
+  }
+  programId
+  }
+
+  /** Load a stored program back into an editable plan (week 1 is the definition). */
+  suspend fun loadProgramPlan(programId: Long): com.wildodds.gymtracker.data.builder.PlanProgram? =
+  withContext(Dispatchers.IO) {
+  val program = db.programDao().getProgramById(programId) ?: return@withContext null
+  val week1 = db.sessionDao().getSessionsForWeek(1, programId)
+  val exercises = week1.associate { it.id to db.exerciseDao().getExercisesForSession(it.id) }
+  val planned = db.plannedSetDao().forProgram(programId).groupBy { it.exerciseId }
+  val alts = db.plannedSetDao().alternativesForProgram(programId).groupBy { it.exerciseId }
+  com.wildodds.gymtracker.data.builder.PlanMapper.fromStored(program, week1, exercises, planned, alts)
+  }
+
   /** Clears all logs/completions but keeps the program & exercises intact. */
   suspend fun restartProgram() = withContext(Dispatchers.IO) {
   db.setLogDao().deleteAll()

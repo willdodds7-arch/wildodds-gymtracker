@@ -24,9 +24,11 @@ import com.wildodds.gymtracker.data.db.entity.*
   SessionTemplateExercise::class,
   Achievement::class,
   SyncTombstone::class,
-  AnalyticsOutboxEntry::class
+  AnalyticsOutboxEntry::class,
+  PlannedSet::class,
+  ExerciseAlternative::class
   ],
-  version = 23,
+  version = 24,
   exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -43,6 +45,7 @@ abstract class AppDatabase : RoomDatabase() {
   abstract fun achievementDao(): AchievementDao
   abstract fun syncDao(): SyncDao
   abstract fun analyticsOutboxDao(): AnalyticsOutboxDao
+  abstract fun plannedSetDao(): PlannedSetDao
 
   companion object {
   @Volatile private var INSTANCE: AppDatabase? = null
@@ -346,13 +349,49 @@ abstract class AppDatabase : RoomDatabase() {
   }
   }
 
+  private val MIGRATION_23_24 = object : Migration(23, 24) {
+  override fun migrate(db: SupportSQLiteDatabase) {
+  // Per-set prescription (§2.2 of the builder brief) and user-defined exercise alternatives.
+  // Purely ADDITIVE: two new tables, nothing altered or dropped, so every existing program
+  // keeps working unchanged and simply has no rows here until it is edited in the builder.
+  db.execSQL(
+  """CREATE TABLE IF NOT EXISTS planned_sets (
+  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  exerciseId INTEGER NOT NULL,
+  setNumber INTEGER NOT NULL,
+  type TEXT NOT NULL DEFAULT 'WORKING',
+  load TEXT NOT NULL DEFAULT '',
+  reps TEXT NOT NULL DEFAULT '',
+  restSeconds INTEGER NOT NULL DEFAULT 90,
+  rpe TEXT NOT NULL DEFAULT '',
+  tempo TEXT NOT NULL DEFAULT '',
+  notes TEXT NOT NULL DEFAULT '',
+  FOREIGN KEY(exerciseId) REFERENCES exercises(id) ON UPDATE NO ACTION ON DELETE CASCADE
+  )"""
+  )
+  db.execSQL("CREATE INDEX IF NOT EXISTS index_planned_sets_exerciseId ON planned_sets (exerciseId)")
+
+  db.execSQL(
+  """CREATE TABLE IF NOT EXISTS exercise_alternatives (
+  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  exerciseId INTEGER NOT NULL,
+  name TEXT NOT NULL,
+  orderIndex INTEGER NOT NULL DEFAULT 0,
+  note TEXT NOT NULL DEFAULT '',
+  FOREIGN KEY(exerciseId) REFERENCES exercises(id) ON UPDATE NO ACTION ON DELETE CASCADE
+  )"""
+  )
+  db.execSQL("CREATE INDEX IF NOT EXISTS index_exercise_alternatives_exerciseId ON exercise_alternatives (exerciseId)")
+  }
+  }
+
   /** Every migration, in order, as applied by the app. Exposed so tests can run the
    *  identical 1→N chain against a seed database. */
   val ALL_MIGRATIONS: Array<Migration> = arrayOf(
   MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7,
   MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13,
   MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19,
-  MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23
+  MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24
   )
 
   fun getInstance(context: Context): AppDatabase =

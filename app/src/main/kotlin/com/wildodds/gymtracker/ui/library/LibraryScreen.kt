@@ -267,18 +267,20 @@ fun LibraryScreen(
   Text("Select Program", fontWeight = FontWeight.Bold)
   }
 
+  // Pasting or uploading a program is a primary way in, not a hidden extra — it sits directly
+  // under the two main actions rather than behind a menu.
   if (FeatureFlags.isEnabled(SettingsRegistry.UNIVERSAL_IMPORT)) {
-  Spacer(Modifier.height(12.dp))
+  Spacer(Modifier.height(8.dp))
   OutlinedButton(
   onClick  = { navController.navigate("import_program") },
-  modifier = Modifier.fillMaxWidth(),
+  modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
   shape  = RoundedCornerShape(12.dp),
   colors  = ButtonDefaults.outlinedButtonColors(contentColor = accent),
   border  = androidx.compose.foundation.BorderStroke(1.dp, accent)
   ) {
   Icon(Icons.Default.ContentPaste, null, modifier = Modifier.size(16.dp))
   Spacer(Modifier.width(6.dp))
-  Text("Import from Text / CSV", fontWeight = FontWeight.Bold)
+  Text("Paste or upload a program", fontWeight = FontWeight.Bold)
   }
   }
 

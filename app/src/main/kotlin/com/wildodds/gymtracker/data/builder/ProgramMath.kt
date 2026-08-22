@@ -233,3 +233,8 @@ internal object EquipmentGuess {
     return PATTERNS.firstOrNull { lower.contains(it.first) }?.second
   }
 }
+
+/** Public handle onto [EquipmentGuess] for the UI layer, which lives in a different package. */
+object EquipmentGuessAccess {
+  fun of(name: String): String? = EquipmentGuess.of(name)
+}

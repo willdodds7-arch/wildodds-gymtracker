@@ -18,6 +18,9 @@ interface ProgramDao {
   @Query("SELECT * FROM programs ORDER BY createdAt DESC")
   suspend fun getAllProgramsOnce(): List<Program>
 
+  @Query("SELECT * FROM programs WHERE id = :programId")
+  suspend fun getProgramById(programId: Long): Program?
+
   @Query("UPDATE programs SET currentPhase = :phase WHERE id = :id")
   suspend fun setCurrentPhase(id: Long, phase: Int)
 
