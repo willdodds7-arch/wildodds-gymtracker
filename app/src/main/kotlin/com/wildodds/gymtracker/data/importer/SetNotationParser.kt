@@ -31,11 +31,14 @@ object SetNotationParser {
   // sets x reps, optional rep-range, optional trailing "+", optional unit (time/distance/reps)
   // No trailing \b: a token can legitimately end in "+" (AMRAP, e.g. "1x5+"), and \b never holds
   // after a non-word char — which would otherwise force a backtrack that drops the "+".
-  private val setsReps = Regex("""(?i)\b(\d{1,2})\s*(?:x|×|\*|\s+sets?\s+of\s+)\s*(\d{1,3})(?:\s*[-–]\s*(\d{1,3}))?\s*(\+)?\s*(s|sec|secs|m|min|mins|km|yd|reps|rep)?""")
+  // Accepts the terse gym forms (3x8, 3*8, 3×8) AND the long forms a generated program uses
+  // ("4 sets of 5", "4 sets x 5 reps", "4 sets × 5 reps") — the latter is what most pasted
+  // programs actually contain, and without it the whole line falls through as unparsed.
+  private val setsReps = Regex("""(?i)\b(\d{1,2})\s*(?:\s*sets?\s*(?:of|x|×|\*)\s*|x|×|\*)\s*(\d{1,3})(?:\s*[-–]\s*(\d{1,3}))?\s*(\+)?\s*(s|sec|secs|m|min|mins|km|yd|reps|rep)?""")
   private val bodyweight = Regex("""(?i)\b(bodyweight|body\s*weight|bw)\b(?:\s*\+\s*(\d{1,4}(?:\.\d+)?)\s*(kg|lb|lbs|#)?)?""")
 
   fun parseExerciseLine(line: String, orderIndex: Int): SlotDraft? {
-    val original = line.trim().trimEnd(',', ';', '-', ':', '.')
+    val original = line.trim().trimTrailingSeparators()
     if (original.isBlank()) return null
     var working = original
 
@@ -59,8 +62,12 @@ object SetNotationParser {
       val v = (m.groupValues[1].ifBlank { m.groupValues[2] })
       loads += LoadSpec(LoadKind.RIR, v.toDoubleOrNull(), text = v)
     }
+    // A single "TM" anywhere on the line governs every percentage on it: coaches write
+    // "65%, 75%, 85% TM", not "65% TM, 75% TM, 85% TM".
+    val lineMentionsTm = Regex("""(?i)(tm|training\s*max)""").containsMatchIn(working)
     pct.findAll(working).forEach { m ->
-      val isTm = m.groupValues[2].lowercase().let { it == "tm" || it.contains("training") }
+      val isTm = lineMentionsTm ||
+        m.groupValues[2].lowercase().let { it == "tm" || it.contains("training") }
       loads += LoadSpec(if (isTm) LoadKind.PCT_TM else LoadKind.PCT_1RM, m.groupValues[1].toDoubleOrNull(), text = m.value.trim())
     }
     absWeight.find(working)?.let { m ->
@@ -95,7 +102,7 @@ object SetNotationParser {
 
     val (name, prescription) = if (core != null) {
       val (range, spec) = core
-      val nm = working.substring(0, range.first).trim().trimEnd(',', '-', ':', '@')
+      val nm = working.substring(0, range.first).trimTrailingSeparators()
       val withLoad = spec.copy(
         load = loads.firstOrNull { it.kind != LoadKind.NONE },
         tempo = tempoStr,
@@ -181,7 +188,7 @@ object SetNotationParser {
   private fun stripTrailingNoise(s: String): String {
     var out = s
     for (r in listOf(rpe, rir, pct, absWeight, restRange, restOne, tempo, bodyweight)) out = r.replace(out, " ")
-    return out.replace(Regex("""\s{2,}"""), " ").trim().trimEnd(',', '-', ':', '@')
+    return out.replace(Regex("""\s{2,}"""), " ").trimTrailingSeparators()
   }
 
   private fun titleCase(s: String): String =
@@ -190,3 +197,13 @@ object SetNotationParser {
       else w.replaceFirstChar { it.uppercaseChar() }
     }
 }
+
+/**
+ * Trim whitespace and any trailing run of separator punctuation together.
+ *
+ * `trimEnd(',', '-', ':')` stops at the first character outside its set, so "Back Squat - " keeps
+ * its trailing space once the dash is removed — and a name with a trailing space then fails every
+ * comparison against the exercise library.
+ */
+internal fun String.trimTrailingSeparators(): String =
+  trim().replace(Regex("""[\s,;:.\-@|]+$"""), "").trim()
