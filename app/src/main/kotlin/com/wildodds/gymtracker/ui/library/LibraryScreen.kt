@@ -109,7 +109,6 @@ fun LibraryScreen(
   var showError   by remember { mutableStateOf(false) }
   var errorMessage  by remember { mutableStateOf("") }
   var query       by remember { mutableStateOf("") }
-  var dayFilter     by remember { mutableStateOf<Int?>(null) }
   var showBrowseSheet  by remember { mutableStateOf(false) }
 
   if (showError) {
@@ -153,11 +152,12 @@ fun LibraryScreen(
   val activePrograms = programs.filter { !it.isPaused }
   val activeProgram  = activePrograms.firstOrNull { it.isActive }
   val libraryPrograms = activePrograms.filter { !it.isActive }
+  // Day filters were removed from this page: the library is the user's OWN programs, usually a
+  // handful, where search alone is enough — the chips mostly filtered a list down to nothing. The
+  // days facet still exists in the "Select Program" browse sheet, where the ~800-block catalogue
+  // genuinely needs narrowing.
   val filtered = libraryPrograms.filter { prog ->
-  val matchesQuery = query.isBlank() || prog.name.contains(query.trim(), ignoreCase = true)
-  val days = programDays[prog.id] ?: 0
-  val matchesDays = dayFilter == null || (if (dayFilter == 6) days >= 6 else days == dayFilter)
-  matchesQuery && matchesDays
+  query.isBlank() || prog.name.contains(query.trim(), ignoreCase = true)
   }
 
   // Pause-and-start confirmation dialog
@@ -301,19 +301,6 @@ fun LibraryScreen(
   keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search)
   )
 
-  Spacer(Modifier.height(10.dp))
-
-  Row(
-  modifier = Modifier.horizontalScroll(rememberScrollState()),
-  horizontalArrangement = Arrangement.spacedBy(8.dp)
-  ) {
-  DayFilterChip("Any", dayFilter == null, accent) { dayFilter = null }
-  listOf(2, 3, 4, 5, 6).forEach { d ->
-  DayFilterChip(if (d == 6) "6+" else "$d days", dayFilter == d, accent) {
-    dayFilter = if (dayFilter == d) null else d
-  }
-  }
-  }
   Spacer(Modifier.height(16.dp))
   }
 
@@ -461,6 +448,12 @@ fun LibraryScreen(
   } // end Scaffold
 }
 
+
+/**
+ * Pill filter chip. Now used only by the "Select Program" browse sheet — the copy of this row that
+ * filtered the user's own library by training days was removed (a personal library is small enough
+ * that search covers it).
+ */
 @Composable
 private fun DayFilterChip(label: String, selected: Boolean, accent: Color, onClick: () -> Unit) {
   Surface(
