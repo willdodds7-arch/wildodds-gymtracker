@@ -50,6 +50,13 @@ should be. It is a text file. That is a real gap, and it is the single largest o
 **To fix:** add real photographs to the corpus behind a device test, and tune `ImagePrep` against
 them.
 
+The PDF path has the same shape of gap and has been narrowed the same way. Everything decided from
+glyph positions — scan detection, column rebuild, page furniture, reconstruction confidence — now
+lives in the pure `PdfLayout` and is tested against synthetic pages (`PdfLayoutTest`). What is left
+on the device is PDFBox itself, which cannot even static-initialise off one: `LegacyPDFStreamEngine`
+loads its glyph resources through Android's asset loader. So the *binding* is untested, and a real
+coach PDF has still never been through the pipeline in CI.
+
 ---
 
 ## 3. `.xls` (BIFF8) is best-effort
@@ -200,6 +207,7 @@ noticing until they were on a plane.
 | Markdown tables | A table whose header names none of the known column roles is joined cell-by-cell into one line rather than reflowed. |
 | `colour-semantics` | Recognises fully-shaded rows as headings. It does **not** yet group consecutive same-coloured rows into supersets, which was the other half of the idea. |
 | Idempotency hash | Over the source BYTES, so the same document re-exported with a different timestamp inside it reads as a new document. |
+| Headerless delimited text | A tab- or comma-separated table with no header row reads as one exercise per line with no prescriptions when it arrives as TEXT. The same table arriving as a GRID (a spreadsheet, or a rebuilt PDF page) reads correctly, because the layout engine assigns column roles from content when there is no header. |
 | Learned aliases | Per-device `SharedPreferences`. They do not sync and are lost with the app's data. |
 
 ---

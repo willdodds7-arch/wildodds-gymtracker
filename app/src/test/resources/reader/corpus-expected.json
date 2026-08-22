@@ -968,13 +968,11 @@
         "sessions": 1,
         "restDays": 0,
         "exercises": 3,
-        "resolvedExactly": 2,
+        "resolvedExactly": 3,
         "confidenceBucket": 65,
         "flags": [
             "INFO:Only one week was detected. Set how many weeks it runs in re",
-            "REVIEW:Couldn’t confidently match “Lat Pulldown 410” — confirm the ",
-            "REVIEW:No sets/reps recognised for “Lat Pulldown 410” — kept verbat",
-            "REVIEW:“Lat Pulldown 410” looks like “Lat Pulldown” but wasn't cert"
+            "REVIEW:No sets/reps recognised for “Lat Pulldown 410” — kept verbat"
         ],
         "rows": [
             "Barbell Row 4x10",

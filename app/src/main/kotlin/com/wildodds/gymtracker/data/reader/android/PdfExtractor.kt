@@ -6,11 +6,10 @@ import com.tom_roush.pdfbox.text.TextPosition
 import com.wildodds.gymtracker.data.reader.ingest.ExtractInput
 import com.wildodds.gymtracker.data.reader.ingest.ExtractedDocument
 import com.wildodds.gymtracker.data.reader.ingest.Extractor
-import com.wildodds.gymtracker.data.reader.ingest.Grid
 import com.wildodds.gymtracker.data.reader.ingest.IngestError
 import com.wildodds.gymtracker.data.reader.ingest.IngestWarning
 import com.wildodds.gymtracker.data.reader.ingest.OcrLine
-import com.wildodds.gymtracker.data.reader.ingest.OcrRepair
+import com.wildodds.gymtracker.data.reader.ingest.PdfLayout
 import com.wildodds.gymtracker.data.reader.ingest.SourceKind
 
 /**
@@ -30,6 +29,10 @@ import com.wildodds.gymtracker.data.reader.ingest.SourceKind
  * When the reconstruction finds no columns, the plain reading-order text is used, because a
  * single-column PDF is exactly the case reading order already handles correctly.
  *
+ * This file holds ONLY what needs PDFBox: opening the document and capturing each glyph run's
+ * position. PDFBox will not static-initialise off a device, so anything living here is untestable
+ * except on one — which is why every decision made FROM those positions lives in [PdfLayout].
+ *
  * A PDF with no extractable text at all is a SCAN. That is not an error and not an empty document —
  * it is a different pipeline, so this reports [SourceKind.PDF_SCANNED] and lets the caller route to
  * OCR rather than importing a blank program.
@@ -37,9 +40,6 @@ import com.wildodds.gymtracker.data.reader.ingest.SourceKind
 class PdfExtractor : Extractor {
 
   override val handles = setOf(SourceKind.PDF_DIGITAL)
-
-  /** Below this many characters per page, the PDF is a scan wearing a PDF wrapper. */
-  private val MIN_CHARS_PER_PAGE = 24
 
   override fun extract(input: ExtractInput): ExtractedDocument {
     input.cancelCheck()
@@ -68,7 +68,7 @@ class PdfExtractor : Extractor {
         throw IngestError.Corrupt("That PDF's text couldn't be read.", e)
       }
 
-      if (readingOrder.count { !it.isWhitespace() } < MIN_CHARS_PER_PAGE * pages / 2) {
+      if (PdfLayout.looksScanned(readingOrder, pages)) {
         // Deliberately not an error: the caller routes this to OCR.
         return@use ExtractedDocument(
           text = "", sourceKind = SourceKind.PDF_SCANNED, confidence = 0.0,
@@ -76,54 +76,19 @@ class PdfExtractor : Extractor {
         )
       }
 
-      val rebuilt = collector.pages.map { rebuildPage(it) }
-      val anyColumns = rebuilt.any { it.columnCount >= 2 }
-      val text = if (anyColumns) rebuilt.joinToString("\n") { it.text } else readingOrder
-      val tables = rebuilt.filter { it.columnCount >= 2 }.mapIndexed { i, p ->
-        Grid("page ${i + 1}", p.text.lines().map { it.split('\t') })
-      }
-      if (anyColumns) {
-        warnings += IngestWarning(
-          "Columns were reconstructed from the page layout — check the numbers line up.")
-      }
+      // Every decision from here is made from the glyph positions alone, so it lives in the pure
+      // [PdfLayout] where it can be tested without a device.
+      val assembled = PdfLayout.assemble(collector.pages, readingOrder)
 
       ExtractedDocument(
-        text = stripRepeatedPageFurniture(text),
-        tables = tables,
+        text = assembled.text,
+        tables = assembled.tables,
         title = pdf.documentInformation?.title?.trim()?.takeIf { it.isNotBlank() },
         sourceKind = SourceKind.PDF_DIGITAL,
-        // A positional reconstruction is a reading, not a transcription, and confidence says so.
-        confidence = if (anyColumns) 0.9 else 1.0,
-        warnings = warnings
+        confidence = assembled.confidence,
+        warnings = warnings + assembled.warnings
       )
     }
-  }
-
-  private data class PageText(val text: String, val columnCount: Int)
-
-  private fun rebuildPage(runs: List<OcrLine>): PageText {
-    if (runs.isEmpty()) return PageText("", 0)
-    val r = OcrRepair.repair(runs)
-    return PageText(r.text, r.columnCount)
-  }
-
-  /**
-   * A repeated header or footer ("Smith Strength — Block 2", "Page 3 of 12") appears identically on
-   * every page and is not part of the program. Detected by cross-page repetition rather than by
-   * position, because a coach's footer is as likely to be at the top.
-   */
-  fun stripRepeatedPageFurniture(text: String, minPages: Int = 3): String {
-    val lines = text.lines()
-    if (lines.size < minPages * 4) return text
-    val counts = lines.map { it.trim() }.filter { it.length in 3..80 }
-      .groupingBy { it }.eachCount()
-    val furniture = counts.filter { (line, n) ->
-      n >= minPages &&
-        // Never drop something that carries a prescription — a repeated "3x8" is real content.
-        !Regex("""\d\s*[xX×]\s*\d""").containsMatchIn(line)
-    }.keys
-    if (furniture.isEmpty()) return text
-    return lines.filter { it.trim() !in furniture }.joinToString("\n")
   }
 
   /**

@@ -38,6 +38,22 @@ object ExerciseResolver {
 
   fun normalize(name: String): String = Normalise.key(name)
 
+  /**
+   * Tokens that are a prescription rather than part of a movement's name: bare numbers, `3x8`,
+   * a number with a unit, a percentage, an RPE or RIR target.
+   */
+  private val PRESCRIPTION_TOKEN = Regex(
+    """(?i)^(\d+(?:[.,]\d+)?(?:kg|kgs|lb|lbs|s|sec|secs|m|min|mins|%)?|\d+\s*[x]\s*\d+|rpe\d*|rir\d*|amrap)$""")
+
+  /** [norm] with its prescription tokens removed, or [norm] unchanged when none are present. */
+  private fun withoutPrescription(norm: String): String {
+    val words = norm.split(' ').filter { it.isNotBlank() }
+    val kept = words.filterNot { PRESCRIPTION_TOKEN.matches(it) }
+    // All numbers and nothing else is not a name we can rescue; leave it to the layers below.
+    if (kept.isEmpty() || kept.size == words.size) return norm
+    return kept.joinToString(" ")
+  }
+
   fun resolve(original: String, aliasLookup: (String) -> String? = { null }): ExerciseRef {
     val norm = Normalise.key(original)
     if (norm.isBlank()) return ExerciseRef(original, original.trim(), ResolutionStatus.UNRESOLVED, 0.0)
@@ -56,12 +72,38 @@ object ExerciseResolver {
       return ExerciseRef(original, it.canonical, ResolutionStatus.ALIAS, 0.97, via = "bundled_alias")
     }
 
+    // ── layer 2b: the same name with its prescription still attached ───────────
+    // A headerless table hands us "Overhead Press 3 8 45kg" as a name, and the fuzzy layers below
+    // read that trailing noise as evidence: it scored "Machine Overhead Press" level with
+    // "Overhead Press", and "Overhead Press 3x8" phonetically matched "Z Overhead Press" ABOVE the
+    // real answer. Both invent a movement out of a number.
+    //
+    // Stripping is tried only AFTER the raw name has failed both exact layers, so a genuine name
+    // with a number in it — "21s Barbell Curl", "1 1/4 Back Squat", "90 90 Hip Stretch" — has
+    // already matched itself and never reaches here.
+    val stripped = withoutPrescription(norm)
+    if (stripped != norm && stripped.isNotBlank()) {
+      ExerciseIndex.byKey[stripped]?.let {
+        return ExerciseRef(original, it.canonical, ResolutionStatus.EXACT, 0.95, via = "exact_stripped")
+      }
+      ExerciseIndex.byAlias[stripped]?.let {
+        return ExerciseRef(original, it.canonical, ResolutionStatus.ALIAS, 0.93, via = "alias_stripped")
+      }
+    }
+
     // ── layers 3-8: score every plausible candidate, best wins ─────────────────
     val queryTokens = Normalise.contentTokens(original)
     val scored = candidates(norm, queryTokens)
       .map { it.copy(score = it.score.coerceIn(0.0, 1.0)) }
-      // Ties break on the candidate name so the result is identical on every device.
-      .sortedWith(compareByDescending<Scored> { it.score }.thenBy { it.entry.canonical })
+      .sortedWith(
+        compareByDescending<Scored> { it.score }
+          // On a tie, the candidate that adds the FEWEST words the source never said wins. Ranking
+          // ties alphabetically was deterministic and wrong: it preferred "Machine Overhead Press"
+          // to "Overhead Press" for a query that said nothing about a machine, which is inventing
+          // data by sort order.
+          .thenBy { (it.entry.tokens - queryTokens).size }
+          // Then the name, so two equally-specific candidates still resolve identically everywhere.
+          .thenBy { it.entry.canonical })
 
     val top = scored.take(3).map { ExerciseCandidate(it.entry.canonical, round(it.score), it.via) }
     val best = scored.firstOrNull()
