@@ -1,0 +1,382 @@
+# Import benchmark — HELD-OUT documents.
+#
+# Written after the reader was tuned against text-pack / grid-pack, in styles those packs do not
+# use, to measure whether the reader generalises or merely memorised its training set. Same format
+# as text-pack.txt. When a document here fails, fix the reader for the CLASS of document, not for
+# this exact text.
+
+=== reddit-bold-bullets.md
+**Day 1: Upper**
+
+- Bench: 5x5
+- Pendlay row: 5x5
+- Dips: 3x8-12
+- Face pulls: 3x15
+
+**Day 2: Lower**
+
+- Squat: 5x5
+- RDL: 3x8
+- Walking lunges: 3x10 each leg
+--- expect
+DAY Upper
+Bench Press | 5 | 5
+Pendlay Row | 5 | 5
+Dip | 3 | 8-12
+Face Pull | 3 | 15
+DAY Lower
+Back Squat | 5 | 5
+Romanian Deadlift | 3 | 8
+Walking Lunge | 3 | 10
+
+=== emoji-insta.txt
+💪 DAY 1 – CHEST & TRIS 💪
+🔹 Incline Bench Press – 4x10
+🔹 Cable Fly – 3x15
+🔹 Skull Crushers – 3x12
+🔥 DAY 2 – BACK & BIS 🔥
+🔹 Pull Ups – 4xMAX
+🔹 Seated Cable Row – 4x12
+🔹 Hammer Curls – 3x12
+--- expect
+DAY Chest & Tris
+Incline Bench Press | 4 | 10
+Cable Fly | 3 | 15
+Skull Crusher | 3 | 12
+DAY Back & Bis
+Pull Up | 4 | AMRAP
+Seated Cable Row | 4 | 12
+Hammer Curl | 3 | 12
+
+=== em-dash-words.txt
+Leg Day
+Back Squat — 4 sets × 6–8 reps
+Leg Press — 3 sets × 12 reps
+Lying Leg Curl — 3 sets × 10–12 reps
+Standing Calf Raise — 4 sets × 15 reps
+--- expect
+DAY Leg Day
+Back Squat | 4 | 6-8
+Leg Press | 3 | 12
+Lying Leg Curl | 3 | 10-12
+Standing Calf Raise | 4 | 15
+
+=== app-share-sets.txt
+Push Workout
+
+Bench Press (Barbell)
+Set 1: 60 kg × 10
+Set 2: 80 kg × 8
+Set 3: 80 kg × 8
+
+Overhead Press (Barbell)
+Set 1: 40 kg × 10
+Set 2: 40 kg × 10
+
+Triceps Pushdown (Cable)
+Set 1: 25 kg × 15
+Set 2: 25 kg × 15
+Set 3: 25 kg × 12
+--- expect
+DAY Push Workout
+Bench Press | 3 | 10/8/8
+Overhead Press | 2 | 10
+Tricep Pushdown | 3 | 15/15/12
+
+=== reps-in-parens.txt
+Day A
+Leg Press 4 (12, 10, 8, 8)
+Bench Press 3 (10, 8, 6)
+Lat Pulldown 3 (12)
+--- expect
+DAY A
+Leg Press | 4 | 12/10/8/8
+Bench Press | 3 | 10/8/6
+Lat Pulldown | 3 | 12
+
+=== all-caps-shouting.txt
+WORKOUT A
+BACK SQUAT 5X5
+BENCH PRESS 5X5
+BARBELL ROW 5X5
+
+WORKOUT B
+BACK SQUAT 5X5
+OVERHEAD PRESS 5X5
+DEADLIFT 1X5
+--- expect
+DAY Workout A
+Back Squat | 5 | 5
+Bench Press | 5 | 5
+Barbell Row | 5 | 5
+DAY Workout B
+Back Squat | 5 | 5
+Overhead Press | 5 | 5
+Deadlift | 1 | 5
+
+=== timed-core.txt
+Core finisher
+Plank 3 x 45 sec
+Side plank 3 x 30 sec each side
+Hanging leg raise 3 x 12
+Dead bug 3 x 10 each side
+--- expect
+DAY Core finisher
+Plank | 3 | 45s
+Side Plank | 3 | 30s
+Hanging Leg Raise | 3 | 12
+Dead Bug | 3 | 10
+
+=== week-slash-day.txt
+Week 1 / Day 1
+Squat 3x5
+Bench 3x5
+
+Week 1 / Day 2
+Deadlift 1x5
+Press 3x5
+
+Week 2 / Day 1
+Squat 3x5
+Bench 3x5
+
+Week 2 / Day 2
+Deadlift 1x5
+Press 3x5
+--- expect
+WEEK 1
+DAY 1
+Back Squat | 3 | 5
+Bench Press | 3 | 5
+DAY 2
+Deadlift | 1 | 5
+Overhead Press | 3 | 5
+WEEK 2
+DAY 1
+Back Squat | 3 | 5
+Bench Press | 3 | 5
+DAY 2
+Deadlift | 1 | 5
+Overhead Press | 3 | 5
+
+=== markdown-hash-headers.md
+# My PPL
+
+## Push
+* Bench press 4 x 8
+* Incline DB press 3 x 10
+* Lateral raises 4 x 15
+
+## Pull
+* Barbell rows 4 x 8
+* Chin ups 3 x AMRAP
+* EZ bar curls 3 x 10
+
+## Legs
+* Squats 4 x 6
+* Leg extensions 3 x 15
+--- expect
+DAY Push
+Bench Press | 4 | 8
+Incline Dumbbell Press | 3 | 10
+Lateral Raise | 4 | 15
+DAY Pull
+Barbell Row | 4 | 8
+Chin Up | 3 | AMRAP
+EZ Bar Curl | 3 | 10
+DAY Legs
+Back Squat | 4 | 6
+Leg Extension | 3 | 15
+
+=== sets-word-first.txt
+Monday:
+3 sets of 10 goblet squats
+4 sets of 8 push ups
+3 sets of 12 dumbbell rows
+
+Thursday:
+3 sets of 8 Romanian deadlifts
+3 sets of 10 dumbbell shoulder press
+--- expect
+DAY Monday
+Goblet Squat | 3 | 10
+Push Up | 4 | 8
+Dumbbell Row | 3 | 12
+DAY Thursday
+Romanian Deadlift | 3 | 8
+Dumbbell Shoulder Press | 3 | 10
+
+=== csv-per-set-columns.csv
+Exercise,Set 1,Set 2,Set 3
+Bench Press,10,8,6
+Barbell Row,10,10,10
+Overhead Press,8,8,8
+--- expect
+Bench Press | 3 | 10/8/6
+Barbell Row | 3 | 10
+Overhead Press | 3 | 8
+
+=== csv-german-headers.csv
+Tag;Übung;Sätze;Wiederholungen
+1;Kniebeuge;5;5
+1;Bankdrücken;5;5
+2;Kreuzheben;3;5
+2;Klimmzüge;3;8
+--- expect
+DAY 1
+Back Squat | 5 | 5
+Bench Press | 5 | 5
+DAY 2
+Deadlift | 3 | 5
+Pull Up | 3 | 8
+
+=== tab-aligned-notes.txt
+Full Body
+Exercise	Sets	Reps	Rest
+Squat	3	8	2 min
+Bench Press	3	8	2 min
+Seated Row	3	10	90 sec
+Plank	3	30s	60 sec
+--- expect
+DAY Full Body
+Back Squat | 3 | 8
+Bench Press | 3 | 8
+Seated Row | 3 | 10
+Plank | 3 | 30s
+
+=== coach-email-prose.txt
+Hi mate,
+
+Here's your plan for the next block. Keep the rest short on accessories.
+
+Session 1
+Squat 4x5 @ 80%
+Leg press 3x10
+Hamstring curl 3x12
+
+Session 2
+Bench 4x5 @ 80%
+Chest supported row 4x10
+Triceps rope pushdown 3x15
+
+Shout if anything feels off.
+Cheers,
+Sam
+--- expect
+DAY Session 1
+Back Squat | 4 | 5
+Leg Press | 3 | 10
+Hamstring Curl | 3 | 12
+DAY Session 2
+Bench Press | 4 | 5
+Chest Supported Row | 4 | 10
+Triceps Rope Pushdown | 3 | 15
+
+# ── round 2: written after round 1 was fixed, again unseen by the reader ──────────
+
+=== no-of-words.txt
+Day 1 (Push) - 60 min
+Bench Press 3 sets 10 reps
+Incline dumbbell press 3 sets 12 reps
+Cable crossover 2 sets 15 reps
+--- expect
+DAY Push
+Bench Press | 3 | 10
+Incline Dumbbell Press | 3 | 12
+Cable Crossover | 2 | 15
+
+=== slash-ladder-rich.txt
+Upper (Mon)
+Bench press - 3 x 10/8/6
+Weighted pull-ups - 4x6-8 RPE 8 rest 3min
+Farmer's carry 3 x 40m
+Pull-ups 3xF
+
+Lower (Wed)
+Squat 4x6-8 @RPE8, rest 3 min
+  cue: brace before every rep
+Bulgarian split squat 3x10 each leg
+--- expect
+DAY Upper
+Bench Press | 3 | 10/8/6
+Weighted Pull Up | 4 | 6-8
+Farmers Carry | 3 | 40m
+Pull Up | 3 | AMRAP
+DAY Lower
+Back Squat | 4 | 6-8
+Bulgarian Split Squat | 3 | 10
+
+=== weekday-dash-rest.txt
+Monday – Push
+Bench 4x8
+OHP 3x10
+
+Tuesday – Rest
+
+Wednesday – Pull
+Deadlift 3x5
+Lat pulldown 3x12
+--- expect
+DAY Push
+Bench Press | 4 | 8
+Overhead Press | 3 | 10
+DAY Pull
+Deadlift | 3 | 5
+Lat Pulldown | 3 | 12
+
+=== csv-weight-kg.csv
+Exercise,Sets,Reps,Weight (kg)
+Back Squat,4,6,100
+Bench Press,4,8,70
+Barbell Row,3,10,60
+--- expect
+Back Squat | 4 | 6
+Bench Press | 4 | 8
+Barbell Row | 3 | 10
+
+=== day-word-numbers.txt
+DAY ONE
+1) Front squat 4x5
+2) Leg curl 3x12
+
+DAY TWO
+1) Bench press 4x5
+2) Cable row 3x12
+--- expect
+DAY 1
+Front Squat | 4 | 5
+Leg Curl | 3 | 12
+DAY 2
+Bench Press | 4 | 5
+Cable Row | 3 | 12
+
+=== reps-times-sets.txt
+Arms
+12 reps x 3 sets barbell curl
+15 reps x 3 sets rope pushdown
+10 reps x 4 sets preacher curl
+--- expect
+DAY Arms
+Barbell Curl | 3 | 12
+Rope Pushdown | 3 | 15
+Preacher Curl | 4 | 10
+
+=== excel-paste-blocks.txt
+PUSH	Sets	Reps
+Bench Press	4	6
+Overhead Press	3	8
+Lateral Raise	3	15
+
+PULL	Sets	Reps
+Deadlift	3	5
+Pull Up	3	8
+Face Pull	3	15
+--- expect
+DAY Push
+Bench Press | 4 | 6
+Overhead Press | 3 | 8
+Lateral Raise | 3 | 15
+DAY Pull
+Deadlift | 3 | 5
+Pull Up | 3 | 8
+Face Pull | 3 | 15

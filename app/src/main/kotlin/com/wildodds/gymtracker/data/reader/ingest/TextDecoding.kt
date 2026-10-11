@@ -81,7 +81,7 @@ object TextDecoding {
 
   /** CRLF and lone CR both become LF, and a stray BOM mid-stream is dropped. */
   fun normalise(s: String): String =
-    s.replace("\r\n", "\n").replace('\r', '\n').replace("﻿", "")
+    s.replace("\r\n", "\n").replace('\r', '\n').replace("\uFEFF", "")
 }
 
 /** Short alias used by [Sniffer], which needs only a decoded prefix. */

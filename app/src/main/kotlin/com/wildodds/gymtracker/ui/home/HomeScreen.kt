@@ -340,7 +340,7 @@ fun HomeScreen(
               ) {
                 Icon(Icons.Default.ContentPaste, null, modifier = Modifier.size(20.dp))
                 Spacer(Modifier.width(Space.sm))
-                Text("Import from Text / CSV", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+                Text("Import a Program", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
               }
             }
           }
@@ -863,7 +863,7 @@ private fun StartNewBlockSheet(
               listOfNotNull(
                 block.style.ifBlank { null },
                 "${block.daysPerWeek}x / week".takeIf { block.daysPerWeek > 0 },
-                "${block.totalWeeks} weeks"
+                "${block.totalWeeks} week${if (block.totalWeeks != 1) "s" else ""}"
               ).joinToString(" · "),
               style = AppType.label, color = c.textSecondary
             )
@@ -1025,7 +1025,7 @@ private fun DefaultProgramSheet(
                 Spacer(Modifier.width(Space.md))
                 Column(modifier = Modifier.weight(1f)) {
                   Text(prog.name, style = AppType.title, color = c.text)
-                  Text("${prog.totalWeeks} weeks · custom", color = c.textSecondary, style = AppType.label)
+                  Text("${prog.totalWeeks} week${if (prog.totalWeeks != 1) "s" else ""} · custom", color = c.textSecondary, style = AppType.label)
                 }
                 Icon(Icons.Default.ChevronRight, null, tint = c.textSecondary)
               }
@@ -1114,7 +1114,7 @@ private fun DefaultProgramCard(
   val c = LocalAppColors.current
   val daysPerWeek = prog.sessions.filter { it.weekNumber == 1 }.maxOfOrNull { it.dayNumber }
     ?: prog.sessions.map { it.dayNumber }.distinct().size
-  val subtitle = "$daysPerWeek day${if (daysPerWeek != 1) "s" else ""}/week · ${prog.totalWeeks} weeks"
+  val subtitle = "$daysPerWeek day${if (daysPerWeek != 1) "s" else ""}/week · ${prog.totalWeeks} week${if (prog.totalWeeks != 1) "s" else ""}"
 
   GlassCard(modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp)) {
     Column {
@@ -1247,7 +1247,7 @@ internal fun ExcelOptionsSheet(
       Spacer(Modifier.height(Space.md))
       ExcelOptionRow(
         icon = Icons.Default.Download, title = "Download Bulk Template",
-        subtitle = "Phased template — give it + screenshots to Claude to fill", emphasised = false, onClick = onDownloadBulkTemplate
+        subtitle = "Phased template for several multi-week programs at once", emphasised = false, onClick = onDownloadBulkTemplate
       )
 
       Spacer(Modifier.height(Space.xxl))

@@ -91,6 +91,27 @@ object ExerciseResolver {
       }
     }
 
+    // ── layer 2c: the same name with its misspellings corrected ─────────────────
+    // "Incline Dumbbel Press" is "incline dumbbell press" with one typo, and that exact phrase is a
+    // known alias. Correcting word by word against the index's own vocabulary first means the typo
+    // costs nothing; leaving it to whole-name fuzzy matching let "dumbbel" be dropped as noise and
+    // the name resolve to the BARBELL movement.
+    val corrected = spellCorrect(norm)
+    if (corrected != norm) {
+      val hit = ExerciseIndex.byKey[corrected]?.let { it to "spelling" }
+        ?: ExerciseIndex.byAlias[corrected]?.let { it to "spelling_alias" }
+      if (hit != null) {
+        // A correction is still a guess about what was typed, so the alternatives travel with it.
+        val others = candidates(corrected, Normalise.contentTokens(corrected))
+          .filter { it.entry.canonical != hit.first.canonical }
+          .sortedByDescending { it.score }.take(2)
+          .map { ExerciseCandidate(it.entry.canonical, round(it.score.coerceIn(0.0, 1.0)), it.via) }
+        val score = if (hit.second == "spelling") 0.92 else 0.90
+        return ExerciseRef(original, hit.first.canonical, ResolutionStatus.ALIAS, score,
+          listOf(ExerciseCandidate(hit.first.canonical, score, hit.second)) + others, hit.second)
+      }
+    }
+
     // ── layers 3-8: score every plausible candidate, best wins ─────────────────
     val queryTokens = Normalise.contentTokens(original)
     val scored = candidates(norm, queryTokens)
@@ -114,19 +135,73 @@ object ExerciseResolver {
       // same question twice and answering INFERRED to whatever the eight layers above had already
       // declined. Saying we do not know is the honest answer, and it is the one that puts the name
       // in front of the user instead of guessing at it.
-      return ExerciseRef(original, titleCase(norm), ResolutionStatus.UNRESOLVED, 0.30, top, "none")
+      return ExerciseRef(original, displayName(original), ResolutionStatus.UNRESOLVED, 0.30, top, "none")
     }
 
+    // A candidate that names equipment the source never mentioned is a different exercise, however
+    // well the other words matched: "Chest Supported Row" is not "Chest Supported BARBELL Row".
+    val addsEquipment = (best.entry.tokens - queryTokens).any { it in EQUIPMENT_TOKENS }
     val status = when {
       // A blocked near-match is never EXACT, however close it scored. This is the guard that stops
       // a typo fix flipping the movement.
       best.blockedBy != null -> ResolutionStatus.INFERRED
+      addsEquipment -> ResolutionStatus.INFERRED
       best.score >= TRUSTED -> ResolutionStatus.ALIAS
       else -> ResolutionStatus.INFERRED
     }
     val confidence = if (best.blockedBy != null) minOf(best.score, 0.55) else best.score
-    return ExerciseRef(original, best.entry.canonical, status, round(confidence), top, best.via)
+
+    // An uncertain match is OFFERED, never silently applied. The name the user wrote stays the name
+    // (with the candidates attached, so the review screen makes the swap one tap), unless the match
+    // is only a spelling correction or a confident widening that adds no equipment.
+    // Several equally good candidates is ambiguity, not a match ("Incline Press": bench, chest or
+    // machine?) — say so by keeping the source's words.
+    val tied = scored.getOrNull(1)?.let { kotlin.math.abs(it.score - best.score) < 0.005 } ?: false
+    val keepOriginal = status == ResolutionStatus.INFERRED && (tied || !(
+      (best.via == "phonetic_typo" || best.via == "edit_distance") && best.blockedBy == null && !addsEquipment ||
+        best.via.startsWith("token_set") && best.score >= 0.8 && !addsEquipment && best.blockedBy == null))
+    val name = if (keepOriginal) displayName(original) else best.entry.canonical
+    return ExerciseRef(original, name, status, round(confidence), top, best.via)
   }
+
+  /** Equipment words: a candidate may never introduce one the source did not say. */
+  private val EQUIPMENT_TOKENS = setOf(
+    "barbell", "dumbbell", "kettlebell", "cable", "machine", "smith", "band", "banded", "ez", "trap",
+    "hex", "landmine", "sled", "sandbag", "trx", "ring", "plate", "safety", "swiss", "bosu"
+  )
+
+  /** The source's own wording, tidied for display: "half kneeling cable chop" → "Half Kneeling Cable Chop". */
+  private fun displayName(original: String): String =
+    original.trim().replace(Regex("\\s+"), " ").split(' ').joinToString(" ") { w ->
+      if (w.length <= 3 && w.uppercase() == w && w.any { it.isLetter() }) w
+      else w.lowercase(java.util.Locale.ROOT).replaceFirstChar { it.uppercaseChar() }
+    }
+
+  /** Every word the index knows, for per-word spelling correction. */
+  private val vocabulary: Set<String> by lazy {
+    HashSet<String>().apply {
+      for (e in ExerciseIndex.entries) {
+        addAll(e.key.split(' '))
+        for (a in e.aliases) addAll(Normalise.key(a).split(' '))
+      }
+      removeAll { it.length < 3 }
+    }
+  }
+
+  /** Each unknown word → the nearest known word, when exactly one is close enough. */
+  private fun spellCorrect(norm: String): String =
+    norm.split(' ').joinToString(" ") { w ->
+      if (w.length < 5 || w in vocabulary || w.any { it.isDigit() }) w
+      else {
+        val budget = if (w.length >= 8) 2 else 1
+        val near = vocabulary.filter { kotlin.math.abs(it.length - w.length) <= budget }
+          .map { it to Fuzzy.damerauLevenshtein(w, it, budget) }
+          .filter { it.second <= budget }
+        val best = near.minOfOrNull { it.second }
+        val winners = near.filter { it.second == best }.map { it.first }
+        winners.singleOrNull() ?: w
+      }
+    }
 
   // ── candidate generation ─────────────────────────────────────────────────────
 
@@ -210,7 +285,9 @@ object ExerciseResolver {
           else -> false
         }
       }
-      if (unmatched.isNotEmpty() && explained == unmatched.size) {
+      // …and the candidate may not bring words of its own: "seated dumbbell press" is explained by a
+      // dumbbell entry, but "Seated ARNOLD Press" adds a movement the source never named.
+      if (unmatched.isNotEmpty() && explained == unmatched.size && (e.tokens - queryTokens).isEmpty()) {
         offer(0.88 + 0.1 * (overlap.toDouble() / e.tokens.size), "equipment_decomposition")
       }
     }
@@ -257,12 +334,12 @@ object ExerciseResolver {
    * Equipment words, mapped to the equipment tag they assert. A word only qualifies a candidate
    * when the candidate is ACTUALLY that equipment — see the decomposition layer.
    *
-   * `ez`, `trap`, `hex` and `safety` name bar types, all of which are barbells; `landmine` is a
-   * barbell in a hinge. Grouping them here is what lets "EZ bar curl" resolve to "Barbell Curl".
+   * Bar TYPES (`ez`, `trap`, `hex`, `safety`, `landmine`) are deliberately NOT here: a trap-bar
+   * deadlift and an EZ-bar curl are their own movements with their own entries, and explaining the
+   * bar away silently turned "Hex Bar Deadlift" into a conventional "Deadlift".
    */
   private val EQUIPMENT_WORDS: Map<String, String> = mapOf(
-    "barbell" to "BARBELL", "bar" to "BARBELL", "ez" to "BARBELL", "trap" to "BARBELL",
-    "hex" to "BARBELL", "safety" to "BARBELL", "landmine" to "BARBELL",
+    "barbell" to "BARBELL", "bar" to "BARBELL",
     "dumbbell" to "DUMBBELL", "kettlebell" to "KETTLEBELL",
     "cable" to "CABLE", "machine" to "MACHINE", "plate" to "MACHINE",
     "band" to "BAND", "banded" to "BAND",

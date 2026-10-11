@@ -84,7 +84,6 @@ fun SettingsScreen(
   val accentHue     by vm.accentHue.collectAsStateWithLifecycle()
   val accentSat     by vm.accentSaturation.collectAsStateWithLifecycle()
   val timerSound    by vm.timerSound.collectAsStateWithLifecycle()
-  val claudeApiKey  by vm.claudeApiKey.collectAsStateWithLifecycle()
   val toggleStates  by vm.toggleStates.collectAsStateWithLifecycle()
 
   var showExportSheet by remember { mutableStateOf(false) }
@@ -129,19 +128,25 @@ fun SettingsScreen(
   val expandedState   = remember { mutableStateMapOf<String, Boolean>() }
   var showClearDialog by remember { mutableStateOf(false) }
 
-  // Local, on-device analytics-consent state (drives the "Share usage statistics" toggle).
-  val analyticsConsent by vm.analyticsConsent.collectAsStateWithLifecycle()
 
   if (showClearDialog) {
   AlertDialog(
   onDismissRequest = { showClearDialog = false },
-  title  = { Text("Clear All Data") },
-  text  = { Text("This will permanently delete all programs, sessions, and workout logs. This cannot be undone.") },
+  title  = { Text("Delete all my data?") },
+  text  = { Text("This permanently erases everything this app stores on this phone — programs, " +
+  "workout logs, notes, habits, achievements and settings — and closes the app. We hold no copy " +
+  "anywhere else, so it can't be undone. Export a backup first if you might want it back.") },
   confirmButton = {
   TextButton(
-  onClick = { showClearDialog = false; vm.clearAllData {} },
+  onClick = {
+  showClearDialog = false
+  // Android's own full wipe — the same as "Clear storage" in system settings. Every
+  // database, preference, file and cache goes, so nothing is missed as features are added.
+  (context.getSystemService(android.content.Context.ACTIVITY_SERVICE) as android.app.ActivityManager)
+  .clearApplicationUserData()
+  },
   colors  = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
-  ) { Text("Delete Everything") }
+  ) { Text("Delete everything") }
   },
   dismissButton = { TextButton(onClick = { showClearDialog = false }) { Text("Cancel") } }
   )
@@ -225,11 +230,6 @@ fun SettingsScreen(
   title = entry.title, selected = timerSound, accent = accent,
   onSelect = { vm.setTimerSound(it) }
   )
-  SettingControl.API_KEY -> ApiKeyRow(
-  title = entry.title, summary = entry.summary,
-  value = claudeApiKey, accent = accent,
-  onChange = { vm.setClaudeApiKey(it.trim()) }
-  )
   SettingControl.DOWNLOAD_TEMPLATE -> ActionRow(
   title = entry.title, summary = entry.summary,
   tint = accent, onClick = { downloadTemplate(context) }
@@ -259,14 +259,6 @@ fun SettingsScreen(
   SettingControl.REMINDER_SETTINGS -> ActionRow(
   title = entry.title, summary = entry.summary,
   tint = accent, onClick = { showReminderSheet = true }
-  )
-  SettingControl.SHARE_USAGE_STATS -> ToggleRow(
-  title    = entry.title,
-  summary  = entry.summary,
-  checked  = analyticsConsent == "granted",
-  accent   = accent,
-  onToggle = { vm.setAnalyticsConsent(it) },
-  testTag  = "toggle_${entry.key}"
   )
   SettingControl.LEGAL_DOC -> ActionRow(
   title = entry.title, summary = entry.summary,
@@ -446,54 +438,15 @@ private fun WearableConnectRow(
 }
 
 @Composable
-private fun ApiKeyRow(title: String, summary: String, value: String, accent: Color, onChange: (String) -> Unit) {
-  var showKey by remember { mutableStateOf(false) }
-  Column(Modifier.fillMaxWidth().padding(vertical = 10.dp)) {
-  Text(summary, style = MaterialTheme.typography.bodySmall,
-  color = MaterialTheme.colorScheme.onSurfaceVariant)
-  Spacer(Modifier.height(8.dp))
-  OutlinedTextField(
-  value = value,
-  onValueChange = onChange,
-  label = { Text(title) },
-  placeholder = { Text("sk-ant-api03-...") },
-  singleLine = true,
-  modifier = Modifier.fillMaxWidth(),
-  visualTransformation = if (showKey) VisualTransformation.None else PasswordVisualTransformation(),
-  trailingIcon = {
-  IconButton(onClick = { showKey = !showKey }) {
-  Icon(
-  if (showKey) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-  contentDescription = if (showKey) "Hide" else "Show"
-  )
-  }
-  },
-  colors = OutlinedTextFieldDefaults.colors(
-  unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
-  focusedBorderColor = accent
-  )
-  )
-  if (value.isBlank()) {
-  Spacer(Modifier.height(4.dp))
-  Text(
-  "Get a free key at console.anthropic.com",
-  style = MaterialTheme.typography.labelSmall,
-  color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-  )
-  }
-  }
-}
-
-@Composable
 private fun TimerSoundRow(title: String, selected: String, accent: Color, onSelect: (String) -> Unit) {
-  val options = listOf("none" to "No Sound", "ding" to "Ding", "ronnie" to "Ronnie Coleman")
+  val options = listOf("none" to "No Sound", "ding" to "Ding", "pulse" to "Triple pulse")
   Column(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)) {
   Text(title, color = MaterialTheme.colorScheme.onBackground,
   style = MaterialTheme.typography.bodyMedium)
   Spacer(Modifier.height(8.dp))
   Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
   options.forEach { (key, label) ->
-  val isSelected = selected == key
+  val isSelected = selected == key || (key == "pulse" && selected == "ronnie")
   Surface(
   onClick = { onSelect(key) },
   shape = RoundedCornerShape(20.dp),
@@ -595,6 +548,26 @@ private fun ExportSheet(onDismiss: () -> Unit) {
   val scope = rememberCoroutineScope()
   var busy by remember { mutableStateOf(false) }
 
+  // Restore: pick a file → read + validate it → confirm → replace the database.
+  var pendingRestore by remember { mutableStateOf<com.wildodds.gymtracker.data.sync.TrainingSnapshot?>(null) }
+  val pickBackup = androidx.activity.compose.rememberLauncherForActivityResult(
+  androidx.activity.result.contract.ActivityResultContracts.OpenDocument()
+  ) { uri ->
+  if (uri == null) return@rememberLauncherForActivityResult
+  scope.launch {
+  busy = true
+  runCatching {
+  withContext(Dispatchers.IO) {
+  val json = context.contentResolver.openInputStream(uri)?.use { it.bufferedReader().readText() }
+  ?: error("Couldn't open that file.")
+  BackupManager(AppDatabase.getInstance(context)).fromBackupJson(json)
+  }
+  }.onSuccess { pendingRestore = it }
+  .onFailure { Toast.makeText(context, it.message ?: "Couldn't read that backup.", Toast.LENGTH_LONG).show() }
+  busy = false
+  }
+  }
+
   fun export(format: ExportFormat) {
   if (busy) return
   scope.launch {
@@ -624,7 +597,52 @@ private fun ExportSheet(onDismiss: () -> Unit) {
   Spacer(Modifier.height(6.dp))
   OutlinedButton(onClick = { export(ExportFormat.SUMMARY) }, enabled = !busy, modifier = Modifier.fillMaxWidth(),
   shape = RoundedCornerShape(12.dp)) { Text("Share summary") }
+
+  Spacer(Modifier.height(20.dp))
+  HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+  Spacer(Modifier.height(16.dp))
+  Text("Restore from backup", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold,
+  color = MaterialTheme.colorScheme.onBackground)
+  Spacer(Modifier.height(4.dp))
+  Text("Load a file made with \"Export as JSON\" — for moving to a new phone or reinstalling. " +
+  "It replaces every program and log on this phone.",
+  style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+  Spacer(Modifier.height(10.dp))
+  OutlinedButton(onClick = { pickBackup.launch(arrayOf("application/json", "text/plain", "application/octet-stream", "*/*")) },
+  enabled = !busy, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {
+  Text("Choose backup file…")
   }
+  }
+  }
+
+  pendingRestore?.let { snapshot ->
+  AlertDialog(
+  onDismissRequest = { pendingRestore = null },
+  title = { Text("Replace everything with this backup?") },
+  text = {
+  Text("${snapshot.programs.size} program(s), ${snapshot.setLogs.size} logged set(s) and " +
+  "${snapshot.completions.size} completed session(s). Everything currently on this phone is " +
+  "replaced. Settings and athlete notes aren't part of a backup and stay as they are.")
+  },
+  confirmButton = {
+  TextButton(onClick = {
+  pendingRestore = null
+  scope.launch {
+  busy = true
+  runCatching { BackupManager(AppDatabase.getInstance(context)).restore(snapshot) }
+  .onSuccess {
+  Toast.makeText(context, "Backup restored", Toast.LENGTH_LONG).show()
+  onDismiss()
+  // Screens cache what they loaded; a fresh start shows the restored data everywhere.
+  (context as? android.app.Activity)?.recreate()
+  }
+  .onFailure { Toast.makeText(context, "Restore failed: ${it.message}", Toast.LENGTH_LONG).show() }
+  busy = false
+  }
+  }) { Text("Restore", color = MaterialTheme.colorScheme.error) }
+  },
+  dismissButton = { TextButton(onClick = { pendingRestore = null }) { Text("Cancel") } }
+  )
   }
 }
 

@@ -32,6 +32,10 @@ interface WorkoutLogDao {
   @Insert(onConflict = OnConflictStrategy.REPLACE)
   suspend fun insert(log: WorkoutLog): Long
 
+  /** Follow an exercise that moved to another day, so its logged sets move with it. */
+  @Query("UPDATE workout_logs SET sessionId = :sessionId WHERE exerciseId = :exerciseId")
+  suspend fun reassignSession(exerciseId: Long, sessionId: Long)
+
   // choice is nullable so a user can CLEAR (deselect) their progression pick, not just set it.
   @Query("UPDATE workout_logs SET progressionChoice = :choice WHERE id = :workoutLogId")
   suspend fun updateProgressionChoice(workoutLogId: Long, choice: String?)

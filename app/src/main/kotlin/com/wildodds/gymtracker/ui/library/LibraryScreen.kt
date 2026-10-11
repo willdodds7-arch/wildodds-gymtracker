@@ -47,7 +47,6 @@ import com.wildodds.gymtracker.data.MuscleGroup
 import com.wildodds.gymtracker.data.db.entity.Program
 import com.wildodds.gymtracker.data.parser.ParsedProgram
 import com.wildodds.gymtracker.ui.components.GlassCard
-import com.wildodds.gymtracker.ui.home.AiProgramReviewSheet
 import com.wildodds.gymtracker.ui.home.ExcelOptionsSheet
 import com.wildodds.gymtracker.ui.home.HomeViewModel
 import com.wildodds.gymtracker.ui.home.ImportState
@@ -420,7 +419,7 @@ fun LibraryScreen(
   }
   Spacer(Modifier.width(12.dp))
   Column(modifier = Modifier.weight(1f)) {
-  Text("nSuns CAP3", fontWeight = FontWeight.SemiBold,
+  Text("3-Week AMRAP Cycle", fontWeight = FontWeight.SemiBold,
   color = MaterialTheme.colorScheme.onBackground, fontSize = 14.sp)
   Text("Set your maxes and start the 3-week AMRAP cycle",
   color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall)
@@ -519,7 +518,7 @@ private fun ProgramCard(
   color = MaterialTheme.colorScheme.onBackground)
   Spacer(Modifier.height(4.dp))
   Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-  LibChip("${program.totalWeeks} weeks")
+  LibChip("${program.totalWeeks} week${if (program.totalWeeks != 1) "s" else ""}")
   if (program.isFlexible) LibChip("Flexible")
   if (program.isActive) LibChip("Active")
   }
@@ -580,7 +579,7 @@ private fun PausedProgramCard(program: Program, accent: Color, onResume: () -> U
   color = MaterialTheme.colorScheme.onBackground)
   Spacer(Modifier.height(4.dp))
   Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-  LibChip("${program.totalWeeks} weeks")
+  LibChip("${program.totalWeeks} week${if (program.totalWeeks != 1) "s" else ""}")
   Surface(shape = RoundedCornerShape(20.dp),
   color = MaterialTheme.colorScheme.errorContainer.copy(0.5f)) {
   Text("Paused", modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
@@ -641,6 +640,11 @@ private fun AnalysisSheet(result: AnalysisResult, onDismiss: () -> Unit) {
   val accent  = LocalAccentColor.current
   val muscleMap = result.rows.associate { it.muscle to it.setsPerWeek }
   val maxSets  = result.rows.maxOfOrNull { it.setsPerWeek }?.coerceAtLeast(1f) ?: 1f
+  // Every bar shares one round-number scale (never shorter than the 6-set "optimal" line), so bars
+  // are comparable across muscles and the axis under the header reads in real sets per week.
+  val scaleMax = remember(maxSets) {
+  com.wildodds.gymtracker.ui.components.niceTicks(0f, maxOf(maxSets, 8f)).last()
+  }
 
   ModalBottomSheet(onDismissRequest = onDismiss) {
   LazyColumn(
@@ -666,7 +670,8 @@ private fun AnalysisSheet(result: AnalysisResult, onDismiss: () -> Unit) {
   Spacer(Modifier.height(16.dp))
   Text("Volume by Muscle", style = MaterialTheme.typography.titleMedium,
   fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground)
-  Spacer(Modifier.height(4.dp))
+  Spacer(Modifier.height(8.dp))
+  MuscleScaleAxis(scaleMax)
   }
 
   // Muscle rows by region
@@ -683,7 +688,7 @@ private fun AnalysisSheet(result: AnalysisResult, onDismiss: () -> Unit) {
   }
   items(present, key = { it.name }) { muscle ->
   val sets = muscleMap[muscle] ?: 0f
-  MuscleBar(muscle, sets, maxSets)
+  MuscleBar(muscle, sets, scaleMax)
   Spacer(Modifier.height(8.dp))
   }
   }
@@ -812,10 +817,45 @@ private fun MuscleBar(muscle: MuscleGroup, sets: Float, maxSets: Float) {
   }
   }
   Spacer(Modifier.height(3.dp))
-  Box(Modifier.fillMaxWidth().height(7.dp).clip(CircleShape)
+  val tickColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f)
+  Box(Modifier.fillMaxWidth().height(9.dp)) {
+  Box(Modifier.fillMaxWidth().height(7.dp).align(Alignment.Center).clip(CircleShape)
   .background(MaterialTheme.colorScheme.outline.copy(0.2f))) {
   Box(Modifier.fillMaxWidth(fraction).fillMaxHeight().clip(CircleShape).background(barColor))
   }
+  // The "OK" (4) and "optimal" (6) lines, so you can see how far a muscle is from its target.
+  androidx.compose.foundation.Canvas(Modifier.matchParentSize()) {
+  listOf(4f, 6f).forEach { t ->
+  val x = size.width * (t / maxSets).coerceIn(0f, 1f)
+  drawLine(tickColor, androidx.compose.ui.geometry.Offset(x, 0f),
+  androidx.compose.ui.geometry.Offset(x, size.height), strokeWidth = 1.5.dp.toPx())
+  }
+  }
+  }
+  }
+}
+
+/** The shared sets-per-week scale above the muscle bars: 0 · 4 · 8 · 12 … */
+@Composable
+private fun MuscleScaleAxis(scaleMax: Float) {
+  val ticks = remember(scaleMax) { com.wildodds.gymtracker.ui.components.niceTicks(0f, scaleMax) }
+  val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+  Column {
+  BoxWithConstraints(Modifier.fillMaxWidth().height(14.dp)) {
+  val w = maxWidth
+  ticks.forEach { t ->
+  val frac = (t / scaleMax).coerceIn(0f, 1f)
+  Text(
+  com.wildodds.gymtracker.ui.components.formatAxisValue(t),
+  style = MaterialTheme.typography.labelSmall, fontSize = 10.sp, color = labelColor,
+  // Centre each label on its tick; pin the end labels inside the row.
+  modifier = Modifier.offset(x = (w * frac - 10.dp).coerceIn(0.dp, w - 20.dp)).width(20.dp),
+  textAlign = when (frac) { 0f -> TextAlign.Start; 1f -> TextAlign.End; else -> TextAlign.Center }
+  )
+  }
+  }
+  Text("sets per week · lines mark 4 (OK) and 6 (optimal)",
+  style = MaterialTheme.typography.labelSmall, fontSize = 10.sp, color = labelColor.copy(alpha = 0.8f))
   }
 }
 
@@ -979,34 +1019,50 @@ private fun ExerciseProgressionCard(ex: ExerciseProgression, accent: Color) {
 
   Spacer(Modifier.height(10.dp))
 
-  // Week-by-week bar chart (max weight per week)
-  val maxW = ex.snapshots.maxOfOrNull { it.maxWeightKg }?.coerceAtLeast(1f) ?: 1f
-  Text("Max weight per week", style = MaterialTheme.typography.labelSmall,
-  color = MaterialTheme.colorScheme.onSurfaceVariant)
-  Spacer(Modifier.height(6.dp))
-  Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp),
-  verticalAlignment = Alignment.Bottom) {
-  ex.snapshots.forEach { snap ->
-  val frac = (snap.maxWeightKg / maxW).coerceIn(0.05f, 1f)
-  Column(horizontalAlignment = Alignment.CenterHorizontally,
-  modifier = Modifier.weight(1f)) {
-  Text(
-  if (snap.maxWeightKg % 1f == 0f) snap.maxWeightKg.toInt().toString()
-  else "%.0f".format(snap.maxWeightKg),
+  // Week-by-week chart with a real Y axis. One chart, three lenses: the heaviest set says whether
+  // the bar is going up, volume says whether the work is, and average reps explains a flat weight.
+  var metric by remember(ex.exerciseName, ex.dayNumber) { mutableIntStateOf(0) }
+  Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+  listOf("Top weight", "Volume", "Avg reps").forEachIndexed { i, label ->
+  Surface(
+  onClick = { metric = i },
+  shape = RoundedCornerShape(8.dp),
+  color = if (metric == i) accent.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+  ) {
+  Text(label, modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
   style = MaterialTheme.typography.labelSmall,
-  color = MaterialTheme.colorScheme.onSurfaceVariant,
-  fontSize = 9.sp
+  fontWeight = if (metric == i) FontWeight.Bold else FontWeight.Normal,
+  color = if (metric == i) accent else MaterialTheme.colorScheme.onSurfaceVariant)
+  }
+  }
+  }
+  Spacer(Modifier.height(8.dp))
+  val chartPoints = ex.snapshots.map { snap ->
+  com.wildodds.gymtracker.ui.components.ChartPoint("W${snap.week}", when (metric) {
+  1 -> snap.totalVolume
+  2 -> snap.avgReps
+  else -> snap.maxWeightKg
+  })
+  }
+  // Mark the best week for the selected metric so the peak is obvious at a glance.
+  val bestIdx = chartPoints.indices.maxByOrNull { chartPoints[it].value }
+  com.wildodds.gymtracker.ui.components.AxisLineChart(
+  points = chartPoints,
+  color = accent,
+  unit = if (metric == 2) "reps" else "kg",
+  zeroBased = metric == 1,
+  highlight = setOfNotNull(bestIdx),
+  modifier = Modifier.fillMaxWidth().height(170.dp)
   )
-  Spacer(Modifier.height(2.dp))
-  Box(Modifier.fillMaxWidth().height((frac * 40f).dp)
-  .clip(RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp))
-  .background(accent))
-  Spacer(Modifier.height(2.dp))
-  Text("W${snap.week}", style = MaterialTheme.typography.labelSmall,
-  fontSize = 9.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-  }
-  }
-  }
+  Text(
+  when (metric) {
+  1 -> "Weight × reps summed over every set, per week."
+  2 -> "Average reps per set, per week."
+  else -> "Heaviest set logged each week."
+  } + " Larger dot = best week. Tap or drag for values.",
+  style = MaterialTheme.typography.labelSmall,
+  color = MaterialTheme.colorScheme.onSurfaceVariant
+  )
 
   // Correlation insight
   ex.volumeCorrelation?.let { corr ->
@@ -1111,10 +1167,12 @@ fun BrowseDefaultsSheet(
   )
   Spacer(Modifier.height(8.dp))
 
-  if (coaches.isNotEmpty())
+  if (coaches.isNotEmpty()) {
   BrowseFacetRow("Coach", coaches.map { it to it }, coachF) { coachF = it }
-  if (dayOptions.isNotEmpty())
+  }
+  if (dayOptions.isNotEmpty()) {
   BrowseFacetRow("Days", dayOptions.map { it to ("$it days") }, daysF) { daysF = it }
+  }
   Spacer(Modifier.height(8.dp))
   }
 
@@ -1193,7 +1251,7 @@ private fun ProgramBrowseCard(
   modifier = Modifier.clickable(onClick = onCoach).padding(top = 2.dp))
   }
   Spacer(Modifier.height(6.dp))
-  Text("$weeks weeks · ${browseDays(prog)} days/week", style = MaterialTheme.typography.labelSmall,
+  Text("$weeks week${if (weeks != 1) "s" else ""} · ${browseDays(prog)} days/week", style = MaterialTheme.typography.labelSmall,
   color = MaterialTheme.colorScheme.onSurfaceVariant)
   Spacer(Modifier.height(8.dp))
   Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -1250,7 +1308,7 @@ private fun ProgramDetailContent(
   DayFilterChip("${browseDays(prog)} days", false, accent) { onPickDays(browseDays(prog)) }
   }
   Spacer(Modifier.height(8.dp))
-  Text("$weeks weeks · ${browseDays(prog)} days/week", style = MaterialTheme.typography.labelSmall,
+  Text("$weeks week${if (weeks != 1) "s" else ""} · ${browseDays(prog)} days/week", style = MaterialTheme.typography.labelSmall,
   color = MaterialTheme.colorScheme.onSurfaceVariant)
 
   // ── Sample-week preview (see what you're getting before you start) ──
@@ -1359,7 +1417,7 @@ private fun ViewProgramSheet(
     )
     Spacer(Modifier.height(4.dp))
     Text(
-    "${detail.weeks.size} weeks · ${detail.weeks.firstOrNull()?.days?.size ?: 0} days/week",
+    "${detail.weeks.size} week${if (detail.weeks.size != 1) "s" else ""} · ${detail.weeks.firstOrNull()?.days?.size ?: 0} days/week",
     style = MaterialTheme.typography.bodySmall,
     color = MaterialTheme.colorScheme.onSurfaceVariant
     )

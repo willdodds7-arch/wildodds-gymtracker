@@ -52,10 +52,6 @@ object Confidence {
     return Summary(score, slots.size, slots.count { it.confidence < REVIEW_THRESHOLD }, reasons)
   }
 
-  fun forSession(session: SessionDraft): Summary = forSlots(session.slots)
-
-  fun forWeek(week: WeekDraft): Summary = forSlots(week.sessions.flatMap { it.slots })
-
   fun forProgram(draft: ProgramImportDraft): Summary =
     forSlots(draft.weeks.flatMap { w -> w.sessions.flatMap { it.slots } })
 

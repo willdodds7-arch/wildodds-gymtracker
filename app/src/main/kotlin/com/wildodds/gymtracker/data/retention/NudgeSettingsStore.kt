@@ -32,5 +32,4 @@ object NudgeSettingsStore {
     prefs(c).edit().putInt(KEY_QUIET_START, start).putInt(KEY_QUIET_END, end).apply()
   fun recordNudge(c: Context, now: Long) = prefs(c).edit().putLong(KEY_LAST_NUDGE, now).apply()
   fun snooze(c: Context, until: Long) = prefs(c).edit().putLong(KEY_SNOOZED_UNTIL, until).apply()
-  fun clearSnooze(c: Context) = prefs(c).edit().remove(KEY_SNOOZED_UNTIL).apply()
 }

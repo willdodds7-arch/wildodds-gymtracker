@@ -1,7 +1,7 @@
 name: Release AAB
 
 # Builds a signed Play-ready App Bundle when a version tag (v*) is pushed. The keystore and its
-# passwords come from repo secrets (never committed); see docs/launch-runbook.md for one-time setup.
+# passwords come from repo secrets (never committed); see launch-kit/CHECKLIST.md for one-time setup.
 on:
   push:
     tags: ["v*"]
@@ -33,9 +33,6 @@ jobs:
 
       - name: Build signed AAB
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-          GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
           RELEASE_STORE_FILE: ${{ runner.temp }}/release.jks
           RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
           RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}

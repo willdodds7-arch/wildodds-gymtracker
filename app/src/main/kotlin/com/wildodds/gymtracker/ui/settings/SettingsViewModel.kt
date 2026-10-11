@@ -34,14 +34,6 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
   // cold start for a row only the Settings screen ever shows.
   private val wearableGateway by lazy { RealHealthConnectGateway(app) }
 
-  private val _claudeApiKey = MutableStateFlow(gymPrefs.getString("claude_api_key", "") ?: "")
-  val claudeApiKey: StateFlow<String> = _claudeApiKey.asStateFlow()
-
-  fun setClaudeApiKey(key: String) {
-    _claudeApiKey.value = key
-    gymPrefs.edit().putString("claude_api_key", key).apply()
-  }
-
   // PERF: WhileSubscribed, not Eagerly. This ViewModel exposes ~35 DataStore-backed flows (the
   // typed ones here plus one per registry toggle in `toggleStates`), and it is constructed by Home
   // and the session screen as well as Settings — so `Eagerly` opened all ~35 collectors during cold
@@ -82,26 +74,6 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
   com.wildodds.gymtracker.data.analytics.AnalyticsEvent.FeatureToggled(key, value))
   }
 
-  /** "unset" | "granted" | "denied" — the Settings toggle shows granted as ON, anything else OFF. */
-  val analyticsConsent: StateFlow<String> = prefs.analyticsConsent
-  .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "unset")
-
-  fun setAnalyticsConsent(granted: Boolean) {
-  viewModelScope.launch(Dispatchers.IO) {
-  val value = if (granted) "granted" else "denied"
-  prefs.setAnalyticsConsent(value)
-  if (!granted) com.wildodds.gymtracker.data.analytics.AnalyticsGate.onConsentRevoked(getApplication())
-  }
-  }
-
-  fun toggleDarkMode() {
-  viewModelScope.launch { prefs.setDarkMode(!isDarkMode.value) }
-  }
-  fun toggleFeatSessionTimer()      { viewModelScope.launch { prefs.setFeatSessionTimer(!featSessionTimer.value) } }
-  fun toggleFeatWeightAutofill()    { viewModelScope.launch { prefs.setFeatWeightAutofill(!featWeightAutofill.value) } }
-  fun toggleFeatAddExercise()       { viewModelScope.launch { prefs.setFeatAddExercise(!featAddExercise.value) } }
-  fun toggleFeatProgressionPicker() { viewModelScope.launch { prefs.setFeatProgressionPicker(!featProgressionPicker.value) } }
-  fun toggleFeat1rmCalculator()     { viewModelScope.launch { prefs.setFeat1rmCalculator(!feat1rmCalculator.value) } }
   fun setTimerSound(value: String)  { viewModelScope.launch { prefs.setTimerSound(value) } }
 
   fun setAccentHue(hue: Float) {

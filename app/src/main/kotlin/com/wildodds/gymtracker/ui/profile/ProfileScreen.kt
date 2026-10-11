@@ -134,28 +134,17 @@ fun ProfileScreen(
         MaxCard(row = row, accent = accent, onEdit = { editing = row })
       }
 
-      item {
-        Spacer(Modifier.height(8.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          Text("ACHIEVEMENTS", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurfaceVariant, letterSpacing = 0.8.sp, modifier = Modifier.weight(1f))
-          if (achState.enabled) {
+      // Turned off in Settings → the section isn't shown at all.
+      if (achState.enabled && achState.progress.isNotEmpty()) {
+        item {
+          Spacer(Modifier.height(8.dp))
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("ACHIEVEMENTS", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold,
+              color = MaterialTheme.colorScheme.onSurfaceVariant, letterSpacing = 0.8.sp, modifier = Modifier.weight(1f))
             Text("${achState.unlockedCount} / ${achState.totalCount}",
               style = MaterialTheme.typography.labelMedium, color = accent, fontWeight = FontWeight.Bold)
           }
         }
-      }
-      if (!achState.enabled) {
-        item {
-          Text("Achievements are turned off in Settings.",
-            style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-      } else if (achState.progress.isEmpty()) {
-        item {
-          Text("Achievements are coming in a future update.",
-            style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-      } else {
         items(achState.progress, key = { it.definition.id }) { p -> ProfileAchievementRow(p, accent) }
       }
 

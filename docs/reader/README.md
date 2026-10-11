@@ -3,10 +3,9 @@
 Turns a written training program — in whatever form someone has it — into a program in the app.
 
 **Fully on-device. Fully offline. Zero network.** Every path in this subsystem works in airplane
-mode, with no account and no key, on first launch. `ReaderNoNetworkTest` reads the compiled class
-files of the reader packages and fails the build if any of them so much as references a networking
-API. The one permitted networked path in the app, `ClaudeApiClient`, is opt-in, off by default,
-lives outside these packages, and is not reachable from them.
+mode, with no account and no key, on first launch. The whole app has no INTERNET permission, and
+`ReaderNoNetworkTest` fails the build if any compiled class references a networking API or the
+permission comes back into the merged manifest.
 
 ## The pages
 

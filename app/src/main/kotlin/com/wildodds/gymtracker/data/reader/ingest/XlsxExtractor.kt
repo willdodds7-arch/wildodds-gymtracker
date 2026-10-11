@@ -412,4 +412,4 @@ object A1 {
 
 /** OOXML and ODF are always UTF-8; a BOM sometimes sneaks in from hand-edited files. */
 internal fun ByteArray.toXmlString(): String =
-  String(this, Charsets.UTF_8).removePrefix("﻿")
+  String(this, Charsets.UTF_8).removePrefix("\uFEFF")

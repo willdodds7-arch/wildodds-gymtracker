@@ -87,49 +87,6 @@ fun <T> appTween(durationMillis: Int = AppMotion.MICRO): AnimationSpec<T> =
   if (LocalReducedMotion.current) snap() else tween(durationMillis, easing = AppMotion.EaseOut)
 
 /**
- * Standard "appear" wrapper: a subtle fade + slight rise + slight scale-in, used for
- * content that arrives after first render (cards, sections, loaded results). Collapses to
- * an instant show under reduced motion. Keep [visible] hoisted so callers can drive it
- * from a `remember { mutableStateOf(false) }` flipped in a LaunchedEffect, or just pass
- * `true` for a one-shot entrance on composition.
- */
-@Composable
-fun AppAppear(
-  visible: Boolean,
-  modifier: Modifier = Modifier,
-  durationMillis: Int = AppMotion.TRANSITION,
-  content: @Composable () -> Unit
-) {
-  if (LocalReducedMotion.current) {
-    if (visible) content()
-    return
-  }
-  AnimatedVisibility(
-    visible = visible,
-    modifier = modifier,
-    enter = fadeIn(tween(durationMillis, easing = AppMotion.EaseOut)) +
-      slideInVertically(tween(durationMillis, easing = AppMotion.EaseOut)) { it / 12 } +
-      scaleIn(tween(durationMillis, easing = AppMotion.EaseOut), initialScale = 0.98f),
-    exit = fadeOut(tween(AppMotion.MICRO))
-  ) { content() }
-}
-
-/**
- * One-shot entrance: fades/rises in once when it first enters composition. Handy for the
- * top of a screen so content doesn't hard-cut in. No-op under reduced motion.
- */
-@Composable
-fun AppEnter(
-  modifier: Modifier = Modifier,
-  durationMillis: Int = AppMotion.TRANSITION,
-  content: @Composable () -> Unit
-) {
-  var shown by remember { mutableStateOf(false) }
-  androidx.compose.runtime.LaunchedEffect(Unit) { shown = true }
-  AppAppear(visible = shown, modifier = modifier, durationMillis = durationMillis, content = content)
-}
-
-/**
  * Subtle spring "press" scale for tappable surfaces: dips to ~0.97 while pressed, springs
  * back on release. Pass the same [interactionSource] you give the clickable. No-op under
  * reduced motion.

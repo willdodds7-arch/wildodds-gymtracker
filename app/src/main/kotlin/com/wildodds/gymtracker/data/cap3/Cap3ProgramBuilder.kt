@@ -15,7 +15,7 @@ import com.wildodds.gymtracker.data.parser.ParsedSession
  */
 object Cap3ProgramBuilder {
 
-  const val PROGRAM_NAME = "nSuns CAP3"
+  const val PROGRAM_NAME = "3-Week AMRAP Cycle"
 
   /**
    * Default accessory work per day. Deliberately ordinary rows — CAP3 prescribes the two main lifts
@@ -71,10 +71,10 @@ object Cap3ProgramBuilder {
       sessions = sessions,
       coverImage = "3",
       category = "Strength",
-      description = "nSuns CAP3 — a 3-week AMRAP cycle. Each week trains squat, bench and deadlift " +
+      description = "A 3-week AMRAP cycle. Each week trains squat, bench and deadlift " +
         "twice, and one of them takes a heavy major-effort test. Your main-lift weights come from " +
         "your training maxes and update themselves when an AMRAP earns it.",
-      coach = "nSuns",
+      coach = "Wild Odds",
       daysPerWeek = CAP3_DAYS_PER_WEEK,
       split = "Upper/Lower",
       style = "Strength"

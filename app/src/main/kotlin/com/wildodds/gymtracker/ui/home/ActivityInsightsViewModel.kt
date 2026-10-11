@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 /**
  * Computes the user's OWN dropout-risk for the quiet Home insight card (Phase 7A). This is strictly
  * private — a risk score is never shared or shown for anyone else. Gated by the local
- * `SHOW_INSIGHTS` flag (default ON); when off, nothing is computed or shown.
+ * `SHOW_INSIGHTS` flag (default OFF); when off, nothing is computed or shown.
  */
 class ActivityInsightsViewModel(app: Application) : AndroidViewModel(app) {
 
@@ -36,7 +36,7 @@ class ActivityInsightsViewModel(app: Application) : AndroidViewModel(app) {
 
   fun refresh() {
     viewModelScope.launch {
-      val enabled = themePrefs.flag(SettingsRegistry.SHOW_INSIGHTS, true).first()
+      val enabled = themePrefs.flag(SettingsRegistry.SHOW_INSIGHTS, false).first()
       if (!enabled) { _assessment.value = null; return@launch }
       _assessment.value = DropoutRiskEngine.assess(repo.computeDropoutFeatures())
     }

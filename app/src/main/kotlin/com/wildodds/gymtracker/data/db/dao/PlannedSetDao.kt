@@ -37,15 +37,6 @@ interface PlannedSetDao {
   @Query("SELECT * FROM exercise_alternatives WHERE exerciseId = :exerciseId ORDER BY orderIndex")
   suspend fun alternativesFor(exerciseId: Long): List<ExerciseAlternative>
 
-  @Query(
-    """SELECT a.* FROM exercise_alternatives a
-       JOIN exercises e ON e.id = a.exerciseId
-       JOIN sessions s ON s.id = e.sessionId
-       WHERE s.programId = :programId
-       ORDER BY a.exerciseId, a.orderIndex"""
-  )
-  suspend fun alternativesForProgram(programId: Long): List<ExerciseAlternative>
-
   @Insert(onConflict = OnConflictStrategy.REPLACE)
   suspend fun insertAlternatives(rows: List<ExerciseAlternative>)
 

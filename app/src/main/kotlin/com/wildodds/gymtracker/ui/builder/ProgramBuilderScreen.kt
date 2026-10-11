@@ -77,8 +77,8 @@ fun ProgramBuilderScreen(
   var showScheduling by remember { mutableStateOf(false) }
   var showProgression by remember { mutableStateOf(false) }
   var confirmDelete by remember { mutableStateOf<String?>(null) }
-  // Text awaiting the import preview — pasted or read from a file, any supported format.
-  var pendingText by remember { mutableStateOf<String?>(null) }
+  // An import awaiting the preview — pasted or read from a file, any supported format.
+  val pendingImport by vm.pendingImport.collectAsStateWithLifecycle()
 
   // Export writes through the platform file picker — a local file operation, nothing uploaded.
   val exportLauncher = rememberLauncherForActivityResult(
@@ -93,7 +93,7 @@ fun ProgramBuilderScreen(
   }
   val importLauncher = rememberLauncherForActivityResult(
     ActivityResultContracts.OpenDocument()
-  ) { uri -> uri?.let { u -> vm.readUri(u) { text -> pendingText = text } } }
+  ) { uri -> uri?.let { vm.prepareFileImport(it) } }
 
   LaunchedEffect(committed) {
     committed?.let {
@@ -133,7 +133,7 @@ fun ProgramBuilderScreen(
 
   if (showPasteImport) {
     PasteProgramSheet(
-      onImport = { text -> pendingText = text; showPasteImport = false },
+      onImport = { text -> vm.prepareTextImport(text); showPasteImport = false },
       onOpenFullImporter = {
         showPasteImport = false
         navController.navigate("import_program")
@@ -142,14 +142,14 @@ fun ProgramBuilderScreen(
     )
   }
 
-  pendingText?.let { raw ->
+  pendingImport?.let { pending ->
     ImportPreviewDialog(
-      raw = raw,
+      decoded = pending.result,
       hasExisting = plan.workouts.isNotEmpty(),
       // Imports INTO the program being built rather than navigating away and starting a new one,
       // so pasting a day part-way through never costs the user their draft.
-      onConfirm = { replace -> vm.importText(raw, replace); pendingText = null },
-      onDismiss = { pendingText = null }
+      onConfirm = { replace -> vm.confirmImport(replace) },
+      onDismiss = { vm.dismissImport() }
     )
   }
 
@@ -485,7 +485,7 @@ private fun headerSummaryLine(plan: PlanProgram): String = buildString {
   val days = ProgramMath.trainingDaysPerWeek(plan)
   append(if (days == 0) "No training days yet" else "$days training day${if (days == 1) "" else "s"}")
   append(" · ")
-  append(if (plan.isOngoing) "Ongoing" else "${plan.durationWeeks} weeks")
+  append(if (plan.isOngoing) "Ongoing" else "${plan.durationWeeks} week${if (plan.durationWeeks != 1) "s" else ""}")
   append(" · ")
   append(plan.goal.display)
 }
@@ -727,7 +727,7 @@ private fun StartOptions(
     StartOptionRow(Icons.Default.ContentPaste, "Paste a program",
       "Copy it from anywhere — parsed on your device", onPaste)
     StartOptionRow(Icons.Default.FolderOpen, "Open a file",
-      "Text, CSV or a Wild Odds JSON export", onImportFile)
+      "Screenshot, photo, PDF, spreadsheet or text", onImportFile)
     StartOptionRow(Icons.Default.Dashboard, "Use a template",
       "PPL, upper/lower, full body and more", onTemplate)
     StartOptionRow(Icons.Default.Add, "Start blank",

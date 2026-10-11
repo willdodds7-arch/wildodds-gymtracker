@@ -55,7 +55,7 @@ class ThemePreferences(private val context: Context) {
   val featAddExercise: Flow<Boolean>         = prefs.map { it[FEAT_ADD_EXERCISE_KEY]    ?: true }.distinctUntilChanged()
   val featProgressionPicker: Flow<Boolean>   = prefs.map { it[FEAT_PROGRESSION_KEY]    ?: true }.distinctUntilChanged()
   val feat1rmCalculator: Flow<Boolean>       = prefs.map { it[FEAT_1RM_CALC_KEY]        ?: true }.distinctUntilChanged()
-  // "none" | "ding" | "ronnie"
+  // "none" | "ding" | "pulse" (older installs may still hold "ronnie", which plays as "pulse")
   val timerSound: Flow<String>               = prefs.map { it[TIMER_SOUND_KEY]          ?: "ding" }.distinctUntilChanged()
   // Onboarding / account (Phase 2). Only pass/fail booleans are stored — never the birth date
   // itself (data minimisation: the age gate runs before ANY data collection).
@@ -84,15 +84,7 @@ class ThemePreferences(private val context: Context) {
   prefs[ACCENT_SAT_KEY] = DEFAULT_ACCENT_SAT
   }
   }
-  suspend fun setFeatSessionTimer(v: Boolean)      { context.dataStore.edit { it[FEAT_TIMER_KEY]           = v } }
-  suspend fun setFeatWeightAutofill(v: Boolean)    { context.dataStore.edit { it[FEAT_WEIGHT_AUTOFILL_KEY] = v } }
-  suspend fun setFeatAddExercise(v: Boolean)       { context.dataStore.edit { it[FEAT_ADD_EXERCISE_KEY]    = v } }
-  suspend fun setFeatProgressionPicker(v: Boolean) { context.dataStore.edit { it[FEAT_PROGRESSION_KEY]    = v } }
-  suspend fun setFeat1rmCalculator(v: Boolean)     { context.dataStore.edit { it[FEAT_1RM_CALC_KEY]        = v } }
   suspend fun setTimerSound(v: String)             { context.dataStore.edit { it[TIMER_SOUND_KEY]          = v } }
-  suspend fun setAgeGatePassed(v: Boolean)         { context.dataStore.edit { it[AGE_GATE_PASSED_KEY]      = v } }
-  suspend fun setAgeGateBlocked(v: Boolean)        { context.dataStore.edit { it[AGE_GATE_BLOCKED_KEY]     = v } }
-  suspend fun setOnboardingComplete(v: Boolean)    { context.dataStore.edit { it[ONBOARDING_COMPLETE_KEY]  = v } }
   suspend fun setAnalyticsConsent(v: String)       { context.dataStore.edit { it[ANALYTICS_CONSENT_KEY]    = v } }
   suspend fun setOneRm(lift: com.wildodds.gymtracker.data.profile.MainLift, kg: Float) {
   context.dataStore.edit {

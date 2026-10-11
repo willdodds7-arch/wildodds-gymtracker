@@ -4,8 +4,8 @@
     "blocked": 9,
     "errors": 4,
     "parseRate": 0.919,
-    "meanConfidence": 0.877,
-    "resolutionHitRate": 0.87,
-    "unconsumedRate": 0.01,
-    "totalExercises": 378
+    "meanConfidence": 0.991,
+    "resolutionHitRate": 0.992,
+    "unconsumedRate": 0.0,
+    "totalExercises": 2372
 }

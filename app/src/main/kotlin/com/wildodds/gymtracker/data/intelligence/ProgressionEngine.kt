@@ -101,7 +101,7 @@ object ProgressionEngine {
 
   // Smart default. Stall takes priority over everything.
   if (isStalled(input.history, input.stallWeeks)) {
-  return deload(last, "No progress in ${input.stallWeeks} weeks")
+  return deload(last, "No progress in ${input.stallWeeks} week${if (input.stallWeeks != 1) "s" else ""}")
   }
 
   return when (input.trackingMode) {

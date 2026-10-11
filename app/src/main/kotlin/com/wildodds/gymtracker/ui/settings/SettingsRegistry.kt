@@ -6,8 +6,8 @@ package com.wildodds.gymtracker.ui.settings
  * explicitly so they can still be registered, grouped, and — crucially — searched.
  */
 enum class SettingControl {
-  TOGGLE, ACCENT, TIMER_SOUND, API_KEY, CLEAR_DATA, DOWNLOAD_TEMPLATE, WEARABLE_CONNECT,
-  EXPORT_DATA, REMINDER_SETTINGS, HABITS, SHARE_USAGE_STATS, LEGAL_DOC
+  TOGGLE, ACCENT, TIMER_SOUND, CLEAR_DATA, DOWNLOAD_TEMPLATE, WEARABLE_CONNECT,
+  EXPORT_DATA, REMINDER_SETTINGS, HABITS, LEGAL_DOC
 }
 
 /**
@@ -36,10 +36,9 @@ object SettingsRegistry {
 
   /** Preferred display order; groups not listed here are appended in first-seen order. */
   val groupOrder: List<String> =
-  listOf("Account", "Appearance", "Session", "Wearables", "Tools", "Display", "AI Import", "Data", "Legal & privacy")
+  listOf("Appearance", "Session", "Wearables", "Tools", "Display", "Programs", "Data", "Legal & privacy")
 
   // Local, on-device analytics-consent toggle (no account required).
-  const val SHARE_USAGE_STATS = "action_share_usage_stats"
 
   /** Flag key for the session exit-confirmation guard (a safety feature, default ON). */
   const val SESSION_EXIT_GUARD = "feat_session_exit_guard"
@@ -92,19 +91,9 @@ object SettingsRegistry {
   // Phase 3G feature key.
   const val ADVANCED_ANALYTICS = "feat_advanced_analytics"
 
-  // Phase 3H feature key.
-  const val ON_DEMAND_LIBRARY = "feat_ondemand_library"
-
   const val UNIVERSAL_IMPORT = "feat_universal_import"
 
   private val _entries: MutableList<SettingsEntry> = mutableListOf(
-  SettingsEntry(
-  key = SHARE_USAGE_STATS, title = "Record usage statistics",
-  summary = "Record anonymous, non-identifying in-app events (which screens get used — never workout data, names or location). The app has no server, so these stay on your device and are never uploaded. Off by default.",
-  group = "Account",
-  keywords = listOf("analytics", "usage", "statistics", "diagnostics", "telemetry", "consent", "privacy", "tracking", "opt out"),
-  control = SettingControl.SHARE_USAGE_STATS
-  ),
   SettingsEntry(
   key = "dark_mode", title = "Dark Mode",
   summary = "Use a dark colour theme", group = "Appearance",
@@ -120,7 +109,7 @@ object SettingsRegistry {
   SettingsEntry(
   key = "timer_sound", title = "Rest Timer Sound",
   summary = "Sound played when the rest timer ends", group = "Session",
-  keywords = listOf("sound", "timer", "rest", "ding", "ronnie", "audio", "beep", "alert"),
+  keywords = listOf("sound", "timer", "rest", "ding", "pulse", "audio", "beep", "alert"),
   control = SettingControl.TIMER_SOUND
   ),
   SettingsEntry(
@@ -225,13 +214,6 @@ object SettingsRegistry {
   default = true
   ),
   SettingsEntry(
-  key = ON_DEMAND_LIBRARY, title = "On-demand workout library",
-  summary = "Browse extra sessions recommended for your current block, run them without touching your program",
-  group = "Display",
-  keywords = listOf("on-demand", "library", "session", "extra", "accessory", "rest day", "missed", "quick", "workout"),
-  default = true
-  ),
-  SettingsEntry(
   key = ACHIEVEMENTS, title = "Achievements & streaks",
   summary = "Earn quiet badges and track training streaks. Local — no account needed.",
   group = "Display",
@@ -251,7 +233,7 @@ object SettingsRegistry {
   summary = "A quiet card if your training tails off — your data only, never shared. Local.",
   group = "Display",
   keywords = listOf("insights", "activity", "dropout", "risk", "inactive", "reminder", "nudge", "retention", "trend"),
-  default = true
+  default = false
   ),
   SettingsEntry(
   key = REENGAGEMENT, title = "Re-engagement reminders",
@@ -281,14 +263,8 @@ object SettingsRegistry {
   default = true
   ),
   SettingsEntry(
-  key = "claude_api_key", title = "Anthropic API Key",
-  summary = "Key for AI-assisted program import", group = "AI Import",
-  keywords = listOf("ai", "claude", "anthropic", "api", "key", "import", "gpt"),
-  control = SettingControl.API_KEY
-  ),
-  SettingsEntry(
   key = UNIVERSAL_IMPORT, title = "Paste or upload a program",
-  summary = "Paste a program as plain text or CSV — or open a file — and turn it into a structured, editable program. Runs fully on-device; nothing is uploaded anywhere.",
+  summary = "Paste a program, or open a screenshot, photo, PDF, spreadsheet or Word file, and turn it into a structured, editable program. Runs fully on-device.",
   group = "Programs",
   keywords = listOf("import", "universal", "parse", "text", "csv", "paste", "upload", "program", "spreadsheet", "reddit"),
   // On by default: pasting a program is one of the main ways people get started, so it is a
@@ -347,9 +323,13 @@ object SettingsRegistry {
   keywords = listOf("support", "help", "contact", "email", "faq", "questions", "problem", "issue"),
   control = SettingControl.LEGAL_DOC
   ),
-  // Paid-tier legal docs (Creator Agreement, Subscription & Billing, Refunds) are parked for the
-  // free launch, alongside feat_creator_marketplace. The .md files and LegalDoc enum entries are
-  // kept in the codebase — re-add these three Settings rows when the paid tier ships.
+  SettingsEntry(
+  key = "accessibility", title = "Accessibility statement",
+  summary = "Screen readers, contrast, text size and how to report problems",
+  group = "Legal & privacy",
+  keywords = listOf("accessibility", "a11y", "talkback", "screen reader", "contrast", "font size", "wcag"),
+  control = SettingControl.LEGAL_DOC
+  ),
   SettingsEntry(
   key = "action_download_template", title = "Download Template",
   summary = "Save a blank Excel program template", group = "Data",
@@ -357,9 +337,9 @@ object SettingsRegistry {
   control = SettingControl.DOWNLOAD_TEMPLATE
   ),
   SettingsEntry(
-  key = "action_clear_data", title = "Clear All Data",
-  summary = "Permanently delete all programs, sessions and logs", group = "Data",
-  keywords = listOf("clear", "delete", "reset", "wipe", "erase", "data"),
+  key = "action_clear_data", title = "Delete all my data",
+  summary = "Erase everything this app stores on this phone (data deletion request)", group = "Data",
+  keywords = listOf("clear", "delete", "reset", "wipe", "erase", "data", "deletion", "request", "gdpr", "forget", "privacy"),
   control = SettingControl.CLEAR_DATA
   )
   )

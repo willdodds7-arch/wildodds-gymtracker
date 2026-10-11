@@ -104,7 +104,15 @@ class ProgramReader(
         extra = listOf(ImportFlag(FlagSeverity.INFO, "Read as a ${adapter.displayName} export.")))
     }
 
-    // 2. A grid-bearing document goes to the layout engine when one is available.
+    // 2. The import core: one reader for every shape (text, grids, OCR) — see core/ProgramParser.
+    com.wildodds.gymtracker.data.importer.core.ProgramParser.parse(doc, suggestedName)
+      ?.takeIf { it.exerciseCount > 0 }
+      ?.let { parsed ->
+        return finish(parsed.draft, doc, kind, if (parsed.usedColumns) "grid" else "text",
+          aliasLookup, parsed.draft.flags)
+      }
+
+    // 3. Fallbacks for anything the core could not read at all.
     if (doc.tables.isNotEmpty()) {
       gridReader.read(doc, suggestedName)?.let { (draft, route, flags) ->
         // A layout the engine recognised is declared structure: a header row, a week label, a day

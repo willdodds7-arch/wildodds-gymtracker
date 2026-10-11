@@ -96,4 +96,26 @@ class SessionLogicTest {
   assertEquals("2m 5s", formatDuration(125))
   assertEquals("1h 2m", formatDuration(3725))
   }
+
+  // ── Set deletion: stable row identity + log rewrite ─────────────────────────
+
+  @Test fun `row key survives edits and renumbering but differs between rows`() {
+  val a = SetRowState(setNumber = 2)
+  val b = SetRowState(setNumber = 3)
+  assertTrue(a.rowKey != b.rowKey)
+  assertEquals(b.rowKey, b.copy(setNumber = 2, weightKg = "100").rowKey)
+  }
+
+  @Test fun `toSetLog keeps the renumbered set number and skips empty rows`() {
+  val log = SetRowState(setNumber = 2, weightKg = "82.5", reps = "8").toSetLog(workoutLogId = 7L)!!
+  assertEquals(7L, log.workoutLogId)
+  assertEquals(2, log.setNumber)
+  assertEquals(82.5f, log.weightKg!!, 0.001f)
+  assertEquals(8, log.reps)
+  assertEquals(null, SetRowState(setNumber = 3).toSetLog(7L))
+  }
+
+  @Test fun `exercise key ignores case and padding`() {
+  assertEquals(exerciseKey("Bench Press"), exerciseKey("  bench press "))
+  }
 }

@@ -52,5 +52,4 @@ data class Workbook(
     g.rows.sumOf { row -> row.count { it.isNotBlank() } }
   }
 
-  fun nonEmptyCells(g: Grid): Int = g.rows.sumOf { row -> row.count { it.isNotBlank() } }
 }

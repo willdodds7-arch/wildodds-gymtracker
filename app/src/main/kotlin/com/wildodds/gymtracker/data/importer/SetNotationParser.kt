@@ -96,8 +96,5 @@ object SetNotationParser {
   fun coverageOf(line: String): Double = LineGrammar.parse(line)?.coverage ?: 0.0
 }
 
-/** Kept for source compatibility with call sites that predate the grammar. */
-internal fun String.trimTrailingSeparators(): String = trimSeparators()
-
 /** Re-exported so callers do not have to know where the vocabulary lives. */
 internal val readerVocabulary get() = ReaderVocabulary

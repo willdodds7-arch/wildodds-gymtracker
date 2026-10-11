@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- v2 online-first: required for Supabase Auth/Postgrest/Functions (accounts, sync, analytics). -->
-    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- No network access, by design. A library (ML Kit's telemetry transport) asks for INTERNET in
+         its own manifest; this strips it from the merged one, so Android refuses every network call
+         and nothing — app or library — can leave the device. ReaderNoNetworkTest pins this. -->
+    <uses-permission android:name="android.permission.INTERNET" tools:node="remove" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
@@ -12,11 +15,8 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- Health Connect (Phase 4 wearable layer). Declared here; requested at runtime from
-         Settings. Heart rate is used now; sleep / resting HR / HRV are read by Phase 4B. -->
+         Settings. Heart rate only — sleep / resting HR / HRV are not requested (no feature uses them). -->
     <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
-    <uses-permission android:name="android.permission.health.READ_SLEEP" />
-    <uses-permission android:name="android.permission.health.READ_RESTING_HEART_RATE" />
-    <uses-permission android:name="android.permission.health.READ_HEART_RATE_VARIABILITY" />
     <!-- Phase 5B — write completed workouts back to Health Connect (optional, opt-in). -->
     <uses-permission android:name="android.permission.health.WRITE_EXERCISE" />
     <uses-permission android:name="android.permission.health.WRITE_TOTAL_CALORIES_BURNED" />
@@ -71,6 +71,11 @@
 
         <receiver
             android:name=".receiver.MidnightResetReceiver"
+            android:exported="false" />
+
+        <!-- "Turn off reminders" button on reminder notifications (one-tap opt-out). -->
+        <receiver
+            android:name=".data.retention.TurnOffRemindersReceiver"
             android:exported="false" />
 
         <receiver

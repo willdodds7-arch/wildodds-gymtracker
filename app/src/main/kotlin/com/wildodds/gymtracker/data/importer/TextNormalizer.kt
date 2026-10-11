@@ -108,7 +108,7 @@ object TextNormalizer {
     s = s.replace('“', '"').replace('”', '"')     // smart double quotes
     s = s.replace(' ', ' ').replace(' ', ' ').replace(' ', ' ')  // NBSPs
     s = s.replace("​", "").replace("‌", "").replace("‍", "")     // zero-width
-    s = s.replace("﻿", "").replace("⁠", "")                           // BOM, word joiner
+    s = s.replace("\uFEFF", "").replace("\u2060", "")                           // BOM, word joiner
     s = replaceMeaningfulEmoji(s)
     s = stripRemainingEmoji(s)
     return s

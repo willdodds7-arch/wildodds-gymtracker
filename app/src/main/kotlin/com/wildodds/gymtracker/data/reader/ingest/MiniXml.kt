@@ -100,23 +100,6 @@ object MiniXml {
     flushText()
   }
 
-  /**
-   * All text inside [xml], with a separator emitted at each of [breakOn]'s closing tags. The
-   * workhorse for "give me this document as lines" (docx paragraphs, odt paragraphs).
-   */
-  fun textWithBreaks(xml: String, breakOn: Set<String>, separator: String = "\n"): String {
-    val out = StringBuilder()
-    parse(xml) { e ->
-      when (e) {
-        is Event.Text -> out.append(e.value)
-        is Event.End -> if (e.name in breakOn) out.append(separator)
-        else -> Unit
-      }
-      true
-    }
-    return out.toString()
-  }
-
   /** `w:tbl` -> `tbl`. Namespace prefixes carry no information any consumer here needs. */
   fun local(qName: String): String = qName.substringAfterLast(':')
 

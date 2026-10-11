@@ -6,6 +6,7 @@ import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
+import com.wildodds.gymtracker.data.builder.Linear12Spec
 import com.wildodds.gymtracker.data.builder.PlanExercise
 import com.wildodds.gymtracker.data.builder.PlanGroup
 import com.wildodds.gymtracker.data.builder.PlanProgram
@@ -17,10 +18,12 @@ import com.wildodds.gymtracker.data.builder.ProgramSummary
 import com.wildodds.gymtracker.data.builder.ProgressionSettings
 import com.wildodds.gymtracker.data.builder.SetShape
 import com.wildodds.gymtracker.data.builder.SetType
+import com.wildodds.gymtracker.data.builder.TwelveWeekLinear
 import com.wildodds.gymtracker.data.builder.PlanMapper
 import com.wildodds.gymtracker.data.builder.WorkoutKind
 import com.wildodds.gymtracker.data.importer.FlagSeverity
-import com.wildodds.gymtracker.data.importer.UniversalProgramImporter
+import com.wildodds.gymtracker.data.reader.ProgramReader
+import com.wildodds.gymtracker.data.reader.android.AndroidReader
 import com.wildodds.gymtracker.data.db.AppDatabase
 import com.wildodds.gymtracker.data.repository.GymRepository
 import kotlinx.coroutines.Dispatchers
@@ -134,10 +137,6 @@ class BuilderViewModel(app: Application) : AndroidViewModel(app) {
     draftPrefs.edit().remove(DRAFT_KEY).apply()
   }
 
-  /** True when there is meaningful work in progress worth offering to resume. */
-  fun hasContent(): Boolean =
-    _plan.value.name.isNotBlank() || _plan.value.workouts.isNotEmpty()
-
   // ── Undo ───────────────────────────────────────────────────────────────────
 
   private fun snapshotFor(label: String) {
@@ -163,7 +162,6 @@ class BuilderViewModel(app: Application) : AndroidViewModel(app) {
   fun setExperience(v: com.wildodds.gymtracker.data.builder.ExperienceLevel) =
     mutate { it.copy(experience = v) }
   fun setDurationWeeks(v: Int) = mutate { it.copy(durationWeeks = v.coerceIn(0, 104)) }
-  fun setFolder(v: String) = mutate { it.copy(folder = v) }
   fun setCoverImage(v: String?) = mutate { it.copy(coverImage = v) }
   fun setTrackRpe(v: Boolean) = mutate { it.copy(trackRpe = v) }
   fun setTrackOneRm(v: Boolean) = mutate { it.copy(trackOneRm = v) }
@@ -218,9 +216,6 @@ class BuilderViewModel(app: Application) : AndroidViewModel(app) {
 
   fun renameWorkout(id: String, name: String) = updateWorkout(id) { it.copy(name = name) }
   fun setWorkoutWeekday(id: String, weekday: Int) = updateWorkout(id) { it.copy(weekday = weekday) }
-  fun setWorkoutNote(id: String, note: String) = updateWorkout(id) { it.copy(note = note) }
-  fun setWorkoutOptional(id: String, optional: Boolean) =
-    updateWorkout(id) { it.copy(isOptional = optional) }
 
   fun deleteWorkout(id: String) {
     val w = _plan.value.workouts.firstOrNull { it.id == id } ?: return
@@ -239,11 +234,6 @@ class BuilderViewModel(app: Application) : AndroidViewModel(app) {
     p.copy(workouts = list)
   }
 
-  fun moveWorkoutBy(id: String, delta: Int) {
-    val from = _plan.value.workouts.indexOfFirst { it.id == id }
-    if (from >= 0) moveWorkout(id, from + delta)
-  }
-
   private fun updateWorkout(id: String, transform: (PlanWorkout) -> PlanWorkout) = mutate { p ->
     p.copy(workouts = p.workouts.map { if (it.id == id) transform(it) else it })
   }
@@ -260,9 +250,6 @@ class BuilderViewModel(app: Application) : AndroidViewModel(app) {
     updateWorkout(workoutId) { w ->
       w.copy(exercises = w.exercises + names.map { PlanExercise(name = it, sets = preset.build()) })
     }
-
-  fun renameExercise(workoutId: String, exerciseId: String, name: String) =
-    updateExercise(workoutId, exerciseId) { it.copy(name = name) }
 
   fun setExerciseNotes(workoutId: String, exerciseId: String, notes: String) =
     updateExercise(workoutId, exerciseId) { it.copy(notes = notes) }
@@ -298,16 +285,6 @@ class BuilderViewModel(app: Application) : AndroidViewModel(app) {
     w.copy(exercises = list)
   }
 
-  fun moveExerciseTo(workoutId: String, exerciseId: String, toIndex: Int) = updateWorkout(workoutId) { w ->
-    val from = w.exercises.indexOfFirst { it.id == exerciseId }
-    if (from < 0) return@updateWorkout w
-    val to = toIndex.coerceIn(0, w.exercises.lastIndex)
-    if (from == to) return@updateWorkout w
-    val list = w.exercises.toMutableList()
-    list.add(to, list.removeAt(from))
-    w.copy(exercises = list)
-  }
-
   /** Move an exercise into another workout, keeping its whole prescription. */
   fun moveExerciseToWorkout(fromWorkoutId: String, exerciseId: String, toWorkoutId: String) = mutate { p ->
     val src = p.workouts.firstOrNull { it.id == fromWorkoutId } ?: return@mutate p
@@ -334,6 +311,33 @@ class BuilderViewModel(app: Application) : AndroidViewModel(app) {
 
   fun applyPreset(workoutId: String, exerciseId: String, preset: SetPreset) =
     updateExercise(workoutId, exerciseId) { it.copy(sets = preset.build()) }
+
+  // ── 12-week linear progression ─────────────────────────────────────────────
+
+  /**
+   * Turn the 12-week linear progression on or off for one exercise. On: the definition becomes
+   * week 1 (3 × 5, at the typed weight if any) and the save step writes every later week from
+   * [TwelveWeekLinear]. Off: the exercise goes back to being the same every week, keeping week 1.
+   */
+  fun setLinear12(workoutId: String, exerciseId: String, enabled: Boolean) =
+    updateExercise(workoutId, exerciseId) { ex ->
+      if (!enabled) return@updateExercise ex.copy(linear12 = null)
+      val start = ex.topLoad?.tidyLoad().orEmpty()
+      val rest = ex.sets.firstOrNull { it.type.countsAsVolume }?.restSeconds ?: 120
+      ex.copy(linear12 = Linear12Spec(start), sets = linear12Week1(start, rest))
+    }
+
+  fun setLinear12StartLoad(workoutId: String, exerciseId: String, load: String) =
+    updateExercise(workoutId, exerciseId) { ex ->
+      if (ex.linear12 == null) return@updateExercise ex
+      val rest = ex.sets.firstOrNull { it.type.countsAsVolume }?.restSeconds ?: 120
+      ex.copy(linear12 = Linear12Spec(load), sets = linear12Week1(load, rest))
+    }
+
+  private fun linear12Week1(load: String, rest: Int): List<PlanSet> {
+    val w1 = TwelveWeekLinear.CYCLE.first()
+    return List(w1.sets) { PlanSet(type = SetType.WORKING, load = load, reps = w1.reps.toString(), restSeconds = rest) }
+  }
 
   // ── Evolving sets ──────────────────────────────────────────────────────────
 
@@ -381,12 +385,6 @@ class BuilderViewModel(app: Application) : AndroidViewModel(app) {
       })
     }
 
-  /** Change the rep target on every working set at once. */
-  fun setRepsForAllWorking(workoutId: String, exerciseId: String, reps: String) =
-    updateExercise(workoutId, exerciseId) { ex ->
-      ex.copy(sets = ex.sets.map { if (it.type.countsAsVolume) it.copy(reps = reps) else it })
-    }
-
   fun addSet(workoutId: String, exerciseId: String) =
     updateExercise(workoutId, exerciseId) { ex ->
       // A new set copies the last one — far more often right than a blank row.
@@ -421,11 +419,6 @@ class BuilderViewModel(app: Application) : AndroidViewModel(app) {
       ex.copy(sets = ex.sets.map { it.copy(restSeconds = seconds.coerceIn(0, 600)) })
     }
 
-  fun setLoadForAllWorking(workoutId: String, exerciseId: String, load: String) =
-    updateExercise(workoutId, exerciseId) { ex ->
-      ex.copy(sets = ex.sets.map { if (it.type.countsAsVolume) it.copy(load = load) else it })
-    }
-
   /** "8-12" → "10": collapse a range to its midpoint, and back again. */
   fun convertRepsToRange(workoutId: String, exerciseId: String) =
     updateExercise(workoutId, exerciseId) { ex ->
@@ -449,9 +442,6 @@ class BuilderViewModel(app: Application) : AndroidViewModel(app) {
       }
     )
   }
-
-  fun addToGroup(workoutId: String, exerciseId: String, groupId: String) =
-    updateExercise(workoutId, exerciseId) { it.copy(supersetGroupId = groupId) }
 
   /** Break the grouping without deleting a single exercise. */
   fun ungroup(workoutId: String, groupId: String) = updateWorkout(workoutId) { w ->
@@ -485,71 +475,89 @@ class BuilderViewModel(app: Application) : AndroidViewModel(app) {
   fun exportJson(): String = ProgramPlanJson.encode(_plan.value)
   fun exportFileName(): String = ProgramPlanJson.fileNameFor(_plan.value)
 
-  fun importJson(raw: String, replace: Boolean) {
-    when (val r = ProgramPlanJson.decode(raw)) {
-      is ProgramPlanJson.Result.Invalid -> _message.value = r.reason
-      is ProgramPlanJson.Result.Ok -> {
-        if (replace) adoptImported(r.program)
-        else mutate { it.copy(workouts = it.workouts + r.program.workouts) }
-        _message.value = buildString {
-          append("Imported ${r.program.workouts.size} workout")
-          if (r.program.workouts.size != 1) append("s")
-          if (r.notes.isNotEmpty()) append(" · ${r.notes.first()}")
-        }
+  /**
+   * What the import preview shows. `exact` is a Wild Odds JSON export, which replaces the whole
+   * plan (schedule and progression included); anything the reader read only brings workouts.
+   */
+  data class PendingImport(val result: ProgramPlanJson.Result, val exact: Boolean)
+
+  private val _pendingImport = MutableStateFlow<PendingImport?>(null)
+  val pendingImport: StateFlow<PendingImport?> = _pendingImport.asStateFlow()
+  fun dismissImport() { _pendingImport.value = null }
+
+  /**
+   * Read a picked file for the import preview. Every format goes through the same reader the full
+   * importer uses — screenshots and photos (OCR), PDF, Excel, Word, CSV, text — so importing into
+   * the builder is never the weaker path. Nothing leaves the device.
+   */
+  fun prepareFileImport(uri: Uri) {
+    viewModelScope.launch {
+      _message.value = "Reading the file…"
+      _pendingImport.value = withContext(Dispatchers.IO) {
+        runCatching {
+          val app = getApplication<Application>()
+          val bytes = AndroidReader.readBytes(app, uri)
+          exactJson(bytes.toString(Charsets.UTF_8))
+            ?: fromReader(AndroidReader.reader(app).read(
+              bytes = bytes,
+              fileName = AndroidReader.displayName(app, uri),
+              mimeType = AndroidReader.mimeType(app, uri)
+            ))
+        }.getOrElse { e -> PendingImport(ProgramPlanJson.Result.Invalid(e.message ?: "Couldn't read that file."), false) }
       }
     }
   }
 
-  /**
-   * Import pasted text or an opened file INTO the program being built, rather than sending the user
-   * off to the standalone importer and abandoning their draft.
-   *
-   * Wild Odds JSON is applied directly; anything else (a coach's message, a forum post, CSV) goes
-   * through the same deterministic [UniversalProgramImporter] the standalone screen uses, so the
-   * markdown/notation handling is identical. Nothing leaves the device.
-   */
-  fun importText(raw: String, replace: Boolean) {
+  /** Pasted text: Wild Odds JSON is applied exactly, anything else goes through the reader. */
+  fun prepareTextImport(raw: String) {
     if (raw.isBlank()) return
-    if (raw.trimStart().startsWith("{")) { importJson(raw, replace); return }
-
     viewModelScope.launch {
-      val result = withContext(Dispatchers.Default) {
-        runCatching { UniversalProgramImporter.import("", raw) }.getOrNull()
+      _pendingImport.value = withContext(Dispatchers.IO) {
+        runCatching {
+          exactJson(raw) ?: fromReader(AndroidReader.reader(getApplication()).readText(raw))
+        }.getOrElse { e -> PendingImport(ProgramPlanJson.Result.Invalid(e.message ?: "Couldn't read that text."), false) }
       }
-      val workouts = result?.let { PlanMapper.workoutsFromParsed(it.program) }.orEmpty()
-      if (workouts.isEmpty()) {
-        _message.value = "Couldn't find any workouts in that text."
-        return@launch
-      }
+    }
+  }
 
+  /** A Wild Odds export, or null to fall through to the reader. A broken export says why. */
+  private fun exactJson(raw: String): PendingImport? {
+    if (!raw.trimStart().startsWith("{")) return null
+    val r = ProgramPlanJson.decode(raw)
+    // A JSON file that isn't ours (an app export, a hand-written plan) is still worth reading.
+    return if (r is ProgramPlanJson.Result.Ok) PendingImport(r, exact = true) else null
+  }
+
+  private fun fromReader(r: ProgramReader.Result): PendingImport {
+    val workouts = PlanMapper.workoutsFromParsed(r.importResult.program)
+    if (workouts.isEmpty()) return PendingImport(ProgramPlanJson.Result.Invalid(
+      "Couldn't find any workouts in that. If it's a screenshot, make sure the exercises and " +
+        "sets × reps are in shot and readable, or paste the text instead."), false)
+    val notes = r.importResult.flags.filter { it.severity == FlagSeverity.REVIEW }.map { it.message }.take(3)
+    return PendingImport(ProgramPlanJson.Result.Ok(PlanProgram(name = r.importResult.program.name, workouts = workouts), notes), false)
+  }
+
+  /** Apply the previewed import. `replace` swaps the workouts; otherwise they are appended. */
+  fun confirmImport(replace: Boolean) {
+    val pending = _pendingImport.value ?: return
+    _pendingImport.value = null
+    val ok = pending.result as? ProgramPlanJson.Result.Ok ?: return
+    val workouts = ok.program.workouts
+    if (pending.exact && replace) adoptImported(ok.program)
+    else {
       snapshotFor(if (replace) "Replaced program" else "Added ${workouts.size} workouts")
       mutate { plan ->
         plan.copy(
           // Adopt the imported name only when the user hasn't titled their program yet.
-          name = plan.name.ifBlank { result!!.program.name },
+          name = plan.name.ifBlank { ok.program.name },
           workouts = if (replace) workouts else plan.workouts + workouts
         )
       }
-
-      val needingReview = result!!.flags.count { it.severity == FlagSeverity.REVIEW }
-      _message.value = buildString {
-        append("Imported ${workouts.size} workout")
-        if (workouts.size != 1) append("s")
-        if (needingReview > 0) append(" · $needingReview to check")
-      }
     }
-  }
-
-  fun readUri(uri: Uri, onText: (String) -> Unit) {
-    viewModelScope.launch {
-      val text = withContext(Dispatchers.IO) {
-        runCatching {
-          getApplication<Application>().contentResolver.openInputStream(uri)
-            ?.bufferedReader()?.use { it.readText() }
-        }.getOrNull()
-      }
-      if (text.isNullOrBlank()) _message.value = "Couldn't read that file."
-      else onText(text)
+    _message.value = buildString {
+      append("Imported ${workouts.size} workout")
+      if (workouts.size != 1) append("s")
+      if (ok.notes.isNotEmpty()) append(" · ${ok.notes.size} to check")
     }
   }
 

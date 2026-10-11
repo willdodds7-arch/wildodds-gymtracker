@@ -46,6 +46,19 @@ interface SetLogDao {
   orderIndex: Int
   ): List<SetLog>
 
+  /** The most recent week before [currentWeek] with any logged set at this day/position, or null. */
+  @Query("""
+  SELECT MAX(s.weekNumber) FROM set_logs sl
+  INNER JOIN workout_logs wl ON sl.workoutLogId = wl.id
+  INNER JOIN exercises e  ON wl.exerciseId  = e.id
+  INNER JOIN sessions  s  ON e.sessionId  = s.id
+  WHERE s.programId  = :programId
+  AND s.dayNumber  = :dayNumber
+  AND e.orderIndex = :orderIndex
+  AND s.weekNumber < :currentWeek
+  """)
+  suspend fun latestLoggedWeekByPosition(programId: Long, dayNumber: Int, orderIndex: Int, currentWeek: Int): Int?
+
   // Update existing row; returns affected row count
   @Query("UPDATE set_logs SET weightKg = :weightKg, reps = :reps, rpe = :rpe, pct1rm = :pct1rm, weightRightKg = :weightRightKg, repsRight = :repsRight WHERE workoutLogId = :workoutLogId AND setNumber = :setNumber")
   suspend fun update(workoutLogId: Long, setNumber: Int, weightKg: Float?, reps: Int?, rpe: Float? = null, pct1rm: Float? = null, weightRightKg: Float? = null, repsRight: Int? = null): Int
@@ -55,6 +68,9 @@ interface SetLogDao {
 
   @Query("DELETE FROM set_logs WHERE workoutLogId = :workoutLogId AND setNumber = :setNumber")
   suspend fun deleteSetLog(workoutLogId: Long, setNumber: Int)
+
+  @Query("DELETE FROM set_logs WHERE workoutLogId = :workoutLogId")
+  suspend fun deleteForWorkoutLog(workoutLogId: Long)
 
   /** All set logs for an exercise position across every week - for progression charting. */
   @Query("""

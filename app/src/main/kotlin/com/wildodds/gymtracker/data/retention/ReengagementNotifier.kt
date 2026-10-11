@@ -13,12 +13,13 @@ import androidx.core.content.ContextCompat
 
 /**
  * Posts the (rare, kind) re-engagement notification. Honours Android 13+ POST_NOTIFICATIONS — if the
- * permission isn't granted it simply does nothing (no crash, no nag). Tapping opens the app.
+ * permission isn't granted it simply does nothing (no crash, no nag). Tapping opens the app; the
+ * "Turn off reminders" action switches them off without opening it.
  */
 object ReengagementNotifier {
 
   private const val CHANNEL_ID = "reengagement"
-  private const val NOTIFICATION_ID = 7001
+  const val NOTIFICATION_ID = 7001
 
   fun hasPermission(context: Context): Boolean =
     Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
@@ -46,6 +47,13 @@ object ReengagementNotifier {
       PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
 
+    // One-tap opt-out on every reminder (the app's "unsubscribe" link).
+    val turnOff = PendingIntent.getBroadcast(
+      context, 1,
+      Intent(context, TurnOffRemindersReceiver::class.java).setAction(TurnOffRemindersReceiver.ACTION),
+      PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+
     val notification = NotificationCompat.Builder(context, CHANNEL_ID)
       .setSmallIcon(android.R.drawable.ic_popup_reminder)
       .setContentTitle(title)
@@ -54,8 +62,13 @@ object ReengagementNotifier {
       .setPriority(NotificationCompat.PRIORITY_DEFAULT)
       .setAutoCancel(true)
       .setContentIntent(pending)
+      .addAction(0, "Turn off reminders", turnOff)
       .build()
 
+    // Android 13+: the user can refuse notifications. A refused permission means no nudge, not a crash.
+    if (android.os.Build.VERSION.SDK_INT >= 33 &&
+      androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) !=
+        android.content.pm.PackageManager.PERMISSION_GRANTED) return
     runCatching { NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification) }
   }
 }

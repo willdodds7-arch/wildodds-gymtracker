@@ -59,31 +59,29 @@ class LegalDocsAssetTest {
 
   @Test
   fun docsDoNotMakeDishonestNoCollectionClaims() {
-    // Rule 8: no doc may claim it collects nothing at all, or that it is offline WITHOUT naming the
-    // one thing that isn't. AI Import posts the text you give it to Anthropic using your own key, so
-    // "works fully offline" is honest only when that exception is stated alongside it.
-    val alwaysBanned = listOf("no data collection", "no tracking", "does not collect")
+    // Rule 8: no doc may make a vaguer claim than the app can back up. "Fully offline" is honest
+    // because the merged manifest has no INTERNET permission (ReaderNoNetworkTest pins that), so any
+    // doc that says it must also say why: no internet access.
+    val alwaysBanned = listOf("no data collection", "no tracking", "does not collect", "ai import", "anthropic")
     LegalDoc.entries.forEach { doc ->
       val text = read(doc).lowercase()
       alwaysBanned.forEach { phrase ->
-        assertFalse("${doc.asset} must not claim '$phrase'", text.contains(phrase))
+        assertFalse("${doc.asset} must not say '$phrase'", text.contains(phrase))
       }
       if (text.contains("fully offline")) {
-        assertTrue(
-          "${doc.asset} says 'fully offline' without naming the AI Import exception",
-          text.contains("ai import") || text.contains("anthropic")
-        )
+        assertTrue("${doc.asset} says 'fully offline' without saying the app has no internet access",
+          text.contains("internet"))
       }
     }
   }
 
   @Test
   fun privacyPolicyDescribesTheRealPipeline() {
-    // The Supabase-backed Friends layer was removed — the app now ships no backend at all, and the
-    // only third party that can ever receive data is Anthropic, via opt-in AI Import with the
-    // user's own API key. This asserts the policy describes THAT pipeline, not the retired one.
+    // The app has no backend and no internet permission; the only thing that reads an image is ML
+    // Kit, on the device. The policy must say exactly that.
     val privacy = read(LegalDoc.PRIVACY).lowercase()
-    assertTrue("names the only third-party processor", privacy.contains("anthropic"))
+    assertTrue("states there is no internet access", privacy.contains("no internet access"))
+    assertTrue("names on-device text recognition", privacy.contains("ml kit") && privacy.contains("on-device"))
     assertTrue("covers deletion", privacy.contains("delete"))
     assertTrue("covers export", privacy.contains("export"))
     assertTrue("13+ statement", privacy.contains("13"))

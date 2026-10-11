@@ -1,0 +1,130 @@
+# Import benchmark — delimited files (csv / tsv / semicolon), same format as text-pack.txt.
+
+=== csv-day-column.csv
+Day,Exercise,Sets,Reps,Rest
+Upper,Bench Press,4,6-8,2 min
+Upper,Barbell Row,4,8,2 min
+Upper,Lateral Raise,3,15,60s
+Lower,Squat,4,6,3 min
+Lower,Romanian Deadlift,3,8,2 min
+Lower,Leg Curl,3,12,60s
+--- expect
+DAY Upper
+Bench Press | 4 | 6-8
+Barbell Row | 4 | 8
+Lateral Raise | 3 | 15
+DAY Lower
+Squat | 4 | 6
+Romanian Deadlift | 3 | 8
+Leg Curl | 3 | 12
+
+=== csv-no-header.csv
+Bench Press,4,8
+Incline Dumbbell Press,3,10
+Cable Fly,3,15
+Tricep Pushdown,3,12
+--- expect
+DAY 1
+Bench Press | 4 | 8
+Incline Dumbbell Press | 3 | 10
+Cable Fly | 3 | 15
+Tricep Pushdown | 3 | 12
+
+=== csv-week-day.csv
+Week,Day,Exercise,Sets,Reps,Load
+1,1,Squat,3,5,75%
+1,1,Bench Press,3,5,75%
+1,2,Deadlift,3,5,75%
+1,2,Overhead Press,3,5,75%
+2,1,Squat,3,3,85%
+2,1,Bench Press,3,3,85%
+2,2,Deadlift,3,3,85%
+2,2,Overhead Press,3,3,85%
+--- expect
+WEEK 1
+DAY 1
+Squat | 3 | 5
+Bench Press | 3 | 5
+DAY 2
+Deadlift | 3 | 5
+Overhead Press | 3 | 5
+WEEK 2
+DAY 1
+Squat | 3 | 3
+Bench Press | 3 | 3
+DAY 2
+Deadlift | 3 | 3
+Overhead Press | 3 | 3
+
+=== csv-setsreps-cell.csv
+Day,Exercise,Sets x Reps
+Monday,Squat,4x6
+Monday,Leg Press,3x12
+Monday,Leg Curl,3x10
+Thursday,Bench Press,4x6
+Thursday,Pull Up,4x8
+Thursday,Dip,3x12
+--- expect
+DAY Monday
+Squat | 4 | 6
+Leg Press | 3 | 12
+Leg Curl | 3 | 10
+DAY Thursday
+Bench Press | 4 | 6
+Pull Up | 4 | 8
+Dip | 3 | 12
+
+=== semicolon-euro.csv
+Tag;Übung;Sätze;Wdh
+1;Kniebeuge;4;8
+1;Bankdrücken;4;8
+2;Kreuzheben;3;5
+2;Klimmzüge;3;8
+--- expect
+DAY 1
+Squat | 4 | 8
+Bench Press | 4 | 8
+DAY 2
+Deadlift | 3 | 5
+Pull Up | 3 | 8
+
+=== tsv-header-day-blocks.tsv
+Day 1 - Push
+Exercise	Sets	Reps
+Bench Press	4	8
+Overhead Press	3	10
+Day 2 - Pull
+Exercise	Sets	Reps
+Deadlift	3	5
+Barbell Row	4	8
+--- expect
+DAY Push
+Bench Press | 4 | 8
+Overhead Press | 3 | 10
+DAY Pull
+Deadlift | 3 | 5
+Barbell Row | 4 | 8
+
+=== csv-quoted-notes.csv
+Day,Exercise,Sets,Reps,Notes
+1,"Bench Press, paused",4,5,"1 sec pause, then explode"
+1,Incline Dumbbell Press,3,10,"slow negatives, 3 sec"
+1,"Fly, cable",3,15,
+--- expect
+DAY 1
+Pause Bench Press | 4 | 5
+Incline Dumbbell Press | 3 | 10
+Cable Fly | 3 | 15
+
+=== csv-rep-ranges-time.csv
+Exercise,Sets,Reps
+Goblet Squat,3,10-12
+Plank,3,45 sec
+Farmer Carry,3,40m
+Burpee,3,AMRAP
+--- expect
+DAY 1
+Goblet Squat | 3 | 10-12
+Plank | 3 | 45s
+Farmers Carry | 3 | 40m
+Burpee | 3 | AMRAP

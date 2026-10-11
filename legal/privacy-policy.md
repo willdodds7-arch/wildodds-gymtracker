@@ -1,77 +1,80 @@
 # Privacy Policy
 
-**Version 2.0 — Last updated 17 August 2026**
-
-> Have this policy reviewed by a qualified lawyer before you publish to a store.
+**Version 3.0 — Last updated 11 October 2026**
 
 This Privacy Policy explains what Wild Odds Gym Tracker ("the app") does with your data. It
 describes what the app actually does today — not aspirations.
 
 ## The short version
 
-Wild Odds Gym Tracker is a **free, open-source, on-device** Android app for planning and logging
-resistance-training programs. **There is no account, no sign-in, and no server run by us.** Your
-programs, sessions, exercises and workout logs are stored **only on your device**. We do not
-collect, receive, or have any way to see your data.
-
-There is exactly **one** case where data leaves your device, and only if you choose it: **AI
-Import** (see below). Everything else — logging, program building, analysis, the plate and 1RM
-calculators, reminders — works fully offline.
+Wild Odds Gym Tracker is a **free, open-source, offline** Android app for planning and logging
+resistance-training programs. **There is no account, no sign-in, no server and no internet access.**
+The app does not have Android's internet permission, so neither the app nor any library inside it
+can send anything off your phone. Your programs, sessions, exercises and workout logs are stored
+**only on your device**. We do not collect, receive, or have any way to see your data.
 
 ## What we collect
 
-**Nothing.** The app has no backend and no analytics uploader. We, the developers, receive no
-personal data, no training data, and no identifiers from your use of the app.
+**Nothing.** The app has no backend, no analytics and no crash reporting. We, the developers,
+receive no personal data, no training data and no identifiers from your use of the app.
 
 **Your training data** (programs, sessions, exercises, weights, reps, RPE, %1RM, per-side values,
-notes) is created and stored **locally** in an on-device database. It is never uploaded by the app.
+notes) is created and stored **locally** in an on-device database.
 
-**On-device usage events (optional, and local-only).** The app contains a "Share usage statistics"
-setting, **off by default**. When on, it records coarse, non-identifying events (e.g. which screen
-was opened) to a local table on your device. **There is no server to receive them** — they are
-never transmitted and never leave your device. You can turn this off at any time in Settings, which
-also clears anything queued locally.
+## Importing programs
 
-## The one exception: AI Import (opt-in, your own AI provider)
-
-The app includes an optional **AI Import** feature that can turn a coach's program (text, CSV, PDF,
-or spreadsheet) into a structured program.
-
-- The **on-device importer is the default** and does all parsing locally with no network access.
-- The **AI-assisted path is used only if you add your own third-party AI API key** in Settings and
-  choose to use it. When you do, the specific program content you are importing (and only that
-  content) is sent over an encrypted connection to that AI provider's API —
-  **Anthropic** (`api.anthropic.com`) — using your key, to structure it. Your key is stored only on
-  your device.
-- This is **your** direct arrangement with that provider. Their handling of that request is governed
-  by **their** privacy policy and terms, not ours. If you never add a key, nothing is ever sent.
-
-If you are importing a coach's or client's program and want to keep it entirely private, use the
-on-device importer (the default) and do not add an AI key.
+When you import a program — pasted text, a spreadsheet, a PDF, a Word document, a screenshot or a
+photo — it is read **on your device**. Text in images is recognised by Google ML Kit's on-device
+text recognition, which is bundled inside the app. Nothing you import is uploaded, because the app
+has no internet access.
 
 ## Health & fitness data (Health Connect)
 
-If you optionally connect Health Connect, the app reads the data you grant (e.g. heart rate) to show
-it alongside your session, on your device. This is covered in the in-app **Health & Fitness Data
-Notice**. Nothing read from Health Connect is uploaded by the app.
+If you optionally connect Health Connect, the app asks for only two things: to **read heart rate**
+(shown alongside your session, on your device) and, only if you turn it on, to **write completed
+workouts** back to Health Connect. It does not request sleep, resting heart rate, HRV, location or
+any other health data. This is covered in the in-app **Health & Fitness Data Notice**. Nothing read
+from Health Connect leaves your device through the app.
 
 ## What we do NOT do
 
-We do **not**: run accounts or a backend; upload your training logs; use ads or advertising
-identifiers; sell or share your data; collect precise location, contacts, photos, or biometric
-identifiers; or track you across apps.
+We do **not**: run accounts or a backend; upload anything; use ads or advertising identifiers; use
+analytics or crash-reporting services; use cookies; sell or share your data; collect precise
+location, contacts, photos, or biometric identifiers; or track you across apps.
+
+## Cookies and tracking
+
+The app has **no cookies, no web tracking, no advertising IDs and no analytics**, so there is
+nothing to consent to and no cookie banner. The app stores your own settings and training data on
+your device only because it needs them to work; Delete all my data or uninstalling erases them.
+
+## Reminders
+
+Workout reminders are **off by default**. If you turn them on, every reminder has a **"Turn off
+reminders"** button, and you can switch them off anytime in Settings.
+
+## Third-party components
+
+The app is built with open-source libraries, listed in **Open-Source Licenses**. They run inside the
+app on your device. Health Connect is Android's own on-device health store.
 
 ## Your controls
 
 - **Export.** Settings → Export your training data as JSON/CSV, on-device.
-- **Delete.** Uninstalling the app removes its on-device database. You can also clear data from
-  Android Settings → Apps, or delete individual programs/logs in-app.
-- **Turn off usage statistics** at any time (it is off by default and never transmitted regardless).
+- **Delete everything.** Settings → **Delete all my data** erases every program, log, note and
+  setting on this device in one step. Uninstalling the app does the same. Because we hold no copy,
+  there is nothing for us to delete on a server — but you can still email us and we'll confirm.
+- **Restore.** Settings → Export data → Restore from backup loads a JSON export back onto a device.
+- **Android backup.** If you have turned on your phone's own backup (Google backup), Android may
+  include the app's data in that backup, which is stored in **your** Google account under Google's
+  terms — we cannot see it. Turn device backup off in Android Settings if you don't want this.
 
 ## Children
 
-The app is a general-audience fitness tool and collects nothing. It is not directed at children
-under 13.
+The app is a general-audience fitness tool for people **aged 13 and over**, and it collects no
+personal data from anyone, including children. It is not directed at children under 13. If you are
+under the age of digital consent where you live (16 in some EU countries), use it with a parent's or
+guardian's permission.
 
 ## Changes
 

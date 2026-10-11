@@ -58,10 +58,6 @@ class Cap3Preferences(private val context: Context) {
     context.dataStore.edit { it[exerciseKey(slot)] = exercise }
   }
 
-  suspend fun setSecondaryOverride(day: Cap3DaySlot, slot: Cap3Slot) {
-    context.dataStore.edit { it[secondaryKey(day)] = slot.name }
-  }
-
   /**
    * Set a lift's reference max. Saved as typed — no separate confirm step — and it resets that
    * lift's training max to 90% of the new number, which is what changing your max means. Training

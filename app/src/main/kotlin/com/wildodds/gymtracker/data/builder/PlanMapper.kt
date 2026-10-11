@@ -47,7 +47,7 @@ object PlanMapper {
           dayNumber = dayNumber,
           name = w.name.ifBlank { if (w.isRest) "Rest" else "Day $dayNumber" },
           muscleGroups = if (w.isRest) "" else muscleSummary(w),
-          exercises = if (w.isRest) emptyList() else w.exercises.mapIndexed { i, ex -> toParsedExercise(ex, i) },
+          exercises = if (w.isRest) emptyList() else w.exercises.mapIndexed { i, ex -> toParsedExercise(ex, i, week) },
           sessionType = sessionTypeOf(w)
         )
       }
@@ -91,15 +91,35 @@ object PlanMapper {
    * saved by the new builder still renders correctly in the session screen, the importers and the
    * CAP3 engine — none of which know about [PlannedSet].
    */
-  private fun toParsedExercise(ex: PlanExercise, orderIndex: Int) = ParsedExercise(
-    name = ex.name,
-    sets = ex.workingSetCount.coerceAtLeast(1),
-    repsTarget = dominantRepTarget(ex),
-    notes = ex.notes,
-    orderIndex = orderIndex,
-    rpeTarget = ex.sets.firstOrNull { it.rpe.isNotBlank() }?.rpe.orEmpty(),
-    pct1rmTarget = ""
-  )
+  private fun toParsedExercise(ex: PlanExercise, orderIndex: Int, week: Int): ParsedExercise {
+    // The one per-week exception: a 12-week linear progression writes each week's own sets × reps
+    // and a coach note with that week's target. Tagged so later edits know not to flatten it, and
+    // the starting weight is kept in loadValue so the builder can read the spec back.
+    ex.linear12?.let { spec ->
+      val start = spec.startLoad.toFloatOrNull()
+      val wp = TwelveWeekLinear.weekPlan(week - 1, start)
+      return ParsedExercise(
+        name = ex.name,
+        sets = wp.sets,
+        repsTarget = wp.reps.toString(),
+        notes = TwelveWeekLinear.mergeNotes(ex.notes, wp.note),
+        orderIndex = orderIndex,
+        rpeTarget = ex.sets.firstOrNull { it.rpe.isNotBlank() }?.rpe.orEmpty(),
+        pct1rmTarget = "",
+        loadValue = start?.toDouble(),
+        modifiers = listOf(TwelveWeekLinear.MODIFIER)
+      )
+    }
+    return ParsedExercise(
+      name = ex.name,
+      sets = ex.workingSetCount.coerceAtLeast(1),
+      repsTarget = dominantRepTarget(ex),
+      notes = ex.notes,
+      orderIndex = orderIndex,
+      rpeTarget = ex.sets.firstOrNull { it.rpe.isNotBlank() }?.rpe.orEmpty(),
+      pct1rmTarget = ""
+    )
+  }
 
   /** The rep target most working sets share — the single value the legacy column can hold. */
   internal fun dominantRepTarget(ex: PlanExercise): String =
@@ -127,6 +147,9 @@ object PlanMapper {
    * redundant rows would just be noise in the database.
    */
   fun plannedSetsFor(exerciseId: Long, ex: PlanExercise): List<PlannedSet> {
+    // Per-set rows would pin week 1's set count on the session screen; the progression's weeks
+    // are fully described by each week's own legacy columns.
+    if (ex.linear12 != null) return emptyList()
     if (!hasPerSetDetail(ex)) return emptyList()
     return ex.sets.mapIndexed { i, s ->
       PlannedSet(
@@ -330,11 +353,17 @@ object PlanMapper {
       }
     }
 
+    // A stored progression comes back as the spec, with its generated week-1 note removed so the
+    // next save doesn't stack a second one on top.
+    val linear12 = if (TwelveWeekLinear.MODIFIER in ex.modifiers)
+      Linear12Spec(startLoad = fmtLoad(ex.loadValue)) else null
+
     return PlanExercise(
       name = ex.name,
       sets = sets,
-      notes = ex.notes,
-      alternatives = alts?.sortedBy { it.orderIndex }?.map { it.name } ?: emptyList()
+      notes = if (linear12 != null) TwelveWeekLinear.stripNote(ex.notes) else ex.notes,
+      alternatives = alts?.sortedBy { it.orderIndex }?.map { it.name } ?: emptyList(),
+      linear12 = linear12
     )
   }
 }

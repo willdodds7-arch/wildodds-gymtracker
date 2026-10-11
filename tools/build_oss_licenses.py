@@ -8,6 +8,11 @@ import json
 import os
 from datetime import date
 
+# Bundled non-code assets: these are not in the dependency graph, so they are listed by hand.
+ASSETS = [
+    ("Space Grotesk (fonts in res/font)", "SIL Open Font License 1.1 - Copyright 2020 The Space Grotesk Project Authors"),
+]
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPORT = os.path.join(ROOT, "app", "build", "reports", "licenses", "licenseOfflineDebugReport.json")
 OUT = os.path.join(ROOT, "legal", "open-source-licenses.md")
@@ -30,9 +35,9 @@ def main():
     lines = [
         "# Open-Source Licenses",
         "",
-        f"**Last updated {date(2026, 7, 13).strftime('%d %B %Y')}**",
+        f"**Last updated {date.today().strftime('%d %B %Y')}**",
         "",
-        "Wild Odds Gym Tracker is open source (GPLv3) and is built on the open-source components",
+        "Wild Odds Gym Tracker is open source (MIT License) and is built on the open-source components",
         "below. This list is generated from the app's resolved dependencies. Each component remains",
         "under its own license.",
         "",
@@ -41,6 +46,8 @@ def main():
         name, group, lic = seen[key]
         label = group or name
         lines.append(f"- **{label}** — {lic}")
+    lines += ["", "## Fonts and media", ""]
+    lines += [f"- **{n}** - {l}" for n, l in ASSETS]
     lines.append("")
 
     os.makedirs(os.path.dirname(OUT), exist_ok=True)

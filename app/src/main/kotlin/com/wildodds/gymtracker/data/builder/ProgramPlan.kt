@@ -56,7 +56,13 @@ data class PlanExercise(
   /** Manually-chosen swaps, shown during the workout. Names only — resolved against the library. */
   val alternatives: List<String> = emptyList(),
   /** Optional exercises can be skipped without the workout counting as incomplete. */
-  val isOptional: Boolean = false
+  val isOptional: Boolean = false,
+  /**
+   * Non-null when this exercise runs the 12-week linear progression ([TwelveWeekLinear]). Unlike
+   * everything else on a plan exercise this is NOT the same every week: the save step writes each
+   * week's own sets × reps and coach note from it.
+   */
+  val linear12: Linear12Spec? = null
 ) {
   val workingSetCount: Int get() = sets.count { it.type.countsAsVolume }
 
@@ -76,6 +82,9 @@ data class PlanExercise(
   /** True when nothing in this exercise prescribes a rep target — surfaced as a soft warning. */
   val hasNoRepTarget: Boolean get() = sets.none { it.reps.isNotBlank() }
 }
+
+/** 12-week linear progression settings. [startLoad] is free text like a set's load; blank = unknown. */
+data class Linear12Spec(val startLoad: String = "")
 
 /** A superset / triset / circuit: exercises performed back to back for [rounds] rounds. */
 data class PlanGroup(

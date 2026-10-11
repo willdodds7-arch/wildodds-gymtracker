@@ -23,12 +23,14 @@ val MonoLightSurface2      = Color(0xFFEDEDED) // nested / pressed
 val MonoLightBorder        = Color(0xFFE4E4E4) // 1px hairlines, dividers
 val MonoLightText          = Color(0xFF0B0B0B) // primary
 val MonoLightTextSecondary = Color(0xFF6B6B6B) // labels, subtitles
-val MonoLightTextTertiary  = Color(0xFFA0A0A0) // meta, captions
-// Electric azure. Chosen as light/cyan-leaning as it can be while still carrying white content:
-// it sits at 4.1:1 against white, matching the 4.3:1 of the red it replaced, so the selected-tab
-// indicator (white icon on accent) and accent-coloured text stay legible.
-val MonoLightAccent        = Color(0xFF0284C7) // active / checked / selected ONLY
-val MonoLightDanger        = Color(0xFFE5342B) // destructive + error states ONLY
+// Accessibility (WCAG 2.1 AA, 4.5:1 for normal text) on bg, surface AND surface2. Tertiary was
+// 0xA0A0A0 (2.4–2.6:1) / dark 0x6A6A6A (3.2–3.6:1), accent 0x0284C7 (3.7–4.1:1), danger 0xE5342B
+// (4.3:1). Light tertiary has to match secondary to pass on surface2; hierarchy comes from size.
+val MonoLightTextTertiary  = Color(0xFF6B6B6B) // meta, captions
+// Azure. Deepened from 0x0284C7 so accent-coloured TEXT passes WCAG AA: 5.9:1 on white, 5.1:1 on
+// surface2. It still carries white content (the selected-tab indicator), now more legibly.
+val MonoLightAccent        = Color(0xFF0369A1) // active / checked / selected ONLY
+val MonoLightDanger        = Color(0xFFC62828) // destructive + error states ONLY
 
 // DARK
 val MonoDarkBg             = Color(0xFF0C0C0C)
@@ -37,7 +39,7 @@ val MonoDarkSurface2       = Color(0xFF242424)
 val MonoDarkBorder         = Color(0xFF2A2A2A)
 val MonoDarkText           = Color(0xFFFAFAFA)
 val MonoDarkTextSecondary  = Color(0xFF9A9A9A)
-val MonoDarkTextTertiary   = Color(0xFF6A6A6A)
+val MonoDarkTextTertiary   = Color(0xFF8B8B8B)
 val MonoDarkAccent         = Color(0xFFFF4D43)
 val MonoDarkDanger         = Color(0xFFFF4D43)
 

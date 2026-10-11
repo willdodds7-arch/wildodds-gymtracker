@@ -38,9 +38,6 @@ class Cap3ViewModel(app: Application) : AndroidViewModel(app) {
   fun setExercise(slot: Cap3Slot, exercise: String) =
     viewModelScope.launch { prefs.setExercise(slot, exercise) }
 
-  fun setSecondaryFor(day: Cap3DaySlot, slot: Cap3Slot) =
-    viewModelScope.launch { prefs.setSecondaryOverride(day, slot) }
-
   /**
    * Save a max as it is typed. [referenceMax] is in the display unit; blank or nonsense clears the
    * slot rather than storing a zero, so the "every slot needs a max" check stays honest.
@@ -58,7 +55,7 @@ class Cap3ViewModel(app: Application) : AndroidViewModel(app) {
       return@launch
     }
     repo.importProgram(Cap3ProgramBuilder.build(cfg), activate = true)
-    _message.value = "nSuns CAP3 is now your active program."
+    _message.value = "3-Week AMRAP Cycle is now your active program."
     _created.value = true
   }
 

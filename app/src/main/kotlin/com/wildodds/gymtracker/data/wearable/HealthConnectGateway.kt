@@ -28,9 +28,14 @@ object WearableHealthPermissions {
   const val WRITE_EXERCISE = "android.permission.health.WRITE_EXERCISE"
   const val WRITE_CALORIES = "android.permission.health.WRITE_TOTAL_CALORIES_BURNED"
 
-  /** Everything we request in one grant flow (read + write), so a single connect covers all features. */
+  /**
+   * Everything we request in one grant flow. Only what a live feature uses: heart rate (session +
+   * summary) and the optional workout write-back. Sleep / resting HR / HRV fed the recovery feature,
+   * which was removed — so they are no longer requested (data minimisation). Their constants stay so
+   * the readers still compile and permission-gate to null.
+   */
   val ALL: Set<String> = setOf(
-    READ_HEART_RATE, READ_SLEEP, READ_RESTING_HEART_RATE, READ_HRV, WRITE_EXERCISE, WRITE_CALORIES
+    READ_HEART_RATE, WRITE_EXERCISE, WRITE_CALORIES
   )
 }
 

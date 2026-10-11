@@ -305,16 +305,6 @@ class ImportReviewViewModel(app: Application) : AndroidViewModel(app) {
     })
   }
 
-  /** Index of the first row still needing a decision, as (session, exercise). */
-  fun firstProblem(): Pair<Int, Int>? {
-    _state.value.sessions.forEachIndexed { si, sess ->
-      sess.exercises.forEachIndexed { ei, ex ->
-        if (ex.needsReview && !ex.accepted) return si to ei
-      }
-    }
-    return null
-  }
-
   /** How many rows still need a decision. */
   fun remainingProblems(): Int = _state.value.sessions
     .sumOf { s -> s.exercises.count { it.needsReview && !it.accepted } }

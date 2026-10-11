@@ -244,5 +244,4 @@ object GridReader {
     return (2..3).firstNotNullOfOrNull { m.groupValues.getOrNull(it)?.toIntOrNull() }
   }
 
-  fun isWeekLabel(text: String): Boolean = weekNumberIn(text) != null
 }

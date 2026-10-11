@@ -120,31 +120,56 @@ object ExerciseIndex {
     return best
   }
 
+  /** Hand-curated additions (new movements, abbreviations, other languages). See the file header. */
+  private const val EXTRA_RESOURCE = "/reader/exercises-extra.tsv"
+
   private fun load(): List<Entry> {
     val stream = ExerciseIndex::class.java.getResourceAsStream(RESOURCE)
       ?: error("Exercise index missing from the classpath at $RESOURCE")
     val out = ArrayList<Entry>(1024)
+    readRows(stream) { f, list ->
+      val primaries = list(2)
+      if (primaries.isNotEmpty()) out += Entry(
+        canonical = f[0].trim(),
+        pattern = f[1].trim(),
+        primaryMuscles = primaries,
+        equipment = f[3].trim(),
+        unilateral = f[4].trim() == "1",
+        aliases = list(5),
+        secondaryMuscles = list(6)
+      )
+    }
+    // Merge the extras: aliases onto an existing canonical, or a whole new entry.
+    ExerciseIndex::class.java.getResourceAsStream(EXTRA_RESOURCE)?.let { extra ->
+      val position = HashMap<String, Int>().apply { out.forEachIndexed { i, e -> put(Normalise.key(e.canonical), i) } }
+      readRows(extra) { f, list ->
+        val key = Normalise.key(f[0])
+        val at = position[key]
+        if (at != null) {
+          val e = out[at]
+          out[at] = e.copy(aliases = (e.aliases + list(5)).distinct())
+        } else if (list(2).isNotEmpty()) {
+          position[key] = out.size
+          out += Entry(
+            canonical = f[0].trim(), pattern = f[1].trim(), primaryMuscles = list(2),
+            equipment = f[3].trim(), unilateral = f[4].trim() == "1",
+            aliases = list(5), secondaryMuscles = list(6)
+          )
+        }
+      }
+    }
+    return out
+  }
+
+  private fun readRows(stream: java.io.InputStream, row: (List<String>, (Int) -> List<String>) -> Unit) {
     stream.bufferedReader(Charsets.UTF_8).useLines { lines ->
       for (line in lines) {
         if (line.isBlank() || line.startsWith("#")) continue
         val f = line.split('\t')
         if (f.size < 5) continue
-        fun list(i: Int) =
-          f.getOrNull(i).orEmpty().split(',').map { it.trim() }.filter { it.isNotEmpty() }
-        val primaries = list(2)
-        if (primaries.isEmpty()) continue
-        out += Entry(
-          canonical = f[0].trim(),
-          pattern = f[1].trim(),
-          primaryMuscles = primaries,
-          equipment = f[3].trim(),
-          unilateral = f[4].trim() == "1",
-          aliases = list(5),
-          secondaryMuscles = list(6)
-        )
+        row(f) { i -> f.getOrNull(i).orEmpty().split(',').map { it.trim() }.filter { it.isNotEmpty() } }
       }
     }
-    return out
   }
 }
 
@@ -174,7 +199,10 @@ object Normalise {
     s = s.replace(Regex("""[-_]"""), " ")
     s = s.replace(Regex("""\s+"""), " ").trim()
     if (s.isBlank()) return s
+    // Expand abbreviations on the plural AND the singular form: "RDLs" is the plural of "RDL", and
+    // expanding first left it as the unknown word "rdls".
     s = vocab.expandAbbreviations(s)
+    s = vocab.expandAbbreviations(s.split(' ').joinToString(" ") { w -> singular(w).takeIf { vocab.expandAbbreviations(it) != it } ?: w })
     return s.split(' ').joinToString(" ") { singular(it) }.trim()
   }
 

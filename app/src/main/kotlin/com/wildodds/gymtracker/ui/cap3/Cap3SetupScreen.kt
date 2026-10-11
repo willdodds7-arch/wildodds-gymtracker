@@ -65,7 +65,7 @@ fun Cap3SetupScreen(navController: NavController, vm: Cap3ViewModel = viewModel(
     snackbarHost = { SnackbarHost(snackbar) },
     topBar = {
       TopAppBar(
-        title = { Text("nSuns CAP3", fontWeight = FontWeight.Bold) },
+        title = { Text("3-Week AMRAP Cycle", fontWeight = FontWeight.Bold) },
         navigationIcon = {
           IconButton(onClick = { navController.popBackStack() }) {
             Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")

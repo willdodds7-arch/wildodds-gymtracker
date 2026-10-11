@@ -32,7 +32,7 @@ android {
     }
 
     // Release signing (Phase 7). Credentials come from keystore.properties (gitignored) or CI env
-    // vars — never committed. You generate + back up the keystore yourself (see docs/launch-runbook.md).
+    // vars — never committed. You generate + back up the keystore yourself (see launch-kit/CHECKLIST.md).
     // When no release keystore is configured, the release build falls back to debug signing so a
     // local `assembleOfflineRelease` still works for R8 smoke-testing (that artifact is NOT
     // Play-uploadable — Play rejects debug-signed bundles).
@@ -71,10 +71,8 @@ android {
     }
 
     // ── Edition (single product) ────────────────────────────────────────────────
-    // Wild Odds Gym Tracker is local-first: all training data lives on-device and the app works
-    // fully offline. An account is OPTIONAL and used only for the Friends (social) layer — there are
-    // no ads and no in-app purchases. The paid Creator/Marketplace tier is built but parked behind
-    // the `feat_creator_marketplace` feature flag (default off) for the free launch.
+    // Wild Odds Gym Tracker is offline-only: all training data lives on-device, there is no account
+    // and no server, and there are no ads or in-app purchases.
     // The flavor is still named `offline` to keep the `.offline` applicationId (so existing installs
     // upgrade); it also supplies the app_name string.
     flavorDimensions += "edition"
@@ -82,7 +80,6 @@ android {
         create("offline") {
             dimension = "edition"
             applicationIdSuffix = ".offline"
-            versionNameSuffix = "-offline"
             resValue("string", "app_name", "Wild Odds Gym Tracker")
         }
     }
@@ -211,7 +208,6 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.glance.appwidget)
     implementation(libs.glance.material3)
-    implementation(libs.okhttp)
     implementation(libs.pdfbox.android)
     // On-device OCR for scanned PDFs and photos of printed programs. BUNDLED model (see the
     // version catalog): no download, no Play Services dependency, works in airplane mode on first

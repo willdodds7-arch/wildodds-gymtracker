@@ -387,7 +387,7 @@ private fun Cap3EmomBlock(
         modifier = Modifier.width(120.dp)
       )
       Spacer(Modifier.weight(1f))
-      TextButton(onClick = { vm.deleteSet(exerciseIndex, index) }) { Text("Remove") }
+      TextButton(onClick = { vm.deleteSet(exerciseIndex, row.rowKey) }) { Text("Remove") }
     }
   }
 

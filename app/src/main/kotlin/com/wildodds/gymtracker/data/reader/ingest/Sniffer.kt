@@ -45,7 +45,7 @@ object Sniffer {
     if (bytes.startsWith(ZIP)) return sniffZip(zipEntryNames, fileName)
 
     // 3. Textual formats — decode a prefix and look at the shape, not the extension.
-    val head = TextDecoder.decode(bytes, limit = 8192).text.trimStart('﻿', ' ', '\n', '\r', '\t')
+    val head = TextDecoder.decode(bytes, limit = 8192).text.trimStart('\uFEFF', ' ', '\n', '\r', '\t')
     if (head.isBlank()) return SourceKind.UNKNOWN
     if (head.startsWith("MIME-Version:") || head.contains("Content-Type: multipart/related"))
       return SourceKind.MHTML

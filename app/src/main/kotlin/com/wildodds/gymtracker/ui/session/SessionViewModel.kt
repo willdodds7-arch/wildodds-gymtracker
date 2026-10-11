@@ -45,6 +45,9 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import java.time.Instant
 
+private val setRowKeys = java.util.concurrent.atomic.AtomicLong()
+internal fun nextSetRowKey(): Long = setRowKeys.incrementAndGet()
+
 // Marked @Immutable (never mutated in place — every VM update goes through .copy()/toMutableList())
 // so Compose can skip recomposing ExerciseCard/SetRow instances whose reference is unchanged,
 // instead of treating every keystroke as invalidating the whole session screen.
@@ -80,7 +83,14 @@ data class SetRowState(
    * True only for a genuinely distinguished heavy single — a top-set/back-off prescription.
    * Three straight sets at 100% are not "top sets", they are just the work.
    */
-  val isTopSet: Boolean = false
+  val isTopSet: Boolean = false,
+  /**
+   * Stable identity for this row in the UI, independent of [setNumber]. Deleting a set renumbers
+   * every set after it, so keying the swipe-to-delete rows by set number handed a deleted row's
+   * already-dismissed swipe state (and its stale index) to the row that slid up into its place.
+   * Survives `.copy()`, so edits keep the same key.
+   */
+  val rowKey: Long = nextSetRowKey()
 ) {
   val isWarmup: Boolean get() = plannedType == "WARMUP"
   /** True when this row has a prescription of its own worth showing. */
@@ -266,14 +276,6 @@ class SessionViewModel(app: Application, savedStateHandle: SavedStateHandle) : A
   private val _recoveryOverlay = MutableStateFlow<RecoveryAdjustment?>(null)
   val recoveryOverlay: StateFlow<RecoveryAdjustment?> = _recoveryOverlay.asStateFlow()
 
-  /** Clear the active recovery overlay and reload — the full, unscaled session returns immediately. */
-  fun revertRecoveryAdjustment() {
-  RecoveryAdjustmentStore.clear(getApplication())
-  recoveryAdjustment = null
-  _recoveryOverlay.value = null
-  viewModelScope.launch { loadSession() }
-  }
-
   /** Round a recovery-scaled prefill weight to a clean 0.5 kg step (no-op when scale is 1.0). */
   private fun scaleWeight(weight: Float, scale: Float): Float =
   if (scale == 1f) weight else ((weight * scale) / 0.5f).roundToInt() * 0.5f
@@ -387,15 +389,20 @@ class SessionViewModel(app: Application, savedStateHandle: SavedStateHandle) : A
 
   // ── Exercise notes (SharedPreferences, keyed by exercise name) ────────────
 
+  // Athlete notes: the lifter's own notes for an exercise, shared by every session (and program)
+  // that has it. Keyed by the normalised name so "Bench Press" and "bench press " are one exercise;
+  // notes saved under the old exact-name key are still read, and move to the new key on next save.
+  // (Coach notes are different: they're the program's Exercise.notes and are never edited here.)
   fun getNoteForExercise(name: String): String =
-  notePrefs.getString("note_$name", "") ?: ""
+  notePrefs.getString("note_${exerciseKey(name)}", null)
+  ?: notePrefs.getString("note_$name", null)
+  ?: ""
 
   fun saveNoteForExercise(name: String, note: String) {
-  if (note.isBlank()) {
-  notePrefs.edit().remove("note_$name").apply()
-  } else {
-  notePrefs.edit().putString("note_$name", note).apply()
-  }
+  val edit = notePrefs.edit().remove("note_$name")
+  if (note.isBlank()) edit.remove("note_${exerciseKey(name)}")
+  else edit.putString("note_${exerciseKey(name)}", note.trim())
+  edit.apply()
   }
 
   private suspend fun loadSession() {
@@ -440,21 +447,26 @@ class SessionViewModel(app: Application, savedStateHandle: SavedStateHandle) : A
   // Current-week sets already logged
   val currentSets = repo.getSetLogsForWorkoutLog(log.id)
 
+  // Where this exercise's history lives. Normally its own day/position — but an exercise moved
+  // here from another day has no history in this slot yet (earlier weeks hold whatever used to be
+  // here), so until it has been logged in its new home, "last time" is read from where it came from.
+  val hist = historyPosition(exercise, session)
+
   // Previous-week sets - use POSITION query (dayNumber + orderIndex) so it works
   // regardless of which exerciseId was assigned to that slot in the prior week.
   val prevSets = repo.getPrevWeekSetLogsByPosition(
   programId  = session.programId,
-  dayNumber  = session.dayNumber,
-  currentWeek = weekNumber,
-  orderIndex = exercise.orderIndex
+  dayNumber  = hist.day,
+  currentWeek = hist.beforeWeek,
+  orderIndex = hist.index
   )
 
   // Previous-week progression choice for this exercise's position
   val prevChoice = repo.getPrevWeekProgressionByPosition(
   programId  = session.programId,
-  dayNumber  = session.dayNumber,
-  currentWeek = weekNumber,
-  orderIndex = exercise.orderIndex
+  dayNumber  = hist.day,
+  currentWeek = hist.beforeWeek,
+  orderIndex = hist.index
   )
 
   // ── Smart progression (Phase 3B) — suggestion + adjusted carry-forward ──
@@ -462,7 +474,9 @@ class SessionViewModel(app: Application, savedStateHandle: SavedStateHandle) : A
   var suggestionRationale: String? = null
   var adjustedPrev: Map<Int, ProgressionEngine.AdjustedSet> = emptyMap()
   if (smartProgression) {
-  val allWeekLogs = repo.getAllWeekSetLogs(session.programId, session.dayNumber, exercise.orderIndex)
+  val allWeekLogs = repo.getAllWeekSetLogs(session.programId, hist.day, hist.index)
+  // The old slot is someone else's from this week on; only its earlier weeks are this exercise.
+  .let { logs -> if (hist.moved) logs.filter { it.weekNumber < hist.beforeWeek } else logs }
   val (repLow, repHigh) = parseRepRange(exercise.repsTarget)
   val rpeTarget = parseRpeTarget(exercise.rpeTarget)
 
@@ -512,7 +526,10 @@ class SessionViewModel(app: Application, savedStateHandle: SavedStateHandle) : A
   val workingPercents = planned.filter { it.type != "WARMUP" }.mapNotNull { it.loadPercent }
   val hasDistinctTopSet = workingPercents.count { it == 100 } == 1 && workingPercents.any { it < 100 }
 
-  val baseCount = if (plannedCount > 0) plannedCount else exercise.sets
+  // Never hide a set that's already been logged this week, even if the prescription has since
+  // dropped below it (e.g. a progression started mid-session that prescribes fewer sets).
+  val loggedCount = currentSets.maxOfOrNull { it.setNumber } ?: 0
+  val baseCount = maxOf(if (plannedCount > 0) plannedCount else exercise.sets, loggedCount)
   val setCount = if (applyRecovery)
   (baseCount * recoveryAdjustment!!.volumeScale).roundToInt().coerceIn(1, baseCount)
   else baseCount
@@ -530,7 +547,11 @@ class SessionViewModel(app: Application, savedStateHandle: SavedStateHandle) : A
   val adj  = adjustedPrev[setNum]
   val pct1rmPrefill = pct1rmPrefills?.getOrNull(setNum - 1)
   val prefillWeight = (adj?.weightKg ?: prev?.weightKg)?.let { scaleWeight(it, loadScale) }
-  val prefillReps  = adj?.reps ?: prev?.reps
+  // On the 12-week progression the reps are the scheme (week 4 wants 6 even though week 3 did 5),
+  // so prefill this week's target; the weight still carries over from last time.
+  val progressionReps = if (com.wildodds.gymtracker.data.builder.TwelveWeekLinear.MODIFIER in exercise.modifiers)
+  exercise.repsTarget.toIntOrNull() else null
+  val prefillReps  = progressionReps ?: adj?.reps ?: prev?.reps
   val plan = planned.getOrNull(setNum - 1)
   SetRowState(
   setNumber = setNum,
@@ -545,7 +566,7 @@ class SessionViewModel(app: Application, savedStateHandle: SavedStateHandle) : A
   ?: "",
   repsRight = existing?.repsRight?.toString() ?: prev?.repsRight?.toString() ?: "",
   pct1rm  = existing?.pct1rm?.let { if (it % 1f == 0f) it.toInt().toString() else it.toString() } ?: "",
-  isPrefilled = existing == null && (prev != null || pct1rmPrefill != null),
+  isPrefilled = existing == null && (prev != null || pct1rmPrefill != null || progressionReps != null),
   workoutLogId = log.id,
   plannedType = plan?.type,
   plannedReps = plan?.reps.orEmpty(),
@@ -668,14 +689,28 @@ class SessionViewModel(app: Application, savedStateHandle: SavedStateHandle) : A
   scheduleSave(exerciseIndex, setIndex)
   }
 
-  fun deleteSet(exerciseIndex: Int, setIndex: Int) {
+  /**
+   * Delete exactly one set row, identified by its [rowKey] rather than a list index: an index
+   * captured by the swipe gesture goes stale the moment an earlier row is removed, which is how one
+   * swipe used to take out the wrong set (or a second one).
+   */
+  fun deleteSet(exerciseIndex: Int, rowKey: Long) {
   val ex = _state.value.exercises.getOrNull(exerciseIndex) ?: return
-  val setToDelete = ex.sets.getOrNull(setIndex) ?: return
+  val setIndex = ex.sets.indexOfFirst { it.rowKey == rowKey }
+  if (setIndex < 0) return
   val newSets = ex.sets.toMutableList().also { it.removeAt(setIndex) }
   val renumbered = newSets.mapIndexed { i, s -> s.copy(setNumber = i + 1) }
   updateSets(exerciseIndex) { renumbered }
+  // Pending debounced saves are keyed by (exercise, row index) and would now land on the wrong
+  // rows; the rewrite below persists everything they were going to.
+  debounceJobs.keys.filter { it.startsWith("$exerciseIndex-") }.forEach { debounceJobs.remove(it)?.cancel() }
   viewModelScope.launch(Dispatchers.IO) {
-  repo.deleteSetLog(setToDelete.workoutLogId, setToDelete.setNumber)
+  // The logs are stored by set number, and every set after the deleted one just moved up a
+  // number. Deleting only the removed row left the later rows under their old numbers, so on
+  // reload a set vanished and the rest shifted — it looked like several sets had been deleted.
+  // Rewrite this exercise's logs to match the renumbered rows instead. Untouched carry-forward
+  // prefills were never logged, so they stay unlogged.
+  repo.replaceSetLogs(ex.workoutLogId, renumbered.filter { !it.isPrefilled }.mapNotNull { it.toSetLog(ex.workoutLogId) })
   repo.updateExerciseSets(
   exerciseId  = ex.exercise.id,
   sets  = renumbered.size,
@@ -761,6 +796,144 @@ class SessionViewModel(app: Application, savedStateHandle: SavedStateHandle) : A
   )
   loadSession()
   }
+  }
+
+  // ── Move exercise to another day ──────────────────────────────────────────
+
+  /** Another training day this week that an exercise can be moved to. */
+  data class MoveTargetDay(val dayNumber: Int, val name: String, val exerciseNames: List<String>)
+
+  // exerciseId → "originDay:originIndex:moveWeek". Lets a moved exercise keep reading its "last
+  // time" from the slot it came from until it has history in its new one (see historyPosition).
+  private val movePrefs = app.getSharedPreferences("moved_exercises", Context.MODE_PRIVATE)
+
+  /** Where to read an exercise's past weeks from: a day/position, and only weeks before [beforeWeek]. */
+  private data class HistorySource(val day: Int, val index: Int, val beforeWeek: Int, val moved: Boolean)
+
+  private suspend fun historyPosition(exercise: Exercise, session: Session): HistorySource {
+  val own = HistorySource(session.dayNumber, exercise.orderIndex, weekNumber, moved = false)
+  val parts = movePrefs.getString(exercise.id.toString(), null)?.split(":")?.mapNotNull { it.toIntOrNull() }
+  if (parts == null || parts.size != 3) return own
+  val (originDay, originIdx, moveWeek) = parts
+  if (weekNumber < moveWeek) return own
+  // Once it has been logged in its new slot, that slot IS its history.
+  val latestHere = repo.latestLoggedWeekByPosition(session.programId, session.dayNumber, exercise.orderIndex, weekNumber)
+  if (latestHere != null && latestHere >= moveWeek) return own
+  // Otherwise the old slot — but only weeks before the move; from then on it belongs to whatever
+  // slid up into it.
+  return HistorySource(originDay, originIdx, moveWeek, moved = true)
+  }
+
+  /** The other training days in this week, each with its current exercise order. */
+  suspend fun loadMoveTargets(): List<MoveTargetDay> = withContext(Dispatchers.IO) {
+  repo.getSessionsForWeek(weekNumber, cachedProgramId)
+  .filter { it.id != sessionId }
+  .map { s -> MoveTargetDay(s.dayNumber, s.name, repo.getExercisesForSession(s.id).map { it.name }) }
+  }
+
+  /**
+   * Move an exercise to [target] day, landing at [insertAt] in that day's order — this week and
+   * the weeks after it. It disappears from this session; anything already logged goes with it, and
+   * in its new day it still prefills from the last time it was done.
+   */
+  fun moveExerciseToDay(exerciseIndex: Int, target: MoveTargetDay, insertAt: Int) {
+  val ex = _state.value.exercises.getOrNull(exerciseIndex) ?: return
+  viewModelScope.launch {
+  // Pending saves are keyed by list index, which the reload below reshuffles — write them now.
+  flushPendingSaves()
+  val fromIndex = ex.exercise.orderIndex
+  val moved = repo.moveExerciseToDay(
+  programId = cachedProgramId, fromDay = cachedDayNumber, fromIndex = fromIndex,
+  exerciseName = ex.exercise.name, toDay = target.dayNumber, toIndex = insertAt,
+  fromWeek = weekNumber
+  )
+  if (moved.isEmpty()) return@launch
+  // Where its history lives. A row that was itself moved before keeps its original origin until
+  // it has been logged since, so moving twice in a week still finds "last time".
+  val edit = movePrefs.edit()
+  moved.forEach { (id, _) ->
+  val prior = movePrefs.getString(ex.exercise.id.toString(), null)?.split(":")?.mapNotNull { it.toIntOrNull() }
+  val origin = if (prior != null && prior.size == 3 && prior[2] == weekNumber) "${prior[0]}:${prior[1]}"
+  else "$cachedDayNumber:$fromIndex"
+  edit.putString(id.toString(), "$origin:$weekNumber")
+  }
+  edit.apply()
+  _cap3Message.value = "Moved ${ex.exercise.name} to ${target.name}"
+  loadSession()
+  }
+  }
+
+  /** Run every debounced set save immediately (before anything reshuffles exercise indices). */
+  private suspend fun flushPendingSaves() {
+  val pending = debounceJobs.keys.toList()
+  pending.forEach { key ->
+  debounceJobs.remove(key)?.cancel()
+  val (ei, si) = key.split("-").map { it.toInt() }
+  saveSet(ei, si)
+  }
+  }
+
+  // ── 12-week linear progression ────────────────────────────────────────────
+
+  fun isOnLinear12(ex: ExerciseUiState): Boolean =
+    com.wildodds.gymtracker.data.builder.TwelveWeekLinear.MODIFIER in ex.exercise.modifiers
+
+  /** The starting weight a progression was set up with, when one was given. */
+  fun linear12StartLoad(ex: ExerciseUiState): Float? = ex.exercise.loadValue?.toFloat()
+
+  /**
+   * Which week of the 12 (1-12) this session is, for a progression exercise — read from its coach
+   * note, which is the thing the athlete sees. Null when it isn't on one.
+   */
+  fun linear12Week(ex: ExerciseUiState): Int? {
+    if (!isOnLinear12(ex)) return null
+    return Regex("Week (\\d+) of 12").find(ex.exercise.notes)?.groupValues?.get(1)?.toIntOrNull()
+  }
+
+  /**
+   * Start the 12-week linear progression on this exercise with THIS week as its week 1. This
+   * session's sets × reps change straight away; later weeks follow the scheme.
+   */
+  fun startLinear12(exerciseIndex: Int, startLoad: Float?) {
+    val ex = _state.value.exercises.getOrNull(exerciseIndex) ?: return
+    viewModelScope.launch {
+      flushPendingSaves()
+      repo.applyLinear12(
+        programId = cachedProgramId, dayNumber = cachedDayNumber, orderIndex = ex.exercise.orderIndex,
+        exerciseName = ex.exercise.name, fromWeek = weekNumber, startLoad = startLoad
+      )
+      _cap3Message.value = "${ex.exercise.name}: 12-week progression started — this is week 1"
+      loadSession()
+    }
+  }
+
+  /** Take this exercise off the progression from this week on, keeping this week's sets × reps. */
+  fun stopLinear12(exerciseIndex: Int) {
+    val ex = _state.value.exercises.getOrNull(exerciseIndex) ?: return
+    viewModelScope.launch {
+      flushPendingSaves()
+      repo.stopLinear12(
+        programId = cachedProgramId, dayNumber = cachedDayNumber, orderIndex = ex.exercise.orderIndex,
+        exerciseName = ex.exercise.name, fromWeek = weekNumber
+      )
+      _cap3Message.value = "${ex.exercise.name}: 12-week progression stopped"
+      loadSession()
+    }
+  }
+
+  // ── Per-exercise weight autofill ("A" toggle) ─────────────────────────────
+
+  // Names (normalised) of exercises the user switched autofill OFF for. Keyed by name, like notes,
+  // so the choice follows the exercise from week to week. Absent = on, the default.
+  private val autofillPrefs = app.getSharedPreferences("exercise_autofill", Context.MODE_PRIVATE)
+  private val _autofillOff = MutableStateFlow(autofillPrefs.getStringSet("off", emptySet()).orEmpty().toSet())
+  val autofillOff: StateFlow<Set<String>> = _autofillOff.asStateFlow()
+
+  fun toggleExerciseAutofill(exerciseName: String) {
+  val key = exerciseKey(exerciseName)
+  val next = _autofillOff.value.let { if (key in it) it - key else it + key }
+  _autofillOff.value = next
+  autofillPrefs.edit().putStringSet("off", next).apply()
   }
 
   // ── Superset linking ──────────────────────────────────────────────────────
@@ -1213,24 +1386,33 @@ class SessionViewModel(app: Application, savedStateHandle: SavedStateHandle) : A
   private suspend fun saveSet(exerciseIndex: Int, setIndex: Int) {
   val exercise = _state.value.exercises.getOrNull(exerciseIndex) ?: return
   val set  = exercise.sets.getOrNull(setIndex) ?: return
-  val weight  = set.weightKg.toFloatOrNull()
-  val reps  = set.reps.toIntOrNull()
-  val weightRight = set.weightRight.toFloatOrNull()
-  val repsRight  = set.repsRight.toIntOrNull()
-  if (weight == null && reps == null && weightRight == null && repsRight == null) return
-  repo.upsertSetLog(SetLog(
-  workoutLogId = exercise.workoutLogId,
-  setNumber  = set.setNumber,
-  weightKg  = weight,
-  reps  = reps,
-  rpe  = set.rpe.toFloatOrNull(),
-  pct1rm  = set.pct1rm.toFloatOrNull(),
-  weightRightKg = weightRight,
-  repsRight  = repsRight
-  ))
+  val log = set.toSetLog(exercise.workoutLogId) ?: return
+  repo.upsertSetLog(log)
   recomputeFatigue()
   }
 
+}
+
+/** Normalised exercise name — keys per-exercise preferences (autofill toggle, athlete notes). */
+internal fun exerciseKey(exerciseName: String): String = exerciseName.trim().lowercase()
+
+/** The row as a stored log, or null when nothing has been entered in it. */
+internal fun SetRowState.toSetLog(workoutLogId: Long): SetLog? {
+  val w  = weightKg.toFloatOrNull()
+  val r  = reps.toIntOrNull()
+  val wRight = weightRight.toFloatOrNull()
+  val rRight = repsRight.toIntOrNull()
+  if (w == null && r == null && wRight == null && rRight == null) return null
+  return SetLog(
+  workoutLogId = workoutLogId,
+  setNumber  = setNumber,
+  weightKg  = w,
+  reps  = r,
+  rpe  = rpe.toFloatOrNull(),
+  pct1rm  = pct1rm.toFloatOrNull(),
+  weightRightKg = wRight,
+  repsRight  = rRight
+  )
 }
 
 /**

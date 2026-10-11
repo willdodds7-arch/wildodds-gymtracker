@@ -1,0 +1,82 @@
+# Hand-curated additions to the generated exercise index (exercises.tsv). Merged on load by
+# ExerciseIndex: a row whose canonical name already exists ADDS its aliases to that entry (the other
+# columns may be left blank); a new canonical becomes a new entry. Kept separate so regenerating
+# exercises.tsv with tools/build_exercise_index.py never loses these.
+#
+# Sources: names coaches actually write that the generated index missed (found by the import
+# accuracy benchmark), gym abbreviations, and the five non-English languages the reader detects.
+#
+# canonical	pattern	primary	equipment	unilateral	aliases	secondary
+#
+# ── new movements ───────────────────────────────────────────────────────────────
+EZ Bar Curl	ELBOW_FLEXION	BICEPS	BARBELL	0	ez curl,ez-bar curl,ez barbell curl,ezbar curl,ez bar curls,ez curls	FOREARMS
+Trap Bar Deadlift	HINGE	QUADS,GLUTES,HAMSTRINGS	BARBELL	0	hex bar deadlift,trap bar dl,hex bar dl,trapbar deadlift,hexbar deadlift,trap-bar deadlift,hex-bar deadlift	LOWER_BACK,TRAPS,UPPER_BACK,FOREARMS
+Chest Supported Row	HORIZONTAL_PULL	UPPER_BACK,LATS	DUMBBELL	0	chest-supported row,chest supported rows,incline bench row,seal row	BICEPS,REAR_DELT
+Medicine Ball Slam	CONDITIONING	ABS	BODYWEIGHT	0	med ball slam,med ball slams,ball slam,ball slams,slam ball,slam balls,medicine ball slams	LATS,FRONT_DELT
+Cable Woodchop	CORE	OBLIQUES	CABLE	0	cable chop,cable chops,wood chop,woodchop,woodchops,woodchopper,half kneeling cable chop,cable wood chop,cable woodchopper	ABS
+Tricep Extension	ELBOW_EXTENSION	TRICEPS	CABLE	0	triceps extension,tricep extensions,triceps extensions
+#
+# ── abbreviations and common names for existing movements ───────────────────────
+Lat Pulldown					lat pd,lpd,lat pull down,lat pulldowns,pulldown,pulldowns,lat pull,wide grip pulldown
+Leg Extension					leg ext,leg exts,quad extension,quad extensions,knee extension
+Leg Curl					ham curl,ham curls,hammy curl,hamstring curls
+Seated Dumbbell Overhead Press					seated dumbbell press,seated db press,seated db shoulder press,seated dumbbell shoulder press
+Incline Dumbbell Bench Press					incline db,incline dumbbell,incline db press,incline dumbbell press,incline db bench,incline dumbbell bench
+Paused Bench Press					pause bench,pause bench press,paused bench,pause bp
+Cable Chest Fly					cable flye,cable flyes,cable flys,cable flies,cable flyes,cable fly
+Box Back Squat					box squat,box squats
+Tempo Back Squat					tempo squat,tempo squats
+Incline Bench Press					incline bench,incline barbell bench,incline bb bench	
+Decline Bench Press					decline bench	
+Farmer Carry					farmers carry,farmer's carry,farmer carries,farmer walk
+#
+# ── German ──────────────────────────────────────────────────────────────────────
+Back Squat					kniebeuge,kniebeugen,langhantel kniebeuge
+Bench Press					bankdrücken,bankdruecken,bankdrucken
+Deadlift					kreuzheben
+Pull Up					klimmzüge,klimmzuege,klimmzug,klimmzuge
+Barbell Row					rudern,langhantelrudern,vorgebeugtes rudern
+Overhead Press					schulterdrücken,schulterdruecken,militärpresse,militaerpresse
+Lunge					ausfallschritte,ausfallschritt
+Leg Press					beinpresse
+Barbell Curl					bizepscurls,bizepscurl,bizeps curls,langhantel curls
+Romanian Deadlift					rumänisches kreuzheben,rumaenisches kreuzheben
+#
+# ── Spanish ─────────────────────────────────────────────────────────────────────
+Back Squat					sentadilla,sentadillas
+Bench Press					press de banca,press banca,press de pecho
+Deadlift					peso muerto
+Pull Up					dominadas,dominada
+Barbell Row					remo con barra,remo
+Overhead Press					press militar
+Lunge					zancadas,zancada
+Leg Press					prensa de piernas,prensa
+Barbell Curl					curl de biceps,curl de bíceps
+Romanian Deadlift					peso muerto rumano
+Dip					fondos,fondo,fondos en paralelas
+#
+# ── French ──────────────────────────────────────────────────────────────────────
+Bench Press					développé couché,developpe couche
+Deadlift					soulevé de terre,souleve de terre
+Pull Up					tractions,traction
+Barbell Row					rowing barre
+Overhead Press					développé militaire,developpe militaire
+Lunge					fentes,fente
+Leg Press					presse à cuisses,presse a cuisses
+#
+# ── Portuguese ──────────────────────────────────────────────────────────────────
+Back Squat					agachamento,agachamento livre
+Bench Press					supino,supino reto
+Deadlift					levantamento terra
+Pull Up					barra fixa
+Overhead Press					desenvolvimento
+Lunge					afundo
+Leg Press					leg press 45
+Barbell Curl					rosca direta
+#
+# ── Italian ─────────────────────────────────────────────────────────────────────
+Back Squat					accosciata
+Bench Press					panca piana
+Deadlift					stacco,stacco da terra
+Pull Up					trazioni
+Lunge					affondi

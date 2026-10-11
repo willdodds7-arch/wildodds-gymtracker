@@ -1,8 +1,8 @@
 # Open-Source Licenses
 
-**Last updated 13 July 2026**
+**Last updated 05 October 2026**
 
-Wild Odds Gym Tracker is open source (GPLv3) and is built on the open-source components
+Wild Odds Gym Tracker is open source (MIT License) and is built on the open-source components
 below. This list is generated from the app's resolved dependencies. Each component remains
 under its own license.
 
@@ -11,11 +11,11 @@ under its own license.
 - **androidx.activity:activity:1.9.0** — The Apache Software License, Version 2.0
 - **androidx.annotation:annotation-experimental:1.4.0** — The Apache Software License, Version 2.0
 - **androidx.annotation:annotation-jvm:1.8.0** — The Apache Software License, Version 2.0
+- **androidx.appcompat:appcompat-resources:1.6.1** — The Apache Software License, Version 2.0
+- **androidx.appcompat:appcompat:1.6.1** — The Apache Software License, Version 2.0
 - **androidx.arch.core:core-common:2.2.0** — The Apache Software License, Version 2.0
 - **androidx.arch.core:core-runtime:2.2.0** — The Apache Software License, Version 2.0
-- **androidx.asynclayoutinflater:asynclayoutinflater:1.0.0** — The Apache Software License, Version 2.0
 - **androidx.autofill:autofill:1.0.0** — The Apache Software License, Version 2.0
-- **androidx.browser:browser:1.8.0** — The Apache Software License, Version 2.0
 - **androidx.collection:collection-jvm:1.4.0** — The Apache Software License, Version 2.0
 - **androidx.collection:collection-ktx:1.4.0** — The Apache Software License, Version 2.0
 - **androidx.compose.animation:animation-android:1.6.8** — The Apache Software License, Version 2.0
@@ -58,12 +58,9 @@ under its own license.
 - **androidx.compose.ui:ui-util-desktop:1.6.8** — The Apache Software License, Version 2.0
 - **androidx.concurrent:concurrent-futures-ktx:1.1.0** — The Apache Software License, Version 2.0
 - **androidx.concurrent:concurrent-futures:1.1.0** — The Apache Software License, Version 2.0
-- **androidx.coordinatorlayout:coordinatorlayout:1.0.0** — The Apache Software License, Version 2.0
 - **androidx.core:core-ktx:1.13.1** — The Apache Software License, Version 2.0
 - **androidx.core:core-remoteviews:1.1.0** — The Apache Software License, Version 2.0
 - **androidx.core:core:1.13.1** — The Apache Software License, Version 2.0
-- **androidx.credentials:credentials-play-services-auth:1.2.2** — The Apache Software License, Version 2.0
-- **androidx.credentials:credentials:1.2.2** — The Apache Software License, Version 2.0
 - **androidx.cursoradapter:cursoradapter:1.0.0** — The Apache Software License, Version 2.0
 - **androidx.customview:customview-poolingcontainer:1.0.0** — The Apache Software License, Version 2.0
 - **androidx.customview:customview:1.0.0** — The Apache Software License, Version 2.0
@@ -75,10 +72,11 @@ under its own license.
 - **androidx.datastore:datastore-preferences-android:1.1.1** — The Apache Software License, Version 2.0
 - **androidx.datastore:datastore-preferences-core-jvm:1.1.1** — The Apache Software License, Version 2.0
 - **androidx.datastore:datastore-preferences-jvm:1.1.1** — The Apache Software License, Version 2.0
-- **androidx.documentfile:documentfile:1.0.0** — The Apache Software License, Version 2.0
 - **androidx.drawerlayout:drawerlayout:1.0.0** — The Apache Software License, Version 2.0
+- **androidx.emoji2:emoji2-views-helper:1.3.0** — The Apache Software License, Version 2.0
 - **androidx.emoji2:emoji2:1.3.0** — The Apache Software License, Version 2.0
-- **androidx.fragment:fragment:1.0.0** — The Apache Software License, Version 2.0
+- **androidx.exifinterface:exifinterface:1.0.0** — The Apache Software License, Version 2.0
+- **androidx.fragment:fragment:1.3.6** — The Apache Software License, Version 2.0
 - **androidx.glance:glance-appwidget-external-protobuf:1.1.0** — BSD-3-Clause
 - **androidx.glance:glance-appwidget-proto:1.1.0** — The Apache Software License, Version 2.0
 - **androidx.glance:glance-appwidget:1.1.0** — The Apache Software License, Version 2.0
@@ -86,126 +84,95 @@ under its own license.
 - **androidx.glance:glance:1.1.0** — The Apache Software License, Version 2.0
 - **androidx.health.connect:connect-client:1.1.0-alpha07** — The Apache Software License, Version 2.0
 - **androidx.interpolator:interpolator:1.0.0** — The Apache Software License, Version 2.0
-- **androidx.legacy:legacy-support-core-ui:1.0.0** — The Apache Software License, Version 2.0
-- **androidx.legacy:legacy-support-core-utils:1.0.0** — The Apache Software License, Version 2.0
-- **androidx.lifecycle:lifecycle-common-java8:2.8.3** — The Apache Software License, Version 2.0
-- **androidx.lifecycle:lifecycle-common-jvm:2.8.3** — The Apache Software License, Version 2.0
-- **androidx.lifecycle:lifecycle-livedata-core-ktx:2.8.3** — The Apache Software License, Version 2.0
-- **androidx.lifecycle:lifecycle-livedata-core:2.8.3** — The Apache Software License, Version 2.0
-- **androidx.lifecycle:lifecycle-livedata:2.8.3** — The Apache Software License, Version 2.0
-- **androidx.lifecycle:lifecycle-process:2.8.3** — The Apache Software License, Version 2.0
-- **androidx.lifecycle:lifecycle-runtime-android:2.8.3** — The Apache Software License, Version 2.0
-- **androidx.lifecycle:lifecycle-runtime-compose-android:2.8.3** — The Apache Software License, Version 2.0
+- **androidx.lifecycle:lifecycle-common-java8:2.8.2** — The Apache Software License, Version 2.0
+- **androidx.lifecycle:lifecycle-common-jvm:2.8.2** — The Apache Software License, Version 2.0
+- **androidx.lifecycle:lifecycle-livedata-core-ktx:2.8.2** — The Apache Software License, Version 2.0
+- **androidx.lifecycle:lifecycle-livedata-core:2.8.2** — The Apache Software License, Version 2.0
+- **androidx.lifecycle:lifecycle-livedata:2.8.2** — The Apache Software License, Version 2.0
+- **androidx.lifecycle:lifecycle-process:2.8.2** — The Apache Software License, Version 2.0
+- **androidx.lifecycle:lifecycle-runtime-android:2.8.2** — The Apache Software License, Version 2.0
+- **androidx.lifecycle:lifecycle-runtime-compose-android:2.8.2** — The Apache Software License, Version 2.0
 - **androidx.lifecycle:lifecycle-runtime-compose-desktop:2.8.2** — The Apache Software License, Version 2.0
 - **androidx.lifecycle:lifecycle-runtime-desktop:2.8.2** — The Apache Software License, Version 2.0
-- **androidx.lifecycle:lifecycle-runtime-ktx-android:2.8.3** — The Apache Software License, Version 2.0
-- **androidx.lifecycle:lifecycle-service:2.8.3** — The Apache Software License, Version 2.0
-- **androidx.lifecycle:lifecycle-viewmodel-android:2.8.3** — The Apache Software License, Version 2.0
-- **androidx.lifecycle:lifecycle-viewmodel-compose-android:2.8.3** — The Apache Software License, Version 2.0
+- **androidx.lifecycle:lifecycle-runtime-ktx-android:2.8.2** — The Apache Software License, Version 2.0
+- **androidx.lifecycle:lifecycle-service:2.8.2** — The Apache Software License, Version 2.0
+- **androidx.lifecycle:lifecycle-viewmodel-android:2.8.2** — The Apache Software License, Version 2.0
+- **androidx.lifecycle:lifecycle-viewmodel-compose-android:2.8.2** — The Apache Software License, Version 2.0
 - **androidx.lifecycle:lifecycle-viewmodel-compose-desktop:2.8.2** — The Apache Software License, Version 2.0
 - **androidx.lifecycle:lifecycle-viewmodel-desktop:2.8.2** — The Apache Software License, Version 2.0
-- **androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.3** — The Apache Software License, Version 2.0
-- **androidx.lifecycle:lifecycle-viewmodel-savedstate:2.8.3** — The Apache Software License, Version 2.0
-- **androidx.lifecycle:lifecycle-viewmodel:2.8.3** — The Apache Software License, Version 2.0
-- **androidx.localbroadcastmanager:localbroadcastmanager:1.0.0** — The Apache Software License, Version 2.0
+- **androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.2** — The Apache Software License, Version 2.0
+- **androidx.lifecycle:lifecycle-viewmodel-savedstate:2.8.2** — The Apache Software License, Version 2.0
+- **androidx.lifecycle:lifecycle-viewmodel:2.8.2** — The Apache Software License, Version 2.0
+- **androidx.loader:loader:1.0.0** — The Apache Software License, Version 2.0
 - **androidx.multidex:multidex:2.0.1** — The Apache Software License, Version 2.0
 - **androidx.navigation:navigation-common-ktx:2.7.7** — The Apache Software License, Version 2.0
 - **androidx.navigation:navigation-common:2.7.7** — The Apache Software License, Version 2.0
 - **androidx.navigation:navigation-compose:2.7.7** — The Apache Software License, Version 2.0
 - **androidx.navigation:navigation-runtime-ktx:2.7.7** — The Apache Software License, Version 2.0
 - **androidx.navigation:navigation-runtime:2.7.7** — The Apache Software License, Version 2.0
-- **androidx.print:print:1.0.0** — The Apache Software License, Version 2.0
 - **androidx.profileinstaller:profileinstaller:1.3.1** — The Apache Software License, Version 2.0
+- **androidx.resourceinspection:resourceinspection-annotation:1.0.1** — The Apache Software License, Version 2.0
 - **androidx.room:room-common:2.6.1** — The Apache Software License, Version 2.0
 - **androidx.room:room-ktx:2.6.1** — The Apache Software License, Version 2.0
 - **androidx.room:room-runtime:2.6.1** — The Apache Software License, Version 2.0
 - **androidx.savedstate:savedstate-ktx:1.2.1** — The Apache Software License, Version 2.0
 - **androidx.savedstate:savedstate:1.2.1** — The Apache Software License, Version 2.0
-- **androidx.slidingpanelayout:slidingpanelayout:1.0.0** — The Apache Software License, Version 2.0
 - **androidx.sqlite:sqlite-framework:2.4.0** — The Apache Software License, Version 2.0
 - **androidx.sqlite:sqlite:2.4.0** — The Apache Software License, Version 2.0
 - **androidx.startup:startup-runtime:1.1.1** — The Apache Software License, Version 2.0
-- **androidx.swiperefreshlayout:swiperefreshlayout:1.0.0** — The Apache Software License, Version 2.0
 - **androidx.tracing:tracing:1.0.0** — The Apache Software License, Version 2.0
+- **androidx.vectordrawable:vectordrawable-animated:1.1.0** — The Apache Software License, Version 2.0
+- **androidx.vectordrawable:vectordrawable:1.1.0** — The Apache Software License, Version 2.0
 - **androidx.versionedparcelable:versionedparcelable:1.1.1** — The Apache Software License, Version 2.0
 - **androidx.viewpager:viewpager:1.0.0** — The Apache Software License, Version 2.0
 - **androidx.work:work-runtime-ktx:2.9.1** — The Apache Software License, Version 2.0
 - **androidx.work:work-runtime:2.9.1** — The Apache Software License, Version 2.0
-- **co.touchlab:kermit-android-debug:2.0.4** — The Apache Software License, Version 2.0
-- **co.touchlab:kermit-core-android-debug:2.0.4** — The Apache Software License, Version 2.0
-- **co.touchlab:kermit-core-jvm:2.0.4** — The Apache Software License, Version 2.0
-- **co.touchlab:kermit-jvm:2.0.4** — The Apache Software License, Version 2.0
-- **com.google.android.gms:play-services-auth-api-phone:18.0.1** — Android Software Development Kit License
-- **com.google.android.gms:play-services-auth-base:18.0.4** — Android Software Development Kit License
-- **com.google.android.gms:play-services-auth:20.7.0** — Android Software Development Kit License
-- **com.google.android.gms:play-services-base:18.0.1** — Android Software Development Kit License
-- **com.google.android.gms:play-services-basement:18.2.0** — Android Software Development Kit License
-- **com.google.android.gms:play-services-fido:20.1.0** — Android Software Development Kit License
-- **com.google.android.gms:play-services-tasks:18.0.1** — Android Software Development Kit License
-- **com.google.android.libraries.identity.googleid:googleid:1.1.0** — Android Software Development Kit License
+- **com.google.android.datatransport:transport-api:2.2.1** — The Apache Software License, Version 2.0
+- **com.google.android.datatransport:transport-backend-cct:2.3.3** — The Apache Software License, Version 2.0
+- **com.google.android.datatransport:transport-runtime:2.2.6** — The Apache Software License, Version 2.0
+- **com.google.android.gms:play-services-base:18.5.0** — Android Software Development Kit License
+- **com.google.android.gms:play-services-basement:18.4.0** — Android Software Development Kit License
+- **com.google.android.gms:play-services-mlkit-text-recognition-common:19.1.0** — ML Kit Terms of Service
+- **com.google.android.gms:play-services-mlkit-text-recognition:19.0.1** — ML Kit Terms of Service
+- **com.google.android.gms:play-services-tasks:18.2.0** — Android Software Development Kit License
+- **com.google.android.odml:image:1.0.0-beta1** — Android Software Development Kit License
 - **com.google.code.findbugs:jsr305:3.0.2** — The Apache Software License, Version 2.0
 - **com.google.code.gson:gson:2.11.0** — Apache-2.0
 - **com.google.errorprone:error_prone_annotations:2.27.0** — Apache 2.0
+- **com.google.firebase:firebase-annotations:16.0.0** — The Apache Software License, Version 2.0
+- **com.google.firebase:firebase-components:16.1.0** — The Apache Software License, Version 2.0
+- **com.google.firebase:firebase-encoders-json:17.1.0** — The Apache Software License, Version 2.0
+- **com.google.firebase:firebase-encoders:16.1.0** — The Apache Software License, Version 2.0
 - **com.google.guava:failureaccess:1.0.1** — The Apache Software License, Version 2.0
 - **com.google.guava:guava:31.1-android** — Apache License, Version 2.0
 - **com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava** — The Apache Software License, Version 2.0
 - **com.google.j2objc:j2objc-annotations:1.3** — The Apache Software License, Version 2.0
-- **com.russhwolf:multiplatform-settings-android-debug:1.1.1** — The Apache Software License, Version 2.0
-- **com.russhwolf:multiplatform-settings-coroutines-android-debug:1.1.1** — The Apache Software License, Version 2.0
-- **com.russhwolf:multiplatform-settings-coroutines-jvm:1.1.1** — The Apache Software License, Version 2.0
-- **com.russhwolf:multiplatform-settings-jvm:1.1.1** — The Apache Software License, Version 2.0
-- **com.russhwolf:multiplatform-settings-no-arg-android-debug:1.1.1** — The Apache Software License, Version 2.0
-- **com.russhwolf:multiplatform-settings-no-arg-jvm:1.1.1** — The Apache Software License, Version 2.0
-- **com.soywiz.korlibs.krypto:krypto-jvm:4.0.10** — MIT
+- **com.google.mlkit:common:18.11.0** — ML Kit Terms of Service
+- **com.google.mlkit:text-recognition-bundled-common:17.0.0** — ML Kit Terms of Service
+- **com.google.mlkit:text-recognition:16.0.1** — ML Kit Terms of Service
+- **com.google.mlkit:vision-common:17.3.0** — ML Kit Terms of Service
+- **com.google.mlkit:vision-interfaces:16.3.0** — ML Kit Terms of Service
 - **com.squareup.okhttp3:okhttp:4.12.0** — The Apache Software License, Version 2.0
-- **com.squareup.okio:okio-jvm:3.7.0** — The Apache Software License, Version 2.0
+- **com.squareup.okio:okio-jvm:3.6.0** — The Apache Software License, Version 2.0
 - **com.tom-roush:pdfbox-android:2.0.27.0** — The Apache Software License, Version 2.0
-- **com.typesafe:config:1.4.3** — Apache-2.0
-- **io.github.jan-tennert.supabase:functions-kt-android-debug:2.5.4** — MIT License
-- **io.github.jan-tennert.supabase:functions-kt-jvm:2.5.4** — MIT License
-- **io.github.jan-tennert.supabase:gotrue-kt-android-debug:2.5.4** — MIT License
-- **io.github.jan-tennert.supabase:gotrue-kt-jvm:2.5.4** — MIT License
-- **io.github.jan-tennert.supabase:postgrest-kt-android-debug:2.5.4** — MIT License
-- **io.github.jan-tennert.supabase:postgrest-kt-jvm:2.5.4** — MIT License
-- **io.github.jan-tennert.supabase:supabase-kt-android-debug:2.5.4** — MIT License
-- **io.github.jan-tennert.supabase:supabase-kt-jvm:2.5.4** — MIT License
-- **io.ktor:ktor-client-content-negotiation-jvm:2.3.12** — The Apache Software License, Version 2.0
-- **io.ktor:ktor-client-core-jvm:2.3.12** — The Apache Software License, Version 2.0
-- **io.ktor:ktor-client-okhttp-jvm:2.3.12** — The Apache Software License, Version 2.0
-- **io.ktor:ktor-events-jvm:2.3.12** — The Apache Software License, Version 2.0
-- **io.ktor:ktor-http-cio-jvm:2.3.12** — The Apache Software License, Version 2.0
-- **io.ktor:ktor-http-jvm:2.3.12** — The Apache Software License, Version 2.0
-- **io.ktor:ktor-io-jvm:2.3.12** — The Apache Software License, Version 2.0
-- **io.ktor:ktor-network-jvm:2.3.12** — The Apache Software License, Version 2.0
-- **io.ktor:ktor-serialization-jvm:2.3.12** — The Apache Software License, Version 2.0
-- **io.ktor:ktor-serialization-kotlinx-json-jvm:2.3.12** — The Apache Software License, Version 2.0
-- **io.ktor:ktor-serialization-kotlinx-jvm:2.3.12** — The Apache Software License, Version 2.0
-- **io.ktor:ktor-server-cio-jvm:2.3.12** — The Apache Software License, Version 2.0
-- **io.ktor:ktor-server-core-jvm:2.3.12** — The Apache Software License, Version 2.0
-- **io.ktor:ktor-server-host-common-jvm:2.3.12** — The Apache Software License, Version 2.0
-- **io.ktor:ktor-utils-jvm:2.3.12** — The Apache Software License, Version 2.0
-- **io.ktor:ktor-websocket-serialization-jvm:2.3.12** — The Apache Software License, Version 2.0
-- **io.ktor:ktor-websockets-jvm:2.3.12** — The Apache Software License, Version 2.0
+- **javax.inject:javax.inject:1** — The Apache Software License, Version 2.0
 - **org.bouncycastle:bcpkix-jdk15to18:1.72** — Bouncy Castle Licence
 - **org.bouncycastle:bcprov-jdk15to18:1.72** — Bouncy Castle Licence
 - **org.bouncycastle:bcutil-jdk15to18:1.72** — Bouncy Castle Licence
 - **org.checkerframework:checker-qual:3.12.0** — The MIT License
-- **org.fusesource.jansi:jansi:2.4.1** — Apache License, Version 2.0
 - **org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.9.22** — The Apache License, Version 2.0
 - **org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.22** — The Apache License, Version 2.0
-- **org.jetbrains.kotlin:kotlin-reflect:2.0.0** — The Apache License, Version 2.0
-- **org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.0** — The Apache License, Version 2.0
-- **org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.0** — The Apache License, Version 2.0
-- **org.jetbrains.kotlin:kotlin-stdlib:2.0.0** — The Apache License, Version 2.0
-- **org.jetbrains.kotlinx:atomicfu-jvm:0.25.0** — The Apache Software License, Version 2.0
+- **org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.10** — The Apache License, Version 2.0
+- **org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10** — The Apache License, Version 2.0
+- **org.jetbrains.kotlin:kotlin-stdlib:1.9.24** — The Apache License, Version 2.0
 - **org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1** — The Apache Software License, Version 2.0
 - **org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.8.1** — The Apache Software License, Version 2.0
 - **org.jetbrains.kotlinx:kotlinx-coroutines-guava:1.8.1** — The Apache Software License, Version 2.0
-- **org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.8.1** — The Apache Software License, Version 2.0
-- **org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:1.8.1** — The Apache Software License, Version 2.0
 - **org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.8.1** — The Apache Software License, Version 2.0
-- **org.jetbrains.kotlinx:kotlinx-datetime-jvm:0.6.0** — The Apache License, Version 2.0
 - **org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.6.3** — The Apache Software License, Version 2.0
 - **org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.6.3** — The Apache Software License, Version 2.0
 - **org.jetbrains:annotations:23.0.0** — The Apache Software License, Version 2.0
-- **org.slf4j:slf4j-api:1.7.36** — MIT License
+
+## Fonts and media
+
+- **Space Grotesk (fonts in res/font)** - SIL Open Font License 1.1 - Copyright 2020 The Space Grotesk Project Authors

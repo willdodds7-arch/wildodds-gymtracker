@@ -35,12 +35,9 @@ source is open, so you can verify exactly what it does.
 
 ## Privacy in one paragraph
 
-The app collects **nothing** and has no backend. The only time anything leaves your device is if
-**you** add your own AI provider key and use the optional AI-assisted import — then, and only then,
-the specific program you're importing is sent to that provider (Anthropic) to structure it. The
-default importer is fully on-device. An in-app "usage statistics" toggle is off by default and, even
-when on, only records events locally (there is no server to receive them). See
-[`legal/privacy-policy.md`](legal/privacy-policy.md).
+The app collects **nothing**, has no backend, and has **no internet permission** — Android itself
+stops it (and every library in it) from reaching the network. Imports, including reading text from
+screenshots, run on the device. See [`legal/privacy-policy.md`](legal/privacy-policy.md).
 
 ## Building from source
 
@@ -60,8 +57,8 @@ The installable debug APK lands at
 `assembleOfflineRelease` builds a minified (R8) release. Signing is read from a **gitignored**
 `keystore.properties` (or CI env vars); without it the release falls back to debug signing so you
 can smoke-test R8 locally (that artifact is **not** Play-uploadable). See
-[`docs/launch-runbook.md`](docs/launch-runbook.md) and
-[`docs/play-store.md`](docs/play-store.md) for signing and store submission.
+[`launch-kit/`](launch-kit/) (start with its README) and
+[`launch-kit/CHECKLIST.md`](launch-kit/CHECKLIST.md) for signing and store submission.
 
 ## Tests
 

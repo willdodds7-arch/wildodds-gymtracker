@@ -19,15 +19,125 @@ class DefaultProgramCatalogueAssetTest {
     val names = all.map { it.name }
     assertTrue("Strength Formula present", "Strength Formula" in names)
     assertTrue("Wild Odds Split present", "Wild Odds Split" in names)
-    assertTrue("5/3/1 present", "5/3/1 (Jim Wendler)" in names)
-    assertTrue("Candito bench present", "Candito 6-Week (Advanced Bench Hybrid)" in names)
+    assertTrue("wave strength present", "Wave Strength 5s-3s-1s" in names)
+    assertTrue("bench hybrid present", "6-Week Bench-Focus Hybrid" in names)
     assertTrue("Russian present", "Russian Squat Routine" in names)
-    assertTrue("Calgary present", "Calgary Barbell 8-Week (adapted)" in names)
+    assertTrue("powerlifting block present", "8-Week Powerlifting Block" in names)
     assertTrue("Aaron's Oly split present", "Aaron's 5 Day Oly Split" in names)
-    assertTrue("Ed Coen Program present", "Ed Coen Program" in names)
+    assertTrue("powerbuilding present", "Top-Set Powerbuilding 5-Day" in names)
     assertTrue("5x Upper Lower present", "5x Upper Lower" in names)
     assertTrue("5x Bro Split 2.0 present", "5x Bro Split 2.0" in names)
-    assertEquals(10, all.size)
+    assertTrue("Carpark Bodybuilding present", "Carpark Bodybuilding" in names)
+    assertTrue("Silver-Era Space Marine present", "Silver-Era Space Marine" in names)
+    assertTrue("Bronze Era Basics present", "Bronze Era Basics" in names)
+    assertTrue("JPShuru x V1NLAND present", "JPShuru x V1NLAND" in names)
+    assertTrue("JPShuru 3x2 present", "JPShuru x V1NLAND + 3x2 days per week" in names)
+    assertEquals(15, all.size)
+  }
+
+  @Test
+  fun jpShuru3x2_regroupsTheSameExercisesIntoThreeSessionsTwice() {
+    val all = DefaultProgramCatalogue.load(context)
+    val base = all.first { it.name == "JPShuru x V1NLAND" }
+    val p = all.first { it.name == "JPShuru x V1NLAND + 3x2 days per week" }
+    assertEquals(12, p.totalWeeks)
+    assertEquals(6, p.daysPerWeek)
+    val week1 = p.sessions.filter { it.weekNumber == 1 }.sortedBy { it.dayNumber }
+    assertEquals(
+      listOf("Day 1 - Chest, Arms & Abs 1", "Day 2 - Back & Shoulders 1", "Day 3 - Legs: Squat",
+             "Day 4 - Chest, Arms & Abs 2", "Day 5 - Back & Shoulders 2", "Day 6 - Legs: Hinge"),
+      week1.map { it.name }
+    )
+    // Same exercises as the original, each exactly once per week.
+    fun names(s: List<ParsedSession>) = s.flatMap { it.exercises.map { e -> e.name } }.sorted()
+    assertEquals(names(base.sessions.filter { it.weekNumber == 1 }), names(week1))
+    // Leg days unchanged.
+    assertEquals(week1[2].exercises.map { it.name },
+                 base.sessions.first { it.weekNumber == 1 && it.name == "Day 3 - Legs: Squat" }.exercises.map { it.name })
+    // At most one 12-week progression lift per session.
+    val lp = com.wildodds.gymtracker.data.builder.TwelveWeekLinear.MODIFIER
+    assertTrue(week1.all { s -> s.exercises.count { lp in it.modifiers } <= 1 })
+    assertEquals(5, week1.sumOf { s -> s.exercises.count { lp in it.modifiers } })
+  }
+
+  @Test
+  fun jpShuruV1nland_runsItsMainLiftsOnTheTwelveWeekProgression() {
+    val p = DefaultProgramCatalogue.load(context).first { it.name == "JPShuru x V1NLAND" }
+    val lp = com.wildodds.gymtracker.data.builder.TwelveWeekLinear.MODIFIER
+    assertEquals(12, p.totalWeeks)
+    assertEquals(1, p.repeatWeeks) // every week is written out, since the main lifts differ by week
+    assertEquals(6, p.daysPerWeek)
+    assertEquals(72, p.sessions.size)
+    val week1 = p.sessions.filter { it.weekNumber == 1 }.sortedBy { it.dayNumber }
+    assertEquals(
+      listOf("Day 1 - Chest", "Day 2 - Back", "Day 3 - Legs: Squat", "Day 4 - Arms & Abs",
+             "Day 5 - Shoulders", "Day 6 - Legs: Hinge"),
+      week1.map { it.name }
+    )
+    val progressed = p.sessions.flatMap { s -> s.exercises.filter { lp in it.modifiers }.map { s.weekNumber to it } }
+    assertEquals(setOf("Incline Bench Press", "Pull Up", "Back Squat", "Seated Overhead Press", "Deadlift"),
+                 progressed.map { it.second.name }.toSet())
+    // Week 6 of the squat is 5 x 8; week 9 is 3 x 5 with the weight-jump note.
+    fun squat(week: Int) = progressed.first { it.first == week && it.second.name == "Back Squat" }.second
+    assertEquals(5, squat(6).sets); assertEquals("8", squat(6).repsTarget)
+    assertEquals(3, squat(9).sets)
+    assertTrue(squat(9).notes.startsWith(com.wildodds.gymtracker.data.builder.TwelveWeekLinear.NOTE_PREFIX))
+    assertTrue("keeps the coach's own note", squat(9).notes.endsWith("Full depth."))
+    // Accessories are the same every week.
+    val dips = p.sessions.flatMap { it.exercises }.filter { it.name == "Dip" }
+    assertEquals(12, dips.size)
+    assertTrue(dips.all { it.sets == 3 && it.repsTarget == "20/15/15" })
+  }
+
+  @Test
+  fun bronzeEraBasics_isThreeDaysOverEightWeeks_withRirConvertedToRpe() {
+    val p = DefaultProgramCatalogue.load(context).first { it.name == "Bronze Era Basics" }
+    assertEquals(8, p.totalWeeks)
+    assertEquals(8, p.repeatWeeks)
+    assertEquals(3, p.daysPerWeek)
+    assertTrue("prescribes RPE", p.trackRpe)
+    val week1 = p.sessions.filter { it.weekNumber == 1 }
+    assertEquals(listOf("Push & Zercher", "Flex & Squat", "Bench & Pull"), week1.map { it.name })
+    // The source prescribes RIR; the catalogue stores RPE = 10 - RIR and restates the RIR in the note.
+    val bench = week1.first { it.name == "Bench & Pull" }.exercises.first()
+    assertEquals("Barbell Bench Press", bench.name)
+    assertEquals(5, bench.sets)
+    assertEquals("4-8", bench.repsTarget)
+    assertEquals("8", bench.rpeTarget) // 2 RIR
+    assertTrue("note keeps the original RIR", bench.notes.contains("2 RIR"))
+    val everyExercise = week1.flatMap { it.exercises }
+    assertTrue("every exercise carries an RPE target", everyExercise.all { it.rpeTarget.isNotBlank() })
+    assertTrue("every exercise restates its RIR", everyExercise.all { it.notes.contains("RIR") })
+  }
+
+  @Test
+  fun carparkBodybuilding_isSixDaysOverEightWeeks() {
+    val p = DefaultProgramCatalogue.load(context).first { it.name == "Carpark Bodybuilding" }
+    assertEquals(8, p.totalWeeks)
+    assertEquals(8, p.repeatWeeks) // single-week shape: block_weeks drives the repeat
+    assertEquals(6, p.daysPerWeek)
+    val week1 = p.sessions.filter { it.weekNumber == 1 }
+    assertEquals(6, week1.size)
+    assertTrue("opens on the posterior chain day", week1.first().name.startsWith("Sunday"))
+    // The Tuesday/Wednesday/Thursday days each fold two sessions together.
+    val wednesday = week1.first { it.name.startsWith("Wednesday") }
+    assertEquals(14, wednesday.exercises.size)
+  }
+
+  @Test
+  fun silverEraSpaceMarine_isFourDaysOverEightWeeks_andTracksRpe() {
+    val p = DefaultProgramCatalogue.load(context).first { it.name == "Silver-Era Space Marine" }
+    assertEquals(8, p.totalWeeks)
+    assertEquals(8, p.repeatWeeks)
+    assertEquals(4, p.daysPerWeek)
+    assertTrue("prescribes RPE", p.trackRpe)
+    val week1 = p.sessions.filter { it.weekNumber == 1 }
+    assertEquals(listOf("Confirmed Sasquatch (D1)", "Bro Day (D2)", "Quads, Abs & Calves (D3)", "IRL Space Marine (D4)"),
+                 week1.map { it.name })
+    val zercher = week1.first().exercises.first { it.name == "Zercher Deadlifts" }
+    assertEquals(1, zercher.sets)
+    assertEquals("10-15", zercher.repsTarget)
+    assertEquals("9", zercher.rpeTarget)
   }
 
   @Test
@@ -56,7 +166,7 @@ class DefaultProgramCatalogueAssetTest {
 
   @Test
   fun fiveThreeOne_wavesItsPercentagesWeekByWeek_perSet() {
-    val p = DefaultProgramCatalogue.load(context).first { it.name == "5/3/1 (Jim Wendler)" }
+    val p = DefaultProgramCatalogue.load(context).first { it.name == "Wave Strength 5s-3s-1s" }
     assertEquals(4, p.totalWeeks)
     assertEquals(1, p.repeatWeeks) // per-week shape: weeks are materialised as authored
     val benchW1 = p.sessions.first { it.weekNumber == 1 && it.name == "Bench Day" }.exercises.first()
@@ -82,12 +192,12 @@ class DefaultProgramCatalogueAssetTest {
   }
 
   @Test
-  fun canditoAndCalgary_carryTheirWeeks() {
+  fun benchHybridAndPowerliftingBlock_carryTheirWeeks() {
     val all = DefaultProgramCatalogue.load(context)
-    assertEquals(6, all.first { it.name.startsWith("Candito") }.totalWeeks)
-    assertEquals(8, all.first { it.name.startsWith("Calgary") }.totalWeeks)
-    // Calgary week 1 vs week 6: same lift, different prescription.
-    val cal = all.first { it.name.startsWith("Calgary") }
+    assertEquals(6, all.first { it.name == "6-Week Bench-Focus Hybrid" }.totalWeeks)
+    assertEquals(8, all.first { it.name == "8-Week Powerlifting Block" }.totalWeeks)
+    // Powerlifting block week 1 vs week 6: same lift, different prescription.
+    val cal = all.first { it.name == "8-Week Powerlifting Block" }
     val sqW1 = cal.sessions.first { it.weekNumber == 1 }.exercises.first { it.name == "Back Squat" }
     val sqW6 = cal.sessions.first { it.weekNumber == 6 }.exercises.first { it.name == "Back Squat" }
     assertTrue(sqW1.pct1rmTarget != sqW6.pct1rmTarget)

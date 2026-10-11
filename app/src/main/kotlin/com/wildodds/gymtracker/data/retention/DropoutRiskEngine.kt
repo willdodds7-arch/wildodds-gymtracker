@@ -110,5 +110,4 @@ object DropoutRiskEngine {
     DropoutRisk.LOW -> "You're on track — nice work."
   }
 
-  internal fun pctOf(part: Float, whole: Float): Int = if (whole == 0f) 0 else ((part / whole) * 100).roundToInt()
 }

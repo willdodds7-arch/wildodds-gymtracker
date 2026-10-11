@@ -58,9 +58,6 @@ fun CreateProgramScreen(
   var showExcelOptions by remember { mutableStateOf(false) }
   var importError by remember { mutableStateOf<String?>(null) }
 
-  val filePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-  uri?.let { homeVm.importAnyFile(it) }
-  }
   val templateSaver = rememberLauncherForActivityResult(
   ActivityResultContracts.CreateDocument("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
   ) { uri -> uri?.let { homeVm.saveTemplateToUri(it) } }
@@ -113,17 +110,10 @@ fun CreateProgramScreen(
   onDismiss = { homeVm.clearImportState() }
   )
   }
-  val aiReviewState = importState as? com.wildodds.gymtracker.ui.home.ImportState.AiReview
-  if (aiReviewState != null) {
-  com.wildodds.gymtracker.ui.home.AiProgramReviewSheet(
-  initial  = aiReviewState.program,
-  onConfirm = { prog, name, weeks, activate -> homeVm.confirmAiImport(prog, name, weeks, activate) },
-  onDismiss = { homeVm.clearImportState() }
-  )
-  }
   if (showExcelOptions) {
   com.wildodds.gymtracker.ui.home.ExcelOptionsSheet(
-  onUpload  = { showExcelOptions = false; filePicker.launch("*/*") },
+  // The on-device importer reads spreadsheets, PDFs, screenshots and text, with a review step.
+  onUpload  = { showExcelOptions = false; navController.navigate("import_program") },
   onDownloadTemplate = { showExcelOptions = false; templateSaver.launch("WildOdds_GymTracker_Template.xlsx") },
   onDismiss = { showExcelOptions = false },
   onBulkUpload = { showExcelOptions = false; bulkPicker.launch("*/*") },
@@ -349,7 +339,7 @@ private fun SetupStep(
   Row(modifier = Modifier.padding(14.dp), horizontalArrangement = Arrangement.spacedBy(8.dp),
   verticalAlignment = Alignment.CenterVertically) {
   Icon(Icons.Default.FitnessCenter, null, tint = LocalAccentColor.current, modifier = Modifier.size(20.dp))
-  Text("\"${state.programName}\"  ·  ${state.daysPerWeek} days/week  ·  ${state.numberOfWeeks} weeks",
+  Text("\"${state.programName}\"  ·  ${state.daysPerWeek} days/week  ·  ${state.numberOfWeeks} week${if (state.numberOfWeeks != 1) "s" else ""}",
   color = LocalAccentColor.current, fontWeight = FontWeight.Medium, fontSize = 13.sp)
   }
   }
@@ -464,12 +454,13 @@ private fun BuilderStep(state: CreateProgramState, vm: CreateProgramViewModel, o
   text  = {
   Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
   Text("\"$displayName\"", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-  Text("${state.daysPerWeek} days/week  ·  ${state.numberOfWeeks} weeks")
-  if (totalExercises > 0)
+  Text("${state.daysPerWeek} days/week  ·  ${state.numberOfWeeks} week${if (state.numberOfWeeks != 1) "s" else ""}")
+  if (totalExercises > 0) {
   Text("$totalExercises exercise${if (totalExercises != 1) "s" else ""} defined")
-  else
+  } else {
   Text("No exercises yet - you can add them later in each session.",
   color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
+  }
   if (confirmActivate)
   Text("This will become your active program.",
   color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
@@ -499,7 +490,7 @@ private fun BuilderStep(state: CreateProgramState, vm: CreateProgramViewModel, o
   Column(modifier = Modifier.weight(1f)) {
   Text(state.programName.ifBlank { "My Program" }, fontWeight = FontWeight.Bold, fontSize = 18.sp,
   color = MaterialTheme.colorScheme.onBackground)
-  Text("Design week 1 - repeated for ${state.numberOfWeeks} weeks",
+  Text("Design week 1 - repeated for ${state.numberOfWeeks} week${if (state.numberOfWeeks != 1) "s" else ""}",
   color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelMedium)
   }
   }

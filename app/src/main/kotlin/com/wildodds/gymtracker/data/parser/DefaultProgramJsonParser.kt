@@ -96,8 +96,17 @@ class DefaultProgramJsonParser(private val context: Context) {
     @SerializedName("target_reps") val targetReps: String? = null,
     @SerializedName("percent_1rm") val percent1rm: String? = null,
     val rpe: String? = null,
-    val notes: String? = null
-  )
+    val notes: String? = null,
+    /**
+     * "linear_12wk" puts this exercise on the 12-week linear progression
+     * ([com.wildodds.gymtracker.data.builder.TwelveWeekLinear]): its sets × reps and coach note then
+     * come from the week it lands in, and `sets` / `target_reps` here are ignored.
+     */
+    val progression: String? = null
+  ) {
+    val isLinear12: Boolean
+      get() = progression?.trim() == com.wildodds.gymtracker.data.builder.TwelveWeekLinear.MODIFIER
+  }
 }
 
 /** Map a JSON day to a [ParsedSession] for a given (1-based) week and day position. */
@@ -105,6 +114,18 @@ private fun DefaultProgramJsonParser.JsonDay.toParsedSession(weekNumber: Int, da
   val exercises = exercises
     .filter { it.name.isNotBlank() }
     .mapIndexed { i, ex ->
+      if (ex.isLinear12) {
+        val wp = com.wildodds.gymtracker.data.builder.TwelveWeekLinear.weekPlan(weekNumber - 1, startLoad = null)
+        return@mapIndexed ParsedExercise(
+          name = ex.name.trim(),
+          sets = wp.sets,
+          repsTarget = wp.reps.toString(),
+          notes = com.wildodds.gymtracker.data.builder.TwelveWeekLinear.mergeNotes(ex.notes?.trim().orEmpty(), wp.note),
+          orderIndex = i,
+          rpeTarget = ex.rpe?.trim().orEmpty(),
+          modifiers = listOf(com.wildodds.gymtracker.data.builder.TwelveWeekLinear.MODIFIER)
+        )
+      }
       ParsedExercise(
         name = ex.name.trim(),
         sets = ex.sets.coerceAtLeast(1),
@@ -131,10 +152,19 @@ internal fun DefaultProgramJsonParser.JsonBlock.toParsedProgram(index: Int): Par
 
   val perWeek = weeks.isNotEmpty()
 
+  // A single-week block normally stores week 1 and is repeated at import. One with a 12-week
+  // progression exercise can't be — its weeks differ — so it is written out week by week instead.
+  val expandWeeks = !perWeek && days.any { d -> d.exercises.any { it.isLinear12 } }
+  val singleWeekLength = if (blockWeeks > 0) blockWeeks else DefaultProgramJsonParser.DEFAULT_BLOCK_WEEKS
+
   val sessions: List<ParsedSession> =
     if (perWeek) {
       weeks.flatMapIndexed { wIdx, week ->
         week.days.mapIndexedNotNull { dayIdx, day -> day.toParsedSession(wIdx + 1, dayIdx) }
+      }
+    } else if (expandWeeks) {
+      (1..singleWeekLength).flatMap { week ->
+        days.mapIndexedNotNull { dayIdx, day -> day.toParsedSession(week, dayIdx) }
       }
     } else {
       days.mapIndexedNotNull { dayIdx, day -> day.toParsedSession(1, dayIdx) }
@@ -169,7 +199,7 @@ internal fun DefaultProgramJsonParser.JsonBlock.toParsedProgram(index: Int): Par
     daysPerWeek = daysPerWeek,
     split = split.trim(),
     style = style.trim(),
-    repeatWeeks = if (perWeek) 1 else weekCount,
+    repeatWeeks = if (perWeek || expandWeeks) 1 else weekCount,
     liftSwappable = liftSwappable
   )
 }

@@ -1,7 +1,7 @@
 {
   "library_version": "1.0",
   "author": "Wild Odds",
-  "program_count": 8,
+  "program_count": 15,
   "programs": [
     {
       "name": "Strength Formula",
@@ -477,12 +477,12 @@
       ]
     },
     {
-      "name": "5/3/1 (Jim Wendler)",
-      "author": "Jim Wendler",
+      "name": "Wave Strength 5s-3s-1s",
+      "author": "Wild Odds",
       "split": "4-Day Main Lift Split",
       "style": "Strength",
       "specialisation": "None",
-      "description": "Wendler's classic strength template: one main lift per day, three waved work sets, and an all-out AMRAP top set to drive progress. Cycles 5s week → 3s week → 5/3/1 week → deload. All loads are prescribed as percentages and prefill from YOUR 1RMs (set them in Profile) — the book runs off a Training Max of 90% of your true 1RM, and the numbers here are already converted. After each cycle, add 2.5 kg to upper-body and 5 kg to lower-body maxes and run it again.",
+      "description": "A classic percentage-wave strength template: one main lift per day, three waved work sets, and an all-out AMRAP top set to drive progress. Cycles a 5s week → 3s week → 5s/3s/1s week → deload. All loads are prescribed as percentages and prefill from YOUR 1RMs (set them in Profile) — the waves run off a Training Max of 90% of your true 1RM, and the numbers here are already converted. After each cycle, add 2.5 kg to upper-body and 5 kg to lower-body maxes and run it again.",
       "weeks": [
         {
           "name": "Week 1",
@@ -512,7 +512,7 @@
                   "target_reps": "10",
                   "percent_1rm": null,
                   "rpe": null,
-                  "notes": "Wendler's template: 25-50 quality reps of pulling."
+                  "notes": "25-50 quality reps of pulling."
                 },
                 {
                   "name": "Assistance — core or single-leg",
@@ -549,7 +549,7 @@
                   "target_reps": "10",
                   "percent_1rm": null,
                   "rpe": null,
-                  "notes": "Wendler's template: 25-50 quality reps of pulling."
+                  "notes": "25-50 quality reps of pulling."
                 },
                 {
                   "name": "Assistance — core or single-leg",
@@ -586,7 +586,7 @@
                   "target_reps": "10",
                   "percent_1rm": null,
                   "rpe": null,
-                  "notes": "Wendler's template: 25-50 quality reps of pulling."
+                  "notes": "25-50 quality reps of pulling."
                 },
                 {
                   "name": "Assistance — core or single-leg",
@@ -623,7 +623,7 @@
                   "target_reps": "10",
                   "percent_1rm": null,
                   "rpe": null,
-                  "notes": "Wendler's template: 25-50 quality reps of pulling."
+                  "notes": "25-50 quality reps of pulling."
                 },
                 {
                   "name": "Assistance — core or single-leg",
@@ -665,7 +665,7 @@
                   "target_reps": "10",
                   "percent_1rm": null,
                   "rpe": null,
-                  "notes": "Wendler's template: 25-50 quality reps of pulling."
+                  "notes": "25-50 quality reps of pulling."
                 },
                 {
                   "name": "Assistance — core or single-leg",
@@ -702,7 +702,7 @@
                   "target_reps": "10",
                   "percent_1rm": null,
                   "rpe": null,
-                  "notes": "Wendler's template: 25-50 quality reps of pulling."
+                  "notes": "25-50 quality reps of pulling."
                 },
                 {
                   "name": "Assistance — core or single-leg",
@@ -739,7 +739,7 @@
                   "target_reps": "10",
                   "percent_1rm": null,
                   "rpe": null,
-                  "notes": "Wendler's template: 25-50 quality reps of pulling."
+                  "notes": "25-50 quality reps of pulling."
                 },
                 {
                   "name": "Assistance — core or single-leg",
@@ -776,7 +776,7 @@
                   "target_reps": "10",
                   "percent_1rm": null,
                   "rpe": null,
-                  "notes": "Wendler's template: 25-50 quality reps of pulling."
+                  "notes": "25-50 quality reps of pulling."
                 },
                 {
                   "name": "Assistance — core or single-leg",
@@ -802,7 +802,7 @@
                   "target_reps": "5/3/1+",
                   "percent_1rm": "67.5/76.5/85.5%",
                   "rpe": null,
-                  "notes": "The 5/3/1 week: last set AMRAP — this is the money set. (= 75/85/95% of TM.)"
+                  "notes": "The 5s/3s/1s week: last set AMRAP — this is the money set. (= 75/85/95% of TM.)"
                 },
                 {
                   "name": "Overhead Press (Boring But Big)",
@@ -818,7 +818,7 @@
                   "target_reps": "10",
                   "percent_1rm": null,
                   "rpe": null,
-                  "notes": "Wendler's template: 25-50 quality reps of pulling."
+                  "notes": "25-50 quality reps of pulling."
                 },
                 {
                   "name": "Assistance — core or single-leg",
@@ -839,7 +839,7 @@
                   "target_reps": "5/3/1+",
                   "percent_1rm": "67.5/76.5/85.5%",
                   "rpe": null,
-                  "notes": "The 5/3/1 week: last set AMRAP — this is the money set. (= 75/85/95% of TM.)"
+                  "notes": "The 5s/3s/1s week: last set AMRAP — this is the money set. (= 75/85/95% of TM.)"
                 },
                 {
                   "name": "Deadlift (Boring But Big)",
@@ -855,7 +855,7 @@
                   "target_reps": "10",
                   "percent_1rm": null,
                   "rpe": null,
-                  "notes": "Wendler's template: 25-50 quality reps of pulling."
+                  "notes": "25-50 quality reps of pulling."
                 },
                 {
                   "name": "Assistance — core or single-leg",
@@ -876,7 +876,7 @@
                   "target_reps": "5/3/1+",
                   "percent_1rm": "67.5/76.5/85.5%",
                   "rpe": null,
-                  "notes": "The 5/3/1 week: last set AMRAP — this is the money set. (= 75/85/95% of TM.)"
+                  "notes": "The 5s/3s/1s week: last set AMRAP — this is the money set. (= 75/85/95% of TM.)"
                 },
                 {
                   "name": "Bench Press (Boring But Big)",
@@ -892,7 +892,7 @@
                   "target_reps": "10",
                   "percent_1rm": null,
                   "rpe": null,
-                  "notes": "Wendler's template: 25-50 quality reps of pulling."
+                  "notes": "25-50 quality reps of pulling."
                 },
                 {
                   "name": "Assistance — core or single-leg",
@@ -913,7 +913,7 @@
                   "target_reps": "5/3/1+",
                   "percent_1rm": "67.5/76.5/85.5%",
                   "rpe": null,
-                  "notes": "The 5/3/1 week: last set AMRAP — this is the money set. (= 75/85/95% of TM.)"
+                  "notes": "The 5s/3s/1s week: last set AMRAP — this is the money set. (= 75/85/95% of TM.)"
                 },
                 {
                   "name": "Back Squat (Boring But Big)",
@@ -929,7 +929,7 @@
                   "target_reps": "10",
                   "percent_1rm": null,
                   "rpe": null,
-                  "notes": "Wendler's template: 25-50 quality reps of pulling."
+                  "notes": "25-50 quality reps of pulling."
                 },
                 {
                   "name": "Assistance — core or single-leg",
@@ -963,7 +963,7 @@
                   "target_reps": "10",
                   "percent_1rm": null,
                   "rpe": null,
-                  "notes": "Wendler's template: 25-50 quality reps of pulling."
+                  "notes": "25-50 quality reps of pulling."
                 },
                 {
                   "name": "Assistance — core or single-leg",
@@ -992,7 +992,7 @@
                   "target_reps": "10",
                   "percent_1rm": null,
                   "rpe": null,
-                  "notes": "Wendler's template: 25-50 quality reps of pulling."
+                  "notes": "25-50 quality reps of pulling."
                 },
                 {
                   "name": "Assistance — core or single-leg",
@@ -1021,7 +1021,7 @@
                   "target_reps": "10",
                   "percent_1rm": null,
                   "rpe": null,
-                  "notes": "Wendler's template: 25-50 quality reps of pulling."
+                  "notes": "25-50 quality reps of pulling."
                 },
                 {
                   "name": "Assistance — core or single-leg",
@@ -1050,7 +1050,7 @@
                   "target_reps": "10",
                   "percent_1rm": null,
                   "rpe": null,
-                  "notes": "Wendler's template: 25-50 quality reps of pulling."
+                  "notes": "25-50 quality reps of pulling."
                 },
                 {
                   "name": "Assistance — core or single-leg",
@@ -1067,12 +1067,12 @@
       ]
     },
     {
-      "name": "Candito 6-Week (Advanced Bench Hybrid)",
-      "author": "Jonnie Candito",
-      "split": "Candito Upper/Lower - Bench Focus",
+      "name": "6-Week Bench-Focus Hybrid",
+      "author": "Wild Odds",
+      "split": "Upper/Lower - Bench Focus",
       "style": "Powerlifting",
       "specialisation": "Bench Press",
-      "description": "Jonnie Candito's free 6-week linear program in the Advanced Bench Press Hybrid layout - extra bench frequency on top of the upper/lower structure. The block waves from muscular conditioning (wk1-2) through a linear max-OT phase (wk3), heavy acclimation (wk4), high-intensity strength (wk5) and a peak/test week (wk6). Main lifts are prescribed as a %1RM each week, so set your Squat / Bench / Deadlift 1RMs in Profile and the app fills your working weights. Per-set schemes and the MR / back-off protocols are in each exercise's notes. Loads are percent-based and prefill from your bench (and squat/deadlift) 1RMs — set them in Profile.",
+      "description": "A 6-week linear block in a bench-focused hybrid layout - extra bench frequency on top of the upper/lower structure. The block waves from muscular conditioning (wk1-2) through a linear max-OT phase (wk3), heavy acclimation (wk4), high-intensity strength (wk5) and a peak/test week (wk6). Main lifts are prescribed as a %1RM each week, so set your Squat / Bench / Deadlift 1RMs in Profile and the app fills your working weights. Per-set schemes and the MR / back-off protocols are in each exercise's notes. Loads are percent-based and prefill from your bench (and squat/deadlift) 1RMs — set them in Profile.",
       "weeks": [
         {
           "days": [
@@ -1361,7 +1361,7 @@
                   "sets": 1,
                   "target_reps": "AMRAP (~10)",
                   "percent_1rm": "80%",
-                  "notes": "MR10 @ ~80%, then back-off triples: 10/8/5 sets of 3 by reps hit (Candito protocol)."
+                  "notes": "MR10 @ ~80%, then back-off triples: 10/8/5 sets of 3 by reps hit."
                 },
                 {
                   "name": "Deadlift Variation",
@@ -2347,12 +2347,12 @@
       ]
     },
     {
-      "name": "Calgary Barbell 8-Week (adapted)",
-      "author": "Adapted from Calgary Barbell",
+      "name": "8-Week Powerlifting Block",
+      "author": "Wild Odds",
       "split": "4-Day Powerlifting",
       "style": "Powerlifting",
       "specialisation": "None",
-      "description": "An adaptation of Calgary Barbell's free 8-week block: four days a week with squat ×3, bench ×4 and deadlift ×3 weekly across competition lifts and paused variations. Percent-based with RPE caps — weeks 1-4 build volume, 5-7 push intensity, week 8 tapers to openers. Loads prefill from your 1RMs in Profile. This is an adaptation of the spreadsheet's structure, not a copy — for Calgary Barbell's exact programming get their original sheet.",
+      "description": "An 8-week powerlifting block: four days a week with squat ×3, bench ×4 and deadlift ×3 weekly across competition lifts and paused variations. Percent-based with RPE caps — weeks 1-4 build volume, 5-7 push intensity, week 8 tapers to openers. Loads prefill from your 1RMs in Profile.",
       "weeks": [
         {
           "name": "Week 1",
@@ -3535,8 +3535,8 @@
       ]
     },
     {
-      "name": "Ed Coen Program",
-      "author": "",
+      "name": "Top-Set Powerbuilding 5-Day",
+      "author": "Wild Odds",
       "split": "5 Day Powerbuilding",
       "style": "Powerbuilding",
       "specialisation": "None",
@@ -4397,6 +4397,1644 @@
               "target_reps": "6-12",
               "percent_1rm": null,
               "notes": "'Bench Hook Curl' - assumed bench-hook hamstring curl; confirm."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Carpark Bodybuilding",
+      "author": "Wild Odds",
+      "split": "6-Day Body Part",
+      "style": "Hypertrophy",
+      "specialisation": "None",
+      "block_weeks": 8,
+      "description": "A six-day, old-time-strongman body-part split run Sunday through Friday. Zercher stones, Kelly snatches, rings and bands sit alongside the barbell, and the small stuff most programs skip - neck, forearms, tibialis, ankles - gets its own dedicated block. Tuesday, Wednesday and Thursday each carry two sessions (marked in the notes), so train them back to back or split them across the day. Exercises sharing a letter in the source are supersets; each one's note names its pair. Descending ladders like 20/15/12/8 mean one set per number - add load as the reps come down. Runs 8 weeks; add a little weight or a rep each week.",
+      "days": [
+        {
+          "name": "Sunday - Posterior Chain A",
+          "exercises": [
+            {
+              "name": "Zercher Stones",
+              "sets": 3,
+              "target_reps": "10",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Odd-object opener. Load the stone into the Zercher position and stand tall."
+            },
+            {
+              "name": "Hang Power Clean",
+              "sets": 3,
+              "target_reps": "6",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Explosive. End the set the moment bar speed drops off."
+            },
+            {
+              "name": "Zercher Deadlift",
+              "sets": 1,
+              "target_reps": "15",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "One long set of 15 - pick a weight you can hold in the crooks of the elbows the whole way."
+            },
+            {
+              "name": "Band Assisted Nordic Curls",
+              "sets": 3,
+              "target_reps": "12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Take only as much band assistance as you need to control the lowering."
+            },
+            {
+              "name": "Pull Up Variation",
+              "sets": 3,
+              "target_reps": "12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Your choice of grip - rotate it week to week."
+            },
+            {
+              "name": "Neck Bridge Pullovers",
+              "sets": 3,
+              "target_reps": "10",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Bridge on the upper back, pullover through a full arc. Build up slowly."
+            },
+            {
+              "name": "Jefferson Curl",
+              "sets": 3,
+              "target_reps": "10",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Light. Segment through the spine one vertebra at a time."
+            },
+            {
+              "name": "Side Bends",
+              "sets": 3,
+              "target_reps": "10",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Per side."
+            }
+          ]
+        },
+        {
+          "name": "Monday - Chest / Arms A",
+          "exercises": [
+            {
+              "name": "Kelly Snatch",
+              "sets": 3,
+              "target_reps": "5",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Technical opener while you are fresh."
+            },
+            {
+              "name": "Arched Floor Press",
+              "sets": 3,
+              "target_reps": "1/8/15",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Descending-load wave: a heavy single, then 8, then 15."
+            },
+            {
+              "name": "Pelican Curls / Bent Press Position Curls",
+              "sets": 4,
+              "target_reps": "10",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Superset C with Decline Ring Pushups."
+            },
+            {
+              "name": "Decline Ring Pushups",
+              "sets": 4,
+              "target_reps": "12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Superset C with Pelican Curls / Bent Press Position Curls."
+            },
+            {
+              "name": "Archer Ring Push Ups",
+              "sets": 3,
+              "target_reps": "12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Per side."
+            },
+            {
+              "name": "Barbell Bicep Curl",
+              "sets": 4,
+              "target_reps": "20/15/12/8",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Superset E with Barbell French Press. Add load as the reps come down."
+            },
+            {
+              "name": "Barbell French Press",
+              "sets": 4,
+              "target_reps": "20/15/12/8",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Superset E with Barbell Bicep Curl. Add load as the reps come down."
+            }
+          ]
+        },
+        {
+          "name": "Tuesday - Quads A + Calves",
+          "exercises": [
+            {
+              "name": "Spanish Squats",
+              "sets": 3,
+              "target_reps": "AMRAP",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 1 (Quads). Band behind the knees, sit back, go to failure."
+            },
+            {
+              "name": "Sissy Squats",
+              "sets": 4,
+              "target_reps": "20",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 1 (Quads)."
+            },
+            {
+              "name": "Back Squats From the Ground",
+              "sets": 2,
+              "target_reps": "12/15",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 1 (Quads). Unrack from the floor or pins - no rack walkout."
+            },
+            {
+              "name": "Banded L-Sits",
+              "sets": 3,
+              "target_reps": "20s",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 1 (Quads). Twenty-second holds."
+            },
+            {
+              "name": "Zercher Cossack Squats",
+              "sets": 2,
+              "target_reps": "10",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 1 (Quads). Per side."
+            },
+            {
+              "name": "Donkey Calf Raises",
+              "sets": 5,
+              "target_reps": "30",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 2 (Calves) - they can grow. Full stretch at the bottom."
+            },
+            {
+              "name": "Tibialis Raises",
+              "sets": 4,
+              "target_reps": "20",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 2 (Calves). Superset B with Squatting Calf Raises."
+            },
+            {
+              "name": "Squatting Calf Raises",
+              "sets": 4,
+              "target_reps": "20",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 2 (Calves). Superset B with Tibialis Raises."
+            },
+            {
+              "name": "Ankle Rotations",
+              "sets": 3,
+              "target_reps": "AMRAP",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 2 (Calves). Both directions."
+            }
+          ]
+        },
+        {
+          "name": "Wednesday - Shoulders A + Forearms",
+          "exercises": [
+            {
+              "name": "Kelly Snatch",
+              "sets": 3,
+              "target_reps": "1",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 1 (Shoulders). Heavy singles - quality over grind."
+            },
+            {
+              "name": "Strict Press Variation",
+              "sets": 5,
+              "target_reps": "1/6/6/6/12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 1 (Shoulders). Open with a heavy single, back off for the volume sets."
+            },
+            {
+              "name": "One-Arm Overhead Carries",
+              "sets": 3,
+              "target_reps": "10-20 m",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 1 (Shoulders). Per arm. The source gives no sets/reps here - three carries per arm for distance is the sensible reading."
+            },
+            {
+              "name": "Landmine Incline Lateral Raise",
+              "sets": 4,
+              "target_reps": "12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 1 (Shoulders). Per side."
+            },
+            {
+              "name": "Landmine Upright Row",
+              "sets": 3,
+              "target_reps": "20",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 1 (Shoulders)."
+            },
+            {
+              "name": "Band Pull Aparts",
+              "sets": 3,
+              "target_reps": "15",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 1 (Shoulders)."
+            },
+            {
+              "name": "Barbell Windmill",
+              "sets": 3,
+              "target_reps": "8",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 1 (Shoulders). Per side."
+            },
+            {
+              "name": "Radial Deviation",
+              "sets": 3,
+              "target_reps": "12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 2 (Forearms). Superset A with Ulnar Deviation."
+            },
+            {
+              "name": "Ulnar Deviation",
+              "sets": 3,
+              "target_reps": "12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 2 (Forearms). Superset A with Radial Deviation."
+            },
+            {
+              "name": "Pronation",
+              "sets": 3,
+              "target_reps": "12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 2 (Forearms). Superset B with Supination."
+            },
+            {
+              "name": "Supination",
+              "sets": 3,
+              "target_reps": "12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 2 (Forearms). Superset B with Pronation."
+            },
+            {
+              "name": "Reverse Squatting Preacher Curls",
+              "sets": 3,
+              "target_reps": "10",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 2 (Forearms)."
+            },
+            {
+              "name": "Barbell Finger Curls",
+              "sets": 3,
+              "target_reps": "30/20/12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 2 (Forearms). Roll the bar out to the fingertips and back."
+            },
+            {
+              "name": "Landmine Chuck Sipes Curls",
+              "sets": 3,
+              "target_reps": "30/20/12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 2 (Forearms)."
+            }
+          ]
+        },
+        {
+          "name": "Thursday - Upper Back + Neck",
+          "exercises": [
+            {
+              "name": "Pull Ups",
+              "sets": 4,
+              "target_reps": "12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 1 (Upper Back)."
+            },
+            {
+              "name": "Archer Ring Rows",
+              "sets": 4,
+              "target_reps": "12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 1 (Upper Back). Per side."
+            },
+            {
+              "name": "Close Grip Ring Rows",
+              "sets": 4,
+              "target_reps": "15",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 1 (Upper Back)."
+            },
+            {
+              "name": "Side Pullovers / Wide Grip Rows",
+              "sets": 3,
+              "target_reps": "15",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 1 (Upper Back)."
+            },
+            {
+              "name": "Biting Neck Extensions",
+              "sets": 4,
+              "target_reps": "30/30/30/20",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 2 (Neck). Bite down on a towel or strap and extend."
+            },
+            {
+              "name": "Twisting Neck Curls",
+              "sets": 4,
+              "target_reps": "30/30/30/20",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 2 (Neck)."
+            },
+            {
+              "name": "Neck Curls",
+              "sets": 4,
+              "target_reps": "30/30/30/20",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Session 2 (Neck)."
+            }
+          ]
+        },
+        {
+          "name": "Friday - Arms",
+          "exercises": [
+            {
+              "name": "Dual Band Tricep Extensions",
+              "sets": 3,
+              "target_reps": "20",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Superset A with Band Incline Curls."
+            },
+            {
+              "name": "Band Incline Curls",
+              "sets": 3,
+              "target_reps": "20",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Superset A with Dual Band Tricep Extensions."
+            },
+            {
+              "name": "Squatting Preacher Curls",
+              "sets": 4,
+              "target_reps": "20/15/12/10",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Superset B with JM Floor Press."
+            },
+            {
+              "name": "JM Floor Press",
+              "sets": 4,
+              "target_reps": "20/15/12/10",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Superset B with Squatting Preacher Curls."
+            },
+            {
+              "name": "Band and Dumbbell Hammer Curls",
+              "sets": 4,
+              "target_reps": "12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Superset C with Standing French Press."
+            },
+            {
+              "name": "Standing French Press",
+              "sets": 4,
+              "target_reps": "20/15/15/12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Superset C with Band and Dumbbell Hammer Curls."
+            },
+            {
+              "name": "Jefferson Curl Curls",
+              "sets": 3,
+              "target_reps": "12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Superset E with Three-Phase Tricep Extensions."
+            },
+            {
+              "name": "Three-Phase Tricep Extensions",
+              "sets": 3,
+              "target_reps": "12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Superset E with Jefferson Curl Curls."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Silver-Era Space Marine",
+      "author": "Wild Odds",
+      "split": "4-Day Rotating",
+      "style": "Hypertrophy",
+      "specialisation": "None",
+      "block_weeks": 8,
+      "description": "Four rotating days - Confirmed Sasquatch, Bro Day, Quads/Abs/Calves and IRL Space Marine - run 2-4 days on, 1-2 days off. Aim to get all four sessions in within a 10-day window at most. Carpark strongman meets classic bodybuilding: Zercher deadlifts, Kelly snatches and overhead walks alongside incline presses, preacher curls and calf work. Can be combined with other programs for core, mobility and cardio - avoid stacking it with another intensive lifting program. Descending ladders like 12-15/8-12/5-8 mean one set per number; RPE targets above 10 mean taking the set past clean failure. Runs 8 weeks.",
+      "days": [
+        {
+          "name": "Confirmed Sasquatch (D1)",
+          "exercises": [
+            {
+              "name": "45 Degree Hyperextensions",
+              "sets": 2,
+              "target_reps": "20",
+              "percent_1rm": null,
+              "rpe": "5",
+              "notes": "30s rest. Use this as a warm up. Actively reach forward at the top."
+            },
+            {
+              "name": "Zercher Deadlifts",
+              "sets": 1,
+              "target_reps": "10-15",
+              "percent_1rm": null,
+              "rpe": "9",
+              "notes": "Rest as needed between warm up sets, then one hard work set."
+            },
+            {
+              "name": "Nordic Curl",
+              "sets": 2,
+              "target_reps": "AMRAP",
+              "percent_1rm": null,
+              "rpe": "9",
+              "notes": "90s rest. Use bands to warm up, or for assistance if you cannot yet control the full lowering."
+            },
+            {
+              "name": "Power Shrugs",
+              "sets": 3,
+              "target_reps": "10-20",
+              "percent_1rm": null,
+              "rpe": "9",
+              "notes": "90s rest. Perform only if you meet the prerequisites (the source screenshot truncates this line)."
+            },
+            {
+              "name": "Pull Ups",
+              "sets": 3,
+              "target_reps": "8-12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "90s rest. Add weight or assistance as required."
+            },
+            {
+              "name": "Pullovers",
+              "sets": 3,
+              "target_reps": "10-15",
+              "percent_1rm": null,
+              "rpe": "9",
+              "notes": "90s rest. Perform with a dumbbell or EZ curl bar."
+            },
+            {
+              "name": "Side Bend",
+              "sets": 3,
+              "target_reps": "5-10",
+              "percent_1rm": null,
+              "rpe": "8",
+              "notes": "Per side. 60s rest. Focus on getting a good stretch."
+            },
+            {
+              "name": "Jefferson Curl",
+              "sets": 3,
+              "target_reps": "5-10",
+              "percent_1rm": null,
+              "rpe": "6",
+              "notes": "Rest as needed. Start with a very light implement."
+            }
+          ]
+        },
+        {
+          "name": "Bro Day (D2)",
+          "exercises": [
+            {
+              "name": "Kelly Snatch",
+              "sets": 3,
+              "target_reps": "5-10",
+              "percent_1rm": null,
+              "rpe": "5",
+              "notes": "90s rest. Optional shoulder warm up - feel free to swap it out."
+            },
+            {
+              "name": "Dual Band Triceps Extensions",
+              "sets": 3,
+              "target_reps": "AMRAP",
+              "percent_1rm": null,
+              "rpe": "7",
+              "notes": "Superset B with Band Incline Curl."
+            },
+            {
+              "name": "Band Incline Curl",
+              "sets": 3,
+              "target_reps": "AMRAP",
+              "percent_1rm": null,
+              "rpe": "7",
+              "notes": "Superset B with Dual Band Triceps Extensions."
+            },
+            {
+              "name": "Dumbbell Incline Press",
+              "sets": 4,
+              "target_reps": "12-15/8-12/5-8",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Four descending sets; the fourth set's target is cut off in the source screenshot - treat it as a back-off AMRAP until you can check the original."
+            },
+            {
+              "name": "Dumbbell Incline Curl",
+              "sets": 4,
+              "target_reps": "12-15/8-12/5-8",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Four descending sets; the fourth set's target is cut off in the source screenshot - treat it as a back-off AMRAP until you can check the original."
+            },
+            {
+              "name": "Dips",
+              "sets": 3,
+              "target_reps": "AMRAP",
+              "percent_1rm": null,
+              "rpe": "9",
+              "notes": "60s rest. Warm up using a band. Sink down into a full stretch."
+            },
+            {
+              "name": "Preacher Curl",
+              "sets": 3,
+              "target_reps": "12-15/5-8/8-12",
+              "percent_1rm": null,
+              "rpe": "10",
+              "notes": "Superset F with Incline Skullcrusher."
+            },
+            {
+              "name": "Incline Skullcrusher",
+              "sets": 4,
+              "target_reps": "12-15/8-12/5-8",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Superset F with Preacher Curl. The fourth set's target is cut off in the source screenshot."
+            },
+            {
+              "name": "Hammer Curl",
+              "sets": 4,
+              "target_reps": "8-12",
+              "percent_1rm": null,
+              "rpe": "10",
+              "notes": "60s rest."
+            },
+            {
+              "name": "Gooseneck Wrist Curls",
+              "sets": 4,
+              "target_reps": "20-30/15-20",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Per side. Sets 3 and 4 are cut off in the source screenshot - keep descending."
+            },
+            {
+              "name": "Reverse Wrist Curls",
+              "sets": 4,
+              "target_reps": "15-30",
+              "percent_1rm": null,
+              "rpe": "11",
+              "notes": "60s rest."
+            }
+          ]
+        },
+        {
+          "name": "Quads, Abs & Calves (D3)",
+          "exercises": [
+            {
+              "name": "Spanish Squats",
+              "sets": 3,
+              "target_reps": "20",
+              "percent_1rm": null,
+              "rpe": "9",
+              "notes": "60s rest. Use as much range of motion as is comfortable, pulling against the band."
+            },
+            {
+              "name": "Banded Sissy Squats",
+              "sets": 3,
+              "target_reps": "10-20",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Warm up using a band to scale. If you feel any knee pain, back off to a shorter range. The source screenshot shows no sets/reps for this one - 3 sets is the sensible reading."
+            },
+            {
+              "name": "Band Assisted L Sits",
+              "sets": 3,
+              "target_reps": "10-20s",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Using band assistance if necessary, hold for 10-20 seconds."
+            },
+            {
+              "name": "Barbell Back Squats",
+              "sets": 3,
+              "target_reps": "1/4-6/8-12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Perform high bar squats. One heavy single, then two descending back-off sets."
+            },
+            {
+              "name": "GHD Sit Up",
+              "sets": 3,
+              "target_reps": "AMRAP",
+              "percent_1rm": null,
+              "rpe": "9",
+              "notes": "60s rest. Ease in gradually, sinking to the lowest depth you can control."
+            },
+            {
+              "name": "Donkey Calf Raise",
+              "sets": 5,
+              "target_reps": "10-20",
+              "percent_1rm": null,
+              "rpe": "11",
+              "notes": "60s rest. Focus on full stretch and contraction."
+            },
+            {
+              "name": "Tibialis Raise",
+              "sets": 5,
+              "target_reps": "AMRAP",
+              "percent_1rm": null,
+              "rpe": "11",
+              "notes": "60s rest. Find a way to add weight if required."
+            }
+          ]
+        },
+        {
+          "name": "IRL Space Marine (D4)",
+          "exercises": [
+            {
+              "name": "Kelly Snatch",
+              "sets": 3,
+              "target_reps": "5-10",
+              "percent_1rm": null,
+              "rpe": "5",
+              "notes": "Rest as required. Optional shoulder warm up."
+            },
+            {
+              "name": "Clean & Strict Press",
+              "sets": 4,
+              "target_reps": "1/4-6/4-6/8-12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "One heavy single, two working sets, then a back-off set."
+            },
+            {
+              "name": "Pull Ups",
+              "sets": 4,
+              "target_reps": "1/4-6/4-6/AMRAP",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "One heavy single, two working sets, then a back-off AMRAP."
+            },
+            {
+              "name": "Single Arm Overhead Walk",
+              "sets": 2,
+              "target_reps": "10-20 m",
+              "percent_1rm": null,
+              "rpe": "10",
+              "notes": "Per side. 60s rest."
+            },
+            {
+              "name": "Side Pullover",
+              "sets": 3,
+              "target_reps": "8-12",
+              "percent_1rm": null,
+              "rpe": "10",
+              "notes": "Per side. 60s rest."
+            },
+            {
+              "name": "Landmine Lateral Raise",
+              "sets": 3,
+              "target_reps": "8-12",
+              "percent_1rm": null,
+              "rpe": "10",
+              "notes": "60s rest."
+            },
+            {
+              "name": "Pullovers",
+              "sets": 3,
+              "target_reps": "10-15",
+              "percent_1rm": null,
+              "rpe": "9",
+              "notes": "60s rest."
+            },
+            {
+              "name": "Landmine Upright Row",
+              "sets": 3,
+              "target_reps": "15-20/12-15",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Per side. The third set's target is cut off in the source screenshot - keep descending."
+            },
+            {
+              "name": "Windmill",
+              "sets": 3,
+              "target_reps": "8-12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "The source screenshot is cut off at this exercise - sets, reps and RPE were not visible. Adjust once you can check the original."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Bronze Era Basics",
+      "author": "Wild Odds",
+      "split": "3-Day Full Body",
+      "style": "Powerbuilding",
+      "specialisation": "None",
+      "block_weeks": 8,
+      "description": "Three full-body days built on the basics: press, row, squat, bench, deadlift and pull-up, with Zercher squats, pullovers and loaded-stretch work rounding them out. Every lift has a barbell-free substitution in its notes, so the whole thing runs in a home gym with dumbbells. Load is prescribed by reps in reserve - the RPE target shown is the same thing inverted (RPE 9 = 1 RIR), and each note restates the original RIR. Later exercises marked as supersets or trisets run back to back with minimal rest, then loop. Runs 8 weeks; add load whenever you beat the top of a rep range at target RIR.",
+      "days": [
+        {
+          "name": "Push & Zercher",
+          "exercises": [
+            {
+              "name": "Single Arm Push",
+              "sets": 3,
+              "target_reps": "6-10",
+              "percent_1rm": null,
+              "rpe": "9",
+              "notes": "1 RIR. 2 mins rest. Per side."
+            },
+            {
+              "name": "Barbell Row",
+              "sets": 3,
+              "target_reps": "8-12",
+              "percent_1rm": null,
+              "rpe": "9",
+              "notes": "1 RIR. 2 mins rest. Allow the torso to rise as needed, but try to avoid using leg drive and excessive momentum to cheat. If you don't have a barbell, use dumbbells."
+            },
+            {
+              "name": "Arched Floor Press",
+              "sets": 3,
+              "target_reps": "5-10",
+              "percent_1rm": null,
+              "rpe": "9",
+              "notes": "1 RIR. 2 mins rest. You may take these out of a rack or begin with a hip thrust, but make sure the plates you use allow clearance for your body, or else get a spotter. If you don't have a barbell, use dumbbell bench press."
+            },
+            {
+              "name": "Pullovers",
+              "sets": 3,
+              "target_reps": "10-15",
+              "percent_1rm": null,
+              "rpe": "9",
+              "notes": "1 RIR. Start light and focus on technique. Sink your hips as low as comfortable and allow the weight to pull your arms down as low as possible without bending them. You should feel a stretch in the area of your ribcage."
+            },
+            {
+              "name": "Zercher Squat",
+              "sets": 3,
+              "target_reps": "6-10",
+              "percent_1rm": null,
+              "rpe": "9",
+              "notes": "1 RIR. 2 mins rest. Try to use a more upright torso style for these. If you don't have a barbell, do goblet squats."
+            },
+            {
+              "name": "Lying Leg Curl",
+              "sets": 3,
+              "target_reps": "10-15",
+              "percent_1rm": null,
+              "rpe": "10",
+              "notes": "0 RIR. 90s rest."
+            },
+            {
+              "name": "V Sit Ups",
+              "sets": 3,
+              "target_reps": "AMRAP",
+              "percent_1rm": null,
+              "rpe": "10",
+              "notes": "0 RIR. 90s rest."
+            }
+          ]
+        },
+        {
+          "name": "Flex & Squat",
+          "exercises": [
+            {
+              "name": "Barbell Strict Press",
+              "sets": 3,
+              "target_reps": "4-8",
+              "percent_1rm": null,
+              "rpe": "9",
+              "notes": "1 RIR. 2 mins rest. If you don't have a barbell, use dumbbells. I recommend beginning these from the floor with a power clean if possible (1 clean per set), but if not, a rack is fine."
+            },
+            {
+              "name": "Pull Ups",
+              "sets": 3,
+              "target_reps": "AMRAP",
+              "percent_1rm": null,
+              "rpe": "9",
+              "notes": "1 RIR. 2 mins rest. Use band or machine assistance if unable to complete at least 5 reps on the first set unassisted. If this is not possible, use lat pulldowns."
+            },
+            {
+              "name": "Dip",
+              "sets": 3,
+              "target_reps": "AMRAP",
+              "percent_1rm": null,
+              "rpe": "9",
+              "notes": "1 RIR. 2 mins rest. If unable to complete at least 5 reps unassisted, use band or machine assistance. If you can get more than 20 reps, add weight next time if possible."
+            },
+            {
+              "name": "Romanian Deadlift",
+              "sets": 3,
+              "target_reps": "10-15",
+              "percent_1rm": null,
+              "rpe": "8",
+              "notes": "2 RIR. 2 mins rest. Barbell or dumbbells are both fine. Pay attention to technique, emphasising stretch on the hamstrings."
+            },
+            {
+              "name": "Barbell Squats",
+              "sets": 3,
+              "target_reps": "6-10",
+              "percent_1rm": null,
+              "rpe": "8",
+              "notes": "2 RIR. 2 mins rest. If you don't have a barbell, use dumbbell goblet squats. I recommend a high bar style, but low bar is fine if that is more comfortable. Feel free to use heel elevation if needed."
+            },
+            {
+              "name": "Side Bend",
+              "sets": 3,
+              "target_reps": "5-10",
+              "percent_1rm": null,
+              "rpe": "8",
+              "notes": "2 RIR. Triset F1. Go straight to F2 (Russian Twist) with minimal rest."
+            },
+            {
+              "name": "Russian Twist",
+              "sets": 3,
+              "target_reps": "10-15",
+              "percent_1rm": null,
+              "rpe": "8",
+              "notes": "2 RIR. Triset F2. Per side. Go straight to F3 (Jefferson Curl) with minimal rest."
+            },
+            {
+              "name": "Jefferson Curl",
+              "sets": 3,
+              "target_reps": "6-10",
+              "percent_1rm": null,
+              "rpe": "5",
+              "notes": "5 RIR. 2 mins rest. Triset F3. Then restart from F1 (Side Bend). Use dumbbells if you don't have a barbell."
+            }
+          ]
+        },
+        {
+          "name": "Bench & Pull",
+          "exercises": [
+            {
+              "name": "Barbell Bench Press",
+              "sets": 5,
+              "target_reps": "4-8",
+              "percent_1rm": null,
+              "rpe": "8",
+              "notes": "2 RIR. 2 mins rest."
+            },
+            {
+              "name": "Dumbbell Pullover",
+              "sets": 3,
+              "target_reps": "10-15",
+              "percent_1rm": null,
+              "rpe": "9",
+              "notes": "1 RIR. Start light and focus on technique. Sink your hips as low as comfortable and allow the weight to pull your arms down as low as possible without bending them. You should feel a stretch in the area of your ribcage."
+            },
+            {
+              "name": "Push Press",
+              "sets": 3,
+              "target_reps": "4-6",
+              "percent_1rm": null,
+              "rpe": "9",
+              "notes": "1 RIR. Superset C1. Go straight to C2 (Dumbbell Incline Curl) with minimal rest between sets. I recommend beginning these from the floor with a power clean if possible (1 clean per set), but if not, a rack is fine. If you don't have a barbell, use dumbbells."
+            },
+            {
+              "name": "Dumbbell Incline Curl",
+              "sets": 3,
+              "target_reps": "8-15",
+              "percent_1rm": null,
+              "rpe": "10",
+              "notes": "0 RIR. 2 mins rest. Superset C2. Then return to C1 (Push Press). Sink into the deepest stretch possible at the bottom of every rep. Go to failure on the last two sets."
+            },
+            {
+              "name": "Deadlift",
+              "sets": 3,
+              "target_reps": "4-8",
+              "percent_1rm": null,
+              "rpe": "8",
+              "notes": "2 RIR. 2 mins rest. Work up to 3 sets of 4-8. If you don't have a barbell, use dumbbells — and if they aren't heavy enough to challenge you in conventional deadlifts, do Romanian deadlifts."
+            },
+            {
+              "name": "Goblet Squat",
+              "sets": 3,
+              "target_reps": "8-12",
+              "percent_1rm": null,
+              "rpe": "9",
+              "notes": "1 RIR. Triset E1. Go straight to E2 (Windmill) with minimal rest. If no dumbbells heavy enough are available, you can use a barbell held in the top position of a curl."
+            },
+            {
+              "name": "Windmill",
+              "sets": 3,
+              "target_reps": "5-10",
+              "percent_1rm": null,
+              "rpe": "5",
+              "notes": "5 RIR. Triset E2. Go straight to E3 (Hanging Knee Raise) with minimal rest. Use a dumbbell instead of a barbell. Start very light and only go down as far as is comfortable. It is OK to bend the off-side knee."
+            },
+            {
+              "name": "Hanging Knee Raise",
+              "sets": 3,
+              "target_reps": "AMRAP",
+              "percent_1rm": null,
+              "rpe": "10",
+              "notes": "0 RIR. 2 mins rest. Triset E3. Then return to E1 (Goblet Squat)."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "JPShuru x V1NLAND",
+      "author": "JPShuru x V1NLAND",
+      "split": "6-Day Body Part",
+      "style": "Powerbuilding",
+      "specialisation": "None",
+      "block_weeks": 12,
+      "description": "A 6-day body-part split built around five main lifts - incline bench, pull-ups, back squat, seated overhead press and deadlift - each run on the 12-week linear progression: add sets (weeks 1-3), add reps (weeks 4-6), add weight while dropping sets (weeks 7-9), then rebuild the sets at the new weight (weeks 10-12). Each main lift's coach notes give that week's sets, reps and weight jump; you choose your own starting weight. After week 12 the progression loops back to phase 1 at the heavier weight. Accessories, jumps, sprints and a Norwegian 4x4 conditioning finisher round out each day. Where a target says 'about', treat the rep number as a guide, not a hard stop.",
+      "days": [
+        {
+          "name": "Day 1 - Chest",
+          "exercises": [
+            {
+              "name": "Incline Bench Press",
+              "sets": 3,
+              "target_reps": "5",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Warm up with a few lighter ramp-up sets first - they don't count.",
+              "progression": "linear_12wk"
+            },
+            {
+              "name": "Dumbbell Chest Fly",
+              "sets": 3,
+              "target_reps": "13",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "About 13 reps."
+            },
+            {
+              "name": "Push Up",
+              "sets": 3,
+              "target_reps": "AMRAP",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Sets and reps not given in the source - as many good reps as you can."
+            },
+            {
+              "name": "Plate Front Raise",
+              "sets": 3,
+              "target_reps": "10",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "About 10 reps."
+            },
+            {
+              "name": "Dip",
+              "sets": 3,
+              "target_reps": "20/15/15",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "One set per number: 20, then 15, then 15."
+            },
+            {
+              "name": "Machine Row",
+              "sets": 3,
+              "target_reps": "AMRAP",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Max out: as many reps as you can on each of the 3 sets."
+            }
+          ]
+        },
+        {
+          "name": "Day 2 - Back",
+          "exercises": [
+            {
+              "name": "Pull Up",
+              "sets": 3,
+              "target_reps": "5",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Bodyweight to start. Once the reps are easy, the target weight is load added with a dip belt.",
+              "progression": "linear_12wk"
+            },
+            {
+              "name": "Wide Grip Pull Up",
+              "sets": 3,
+              "target_reps": "10",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "About 10 reps."
+            },
+            {
+              "name": "Jesus Pull Up",
+              "sets": 3,
+              "target_reps": "5-6",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": null
+            },
+            {
+              "name": "Barbell Row",
+              "sets": 2,
+              "target_reps": "12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Bent over. About 12 reps."
+            },
+            {
+              "name": "Cable Pullover",
+              "sets": 3,
+              "target_reps": "10",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": null
+            },
+            {
+              "name": "Standing Ab Wheel",
+              "sets": 3,
+              "target_reps": "10",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "name": "Day 3 - Legs: Squat",
+          "exercises": [
+            {
+              "name": "Back Squat",
+              "sets": 3,
+              "target_reps": "5",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Full depth.",
+              "progression": "linear_12wk"
+            },
+            {
+              "name": "Pin Squat",
+              "sets": 2,
+              "target_reps": "5",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": null
+            },
+            {
+              "name": "Box Squat",
+              "sets": 2,
+              "target_reps": "5",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Feet-up variation."
+            },
+            {
+              "name": "Bulgarian Split Squat",
+              "sets": 2,
+              "target_reps": "5",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Each leg."
+            },
+            {
+              "name": "Jump Squat + Broad Jump",
+              "sets": 3,
+              "target_reps": "2",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Explosive - full rest between sets."
+            },
+            {
+              "name": "Sissy Squat",
+              "sets": 2,
+              "target_reps": "AMRAP",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "name": "Day 4 - Arms & Abs",
+          "exercises": [
+            {
+              "name": "Decline Crunch",
+              "sets": 4,
+              "target_reps": "12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": null
+            },
+            {
+              "name": "Dumbbell Side Bend",
+              "sets": 3,
+              "target_reps": "15",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Each side."
+            },
+            {
+              "name": "EZ Bar Curl",
+              "sets": 5,
+              "target_reps": "10",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "About 10 reps."
+            },
+            {
+              "name": "Reverse Curl",
+              "sets": 2,
+              "target_reps": "12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "About 12 reps."
+            },
+            {
+              "name": "Single Arm Dumbbell Curl",
+              "sets": 2,
+              "target_reps": "AMRAP",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "To failure."
+            },
+            {
+              "name": "Seated Overhead Tricep Extension",
+              "sets": 3,
+              "target_reps": "AMRAP",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "To failure."
+            },
+            {
+              "name": "Single Arm Cable Tricep Pushdown",
+              "sets": 3,
+              "target_reps": "12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "name": "Day 5 - Shoulders",
+          "exercises": [
+            {
+              "name": "Seated Overhead Press",
+              "sets": 3,
+              "target_reps": "5",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": null,
+              "progression": "linear_12wk"
+            },
+            {
+              "name": "Cable Lateral Raise",
+              "sets": 4,
+              "target_reps": "15",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "About 15 reps."
+            },
+            {
+              "name": "Zercher Shrug",
+              "sets": 3,
+              "target_reps": "20",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "About 20 reps. Bar held in the crook of the elbows."
+            },
+            {
+              "name": "Norwegian 4x4 Intervals",
+              "sets": 4,
+              "target_reps": "4 min",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "4 minutes hard (about 85-95% of max heart rate), then 3 minutes easy. Bike, rower or incline treadmill."
+            }
+          ]
+        },
+        {
+          "name": "Day 6 - Legs: Hinge",
+          "exercises": [
+            {
+              "name": "Golf Swing Warm-Up",
+              "sets": 2,
+              "target_reps": "10",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Warm-up only - sets and reps not given in the source. Easy swings to open the hips."
+            },
+            {
+              "name": "Deadlift",
+              "sets": 3,
+              "target_reps": "5",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": null,
+              "progression": "linear_12wk"
+            },
+            {
+              "name": "Barbell Hip Thrust",
+              "sets": 2,
+              "target_reps": "5",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": null
+            },
+            {
+              "name": "Hang Clean",
+              "sets": 3,
+              "target_reps": "2",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": null
+            },
+            {
+              "name": "Standing Calf Raise",
+              "sets": 5,
+              "target_reps": "AMRAP",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "EMOM: start a set every minute, on the minute."
+            },
+            {
+              "name": "Hill Sprint",
+              "sets": 5,
+              "target_reps": "40m",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Each rep: build up speed for 20 m, then go all-out for 20 m. Walk back down to recover."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "JPShuru x V1NLAND + 3x2 days per week",
+      "author": "JPShuru x V1NLAND",
+      "split": "6-Day (3 sessions x 2)",
+      "style": "Powerbuilding",
+      "specialisation": "None",
+      "block_weeks": 12,
+      "description": "The JPShuru x V1NLAND program reorganised into three sessions run twice a week: Chest, Arms & Abs / Back & Shoulders / Legs. The leg days are unchanged. Chest and arms are split so each session pairs a press with the triceps and biceps work that complements it, and back and shoulders are split so the pull-up variations and the two main presses are spread across the week rather than stacked. Every session has one main lift at most - incline bench, pull-ups, back squat, seated overhead press and deadlift - each on the 12-week linear progression: add sets (weeks 1-3), add reps (weeks 4-6), add weight while dropping sets (weeks 7-9), then rebuild the sets at the new weight (weeks 10-12). Each main lift's coach notes give that week's sets, reps and weight jump; you choose your own starting weight. After week 12 it loops back to phase 1 at the heavier weight.",
+      "days": [
+        {
+          "name": "Day 1 - Chest, Arms & Abs 1",
+          "exercises": [
+            {
+              "name": "Incline Bench Press",
+              "sets": 3,
+              "target_reps": "5",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Warm up with a few lighter ramp-up sets first - they don't count.",
+              "progression": "linear_12wk"
+            },
+            {
+              "name": "Dumbbell Chest Fly",
+              "sets": 3,
+              "target_reps": "13",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "About 13 reps."
+            },
+            {
+              "name": "Single Arm Cable Tricep Pushdown",
+              "sets": 3,
+              "target_reps": "12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": null
+            },
+            {
+              "name": "EZ Bar Curl",
+              "sets": 5,
+              "target_reps": "10",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "About 10 reps."
+            },
+            {
+              "name": "Decline Crunch",
+              "sets": 4,
+              "target_reps": "12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "name": "Day 2 - Back & Shoulders 1",
+          "exercises": [
+            {
+              "name": "Pull Up",
+              "sets": 3,
+              "target_reps": "5",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Bodyweight to start. Once the reps are easy, the target weight is load added with a dip belt.",
+              "progression": "linear_12wk"
+            },
+            {
+              "name": "Barbell Row",
+              "sets": 2,
+              "target_reps": "12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Bent over. About 12 reps."
+            },
+            {
+              "name": "Cable Pullover",
+              "sets": 3,
+              "target_reps": "10",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": null
+            },
+            {
+              "name": "Zercher Shrug",
+              "sets": 3,
+              "target_reps": "20",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "About 20 reps. Bar held in the crook of the elbows."
+            },
+            {
+              "name": "Standing Ab Wheel",
+              "sets": 3,
+              "target_reps": "10",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": null
+            },
+            {
+              "name": "Norwegian 4x4 Intervals",
+              "sets": 4,
+              "target_reps": "4 min",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "4 minutes hard (about 85-95% of max heart rate), then 3 minutes easy. Bike, rower or incline treadmill."
+            }
+          ]
+        },
+        {
+          "name": "Day 3 - Legs: Squat",
+          "exercises": [
+            {
+              "name": "Back Squat",
+              "sets": 3,
+              "target_reps": "5",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Full depth.",
+              "progression": "linear_12wk"
+            },
+            {
+              "name": "Pin Squat",
+              "sets": 2,
+              "target_reps": "5",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": null
+            },
+            {
+              "name": "Box Squat",
+              "sets": 2,
+              "target_reps": "5",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Feet-up variation."
+            },
+            {
+              "name": "Bulgarian Split Squat",
+              "sets": 2,
+              "target_reps": "5",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Each leg."
+            },
+            {
+              "name": "Jump Squat + Broad Jump",
+              "sets": 3,
+              "target_reps": "2",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Explosive - full rest between sets."
+            },
+            {
+              "name": "Sissy Squat",
+              "sets": 2,
+              "target_reps": "AMRAP",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": null
+            }
+          ]
+        },
+        {
+          "name": "Day 4 - Chest, Arms & Abs 2",
+          "exercises": [
+            {
+              "name": "Dip",
+              "sets": 3,
+              "target_reps": "20/15/15",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "One set per number: 20, then 15, then 15."
+            },
+            {
+              "name": "Push Up",
+              "sets": 3,
+              "target_reps": "AMRAP",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Sets and reps not given in the source - as many good reps as you can."
+            },
+            {
+              "name": "Machine Row",
+              "sets": 3,
+              "target_reps": "AMRAP",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Max out: as many reps as you can on each of the 3 sets."
+            },
+            {
+              "name": "Seated Overhead Tricep Extension",
+              "sets": 3,
+              "target_reps": "AMRAP",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "To failure."
+            },
+            {
+              "name": "Reverse Curl",
+              "sets": 2,
+              "target_reps": "12",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "About 12 reps."
+            },
+            {
+              "name": "Single Arm Dumbbell Curl",
+              "sets": 2,
+              "target_reps": "AMRAP",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "To failure."
+            },
+            {
+              "name": "Dumbbell Side Bend",
+              "sets": 3,
+              "target_reps": "15",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Each side."
+            }
+          ]
+        },
+        {
+          "name": "Day 5 - Back & Shoulders 2",
+          "exercises": [
+            {
+              "name": "Seated Overhead Press",
+              "sets": 3,
+              "target_reps": "5",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": null,
+              "progression": "linear_12wk"
+            },
+            {
+              "name": "Wide Grip Pull Up",
+              "sets": 3,
+              "target_reps": "10",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "About 10 reps."
+            },
+            {
+              "name": "Jesus Pull Up",
+              "sets": 3,
+              "target_reps": "5-6",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": null
+            },
+            {
+              "name": "Cable Lateral Raise",
+              "sets": 4,
+              "target_reps": "15",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "About 15 reps."
+            },
+            {
+              "name": "Plate Front Raise",
+              "sets": 3,
+              "target_reps": "10",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "About 10 reps."
+            }
+          ]
+        },
+        {
+          "name": "Day 6 - Legs: Hinge",
+          "exercises": [
+            {
+              "name": "Golf Swing Warm-Up",
+              "sets": 2,
+              "target_reps": "10",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Warm-up only - sets and reps not given in the source. Easy swings to open the hips."
+            },
+            {
+              "name": "Deadlift",
+              "sets": 3,
+              "target_reps": "5",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": null,
+              "progression": "linear_12wk"
+            },
+            {
+              "name": "Barbell Hip Thrust",
+              "sets": 2,
+              "target_reps": "5",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": null
+            },
+            {
+              "name": "Hang Clean",
+              "sets": 3,
+              "target_reps": "2",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": null
+            },
+            {
+              "name": "Standing Calf Raise",
+              "sets": 5,
+              "target_reps": "AMRAP",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "EMOM: start a set every minute, on the minute."
+            },
+            {
+              "name": "Hill Sprint",
+              "sets": 5,
+              "target_reps": "40m",
+              "percent_1rm": null,
+              "rpe": null,
+              "notes": "Each rep: build up speed for 20 m, then go all-out for 20 m. Walk back down to recover."
             }
           ]
         }

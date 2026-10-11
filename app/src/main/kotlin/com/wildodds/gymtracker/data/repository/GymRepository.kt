@@ -181,19 +181,6 @@ class GymRepository(private val db: AppDatabase) {
   programId
   }
 
-  /** Load a stored program back into an editable plan (week 1 is the definition). */
-  suspend fun loadProgramPlan(programId: Long): com.wildodds.gymtracker.data.builder.PlanProgram? =
-  withContext(Dispatchers.IO) {
-  val program = db.programDao().getProgramById(programId) ?: return@withContext null
-  // Rest days included: the builder edits the SHAPE of a week, and a week whose rest days were
-  // filtered out on the way in comes back one day short and silently renumbered.
-  val week1 = db.sessionDao().getSessionsForWeekIncludingRest(1, programId)
-  val exercises = week1.associate { it.id to db.exerciseDao().getExercisesForSession(it.id) }
-  val planned = db.plannedSetDao().forProgram(programId).groupBy { it.exerciseId }
-  val alts = db.plannedSetDao().alternativesForProgram(programId).groupBy { it.exerciseId }
-  com.wildodds.gymtracker.data.builder.PlanMapper.fromStored(program, week1, exercises, planned, alts)
-  }
-
   /** Clears all logs/completions but keeps the program & exercises intact. */
   suspend fun restartProgram() = withContext(Dispatchers.IO) {
   db.setLogDao().deleteAll()
@@ -290,6 +277,12 @@ class GymRepository(private val db: AppDatabase) {
   db.setLogDao().deleteSetLog(workoutLogId, setNumber)
   }
 
+  /** Replace every logged set of one workout log with [logs], atomically. */
+  suspend fun replaceSetLogs(workoutLogId: Long, logs: List<SetLog>) = db.withTransaction {
+  db.setLogDao().deleteForWorkoutLog(workoutLogId)
+  logs.forEach { db.setLogDao().insert(it) }
+  }
+
   suspend fun upsertSetLog(setLog: SetLog) = withContext(Dispatchers.IO) {
   val updated = db.setLogDao().update(setLog.workoutLogId, setLog.setNumber, setLog.weightKg, setLog.reps, setLog.rpe, setLog.pct1rm, setLog.weightRightKg, setLog.repsRight)
   if (updated == 0) db.setLogDao().insert(setLog)
@@ -306,6 +299,12 @@ class GymRepository(private val db: AppDatabase) {
   programId = programId, dayNumber = dayNumber,
   currentWeek = currentWeek, orderIndex = orderIndex
   )
+  }
+
+  suspend fun latestLoggedWeekByPosition(
+  programId: Long, dayNumber: Int, orderIndex: Int, currentWeek: Int
+  ): Int? = withContext(Dispatchers.IO) {
+  db.setLogDao().latestLoggedWeekByPosition(programId, dayNumber, orderIndex, currentWeek)
   }
 
   suspend fun getPrevWeekProgressionByPosition(
@@ -379,6 +378,119 @@ class GymRepository(private val db: AppDatabase) {
   ) = withContext(Dispatchers.IO) {
     db.exerciseDao().deleteByPositionForAllWeeks(orderIndex, dayNumber, programId)
     db.exerciseDao().shiftOrderIndexesDownAfterDelete(orderIndex, dayNumber, programId)
+  }
+
+  /** Training days in one week of a program, in day order. */
+  suspend fun getSessionsForWeek(weekNumber: Int, programId: Long): List<Session> = withContext(Dispatchers.IO) {
+    db.sessionDao().getSessionsForWeek(weekNumber, programId)
+  }
+
+  /**
+   * Move the exercise at ([fromDay], [fromIndex]) to [toDay], landing at position [toIndex] of that
+   * day, in [fromWeek] and every later week — the same "this week onwards" reach as the other
+   * session edits, so positions stay aligned week to week and next week's carry-forward lines up.
+   *
+   * The exercise ROW is moved (its id, planned sets and anything already logged this week travel
+   * with it); both days are renumbered so their positions stay contiguous. A later week is skipped
+   * when the slot no longer holds the same exercise (that week was edited separately) or when it
+   * has no matching target day. Superset links involving the moved exercise are cleared, since its
+   * partner stays behind. Returns (exerciseId, weekNumber) for every row moved.
+   */
+  suspend fun moveExerciseToDay(
+    programId: Long, fromDay: Int, fromIndex: Int, exerciseName: String,
+    toDay: Int, toIndex: Int, fromWeek: Int
+  ): List<Pair<Long, Int>> = db.withTransaction {
+    val exerciseDao = db.exerciseDao()
+    val moved = mutableListOf<Pair<Long, Int>>()
+    val targetsByWeek = db.sessionDao().getSessionsFromWeek(programId, toDay, fromWeek).associateBy { it.weekNumber }
+    db.sessionDao().getSessionsFromWeek(programId, fromDay, fromWeek).forEach { source ->
+      val target = targetsByWeek[source.weekNumber] ?: return@forEach
+      val sourceExercises = exerciseDao.getExercisesForSession(source.id)
+      val ex = sourceExercises.firstOrNull { it.orderIndex == fromIndex } ?: return@forEach
+      if (source.weekNumber != fromWeek && !ex.name.equals(exerciseName, ignoreCase = true)) return@forEach
+
+      ex.supersetGroupId?.let { gid ->
+        sourceExercises.filter { it.supersetGroupId == gid }.forEach { exerciseDao.setSupersetGroupId(it.id, null) }
+      }
+      sourceExercises.filter { it.id != ex.id }.forEachIndexed { i, e ->
+        if (e.orderIndex != i) exerciseDao.updateOrderIndex(e.id, i)
+      }
+      val targetExercises = exerciseDao.getExercisesForSession(target.id)
+      val insertAt = toIndex.coerceIn(0, targetExercises.size)
+      targetExercises.forEachIndexed { i, e ->
+        val newIdx = if (i < insertAt) i else i + 1
+        if (e.orderIndex != newIdx) exerciseDao.updateOrderIndex(e.id, newIdx)
+      }
+      exerciseDao.moveToSession(ex.id, target.id, insertAt)
+      db.workoutLogDao().reassignSession(ex.id, target.id)
+      moved += ex.id to source.weekNumber
+    }
+    moved
+  }
+
+  /**
+   * Put the exercise at ([dayNumber], [orderIndex]) on the 12-week linear progression, with
+   * [fromWeek] as its week 1. Every week from there on gets that week's sets × reps and a coach note
+   * with its target ([TwelveWeekLinear]); past weeks are left exactly as they were. Loops after
+   * week 12 for programs longer than that.
+   *
+   * Later weeks are only touched while the slot still holds the same exercise. Any per-set
+   * prescription rows are dropped (they'd pin the old set count) and a %1RM target is cleared (it
+   * would prefill a different weight than the progression's).
+   */
+  suspend fun applyLinear12(
+    programId: Long, dayNumber: Int, orderIndex: Int, exerciseName: String,
+    fromWeek: Int, startLoad: Float?
+  ) = db.withTransaction {
+    val tag = com.wildodds.gymtracker.data.builder.TwelveWeekLinear.MODIFIER
+    forProgressionSlot(programId, dayNumber, orderIndex, exerciseName, fromWeek) { week, ex ->
+      val wp = com.wildodds.gymtracker.data.builder.TwelveWeekLinear.weekPlan(week - fromWeek, startLoad)
+      db.exerciseDao().update(ex.copy(
+        sets = wp.sets,
+        setsStated = wp.sets,
+        repsTarget = wp.reps.toString(),
+        notes = com.wildodds.gymtracker.data.builder.TwelveWeekLinear.mergeNotes(ex.notes, wp.note),
+        pct1rmTarget = "",
+        perSet = emptyList(),
+        loadValue = startLoad?.toDouble(),
+        modifiers = ex.modifiers.filter { it != tag } + tag
+      ))
+      db.plannedSetDao().deleteForExercise(ex.id)
+    }
+  }
+
+  /**
+   * Take the exercise off the 12-week progression from [fromWeek] on: its generated coach notes go,
+   * and every later week keeps [fromWeek]'s sets × reps (the athlete carries on from where they are).
+   */
+  suspend fun stopLinear12(
+    programId: Long, dayNumber: Int, orderIndex: Int, exerciseName: String, fromWeek: Int
+  ) = db.withTransaction {
+    val tag = com.wildodds.gymtracker.data.builder.TwelveWeekLinear.MODIFIER
+    var keepSets: Int? = null
+    var keepReps: String? = null
+    forProgressionSlot(programId, dayNumber, orderIndex, exerciseName, fromWeek) { _, ex ->
+      if (tag !in ex.modifiers) return@forProgressionSlot
+      if (keepSets == null) { keepSets = ex.sets; keepReps = ex.repsTarget }
+      db.exerciseDao().update(ex.copy(
+        sets = keepSets ?: ex.sets,
+        repsTarget = keepReps ?: ex.repsTarget,
+        notes = com.wildodds.gymtracker.data.builder.TwelveWeekLinear.stripNote(ex.notes),
+        modifiers = ex.modifiers.filter { it != tag }
+      ))
+    }
+  }
+
+  /** Visit the exercise at a day/position in [fromWeek] and each later week where it's still there. */
+  private suspend fun forProgressionSlot(
+    programId: Long, dayNumber: Int, orderIndex: Int, exerciseName: String, fromWeek: Int,
+    action: suspend (week: Int, ex: Exercise) -> Unit
+  ) {
+    db.sessionDao().getSessionsFromWeek(programId, dayNumber, fromWeek).forEach { s ->
+      val ex = db.exerciseDao().getExercisesForSession(s.id).firstOrNull { it.orderIndex == orderIndex } ?: return@forEach
+      if (s.weekNumber != fromWeek && !ex.name.equals(exerciseName, ignoreCase = true)) return@forEach
+      action(s.weekNumber, ex)
+    }
   }
 
   /**
@@ -627,17 +739,6 @@ class GymRepository(private val db: AppDatabase) {
 
   // ── Recovery / readiness inputs (Phase 4B) ──────────────────────────────────
 
-  /** The N most-recently-completed sessions — strain/fatigue + schedule inputs for readiness. */
-  suspend fun recentCompletions(limit: Int): List<SessionCompletion> = withContext(Dispatchers.IO) {
-  db.sessionCompletionDao().getRecentCompletions(limit)
-  }
-
-  /** Whether the active program is in a multi-week stall (3B rule), or false if no active program. */
-  suspend fun isActiveProgramStalled(): Boolean = withContext(Dispatchers.IO) {
-  val program = db.programDao().getCurrentProgramOnce() ?: return@withContext false
-  isProgramStalled(program.id)
-  }
-
   /**
    * Program-wide multi-week stall, centralised here so Home re-calibration (3B) and the adaptive
    * plan engine (4B) share one definition. Per-exercise [ProgressionEngine.isStalled] over each
@@ -659,8 +760,6 @@ class GymRepository(private val db: AppDatabase) {
   }
 
   // ── Achievements / gamification (Phase 6A) ──────────────────────────────────
-
-  fun observeAchievements(): Flow<List<Achievement>> = db.achievementDao().observeAll()
 
   suspend fun unlockedAchievementIds(): Set<String> = withContext(Dispatchers.IO) {
   db.achievementDao().getUnlockedIds().toSet()
@@ -705,27 +804,6 @@ class GymRepository(private val db: AppDatabase) {
   sessionTimestamps, volumeEvents, LocalDate.now(), ZoneId.systemDefault())
   }
 
-  /** Read a local program's full structure into a [ParsedProgram] (for sharing — Phase 6B). */
-  suspend fun exportProgramToParsed(programId: Long): ParsedProgram? = withContext(Dispatchers.IO) {
-  val program = db.programDao().getAllProgramsOnce().firstOrNull { it.id == programId } ?: return@withContext null
-  val parsedSessions = db.sessionDao().getAllSessionsOnce(programId).map { s ->
-  val ex = db.exerciseDao().getExercisesForSession(s.id)
-  com.wildodds.gymtracker.data.parser.ParsedSession(
-  weekNumber = s.weekNumber, dayNumber = s.dayNumber, name = s.name, muscleGroups = s.muscleGroups,
-  exercises = ex.map {
-  com.wildodds.gymtracker.data.parser.ParsedExercise(
-  it.name, it.sets, it.repsTarget, it.notes, it.orderIndex, it.rpeTarget, it.pct1rmTarget)
-  },
-  phaseNumber = s.phaseNumber
-  )
-  }
-  ParsedProgram(
-  name = program.name, totalWeeks = program.totalWeeks, sessions = parsedSessions,
-  coverImage = program.coverImage, isFlexible = program.isFlexible, category = program.category,
-  isUserCreated = true, trackRpe = program.trackRpe, trackOneRm = program.trackOneRm
-  )
-  }
-
   /**
    * Aggregate trend analytics for a program (volume, PRs, consistency, balance) entirely on IO,
    * then hand the flat rows to the pure [com.wildodds.gymtracker.data.analytics.TrendAggregator].
@@ -745,38 +823,6 @@ class GymRepository(private val db: AppDatabase) {
   muscleLookup = { com.wildodds.gymtracker.data.ExerciseLibrary.lookup(it) },
   range = range
   )
-  }
-
-  // ── On-demand / one-off sessions (Phase 3H) ─────────────────────────────────
-
-  /** Weekly sets-per-muscle for the active block (reused for on-demand recommendations). */
-  suspend fun weeklySetsByMuscle(programId: Long): Map<com.wildodds.gymtracker.data.MuscleGroup, Float> =
-  analyseProgram(programId)
-
-  private suspend fun getOrCreateOnDemandProgramId(): Long {
-  db.programDao().getAllProgramsOnce().firstOrNull { it.name == ON_DEMAND_PROGRAM_NAME }?.let { return it.id }
-  return db.programDao().insert(Program(
-  name = ON_DEMAND_PROGRAM_NAME, totalWeeks = 1, isUserCreated = true, isActive = false, isFlexible = true))
-  }
-
-  /**
-   * Materialise a one-off session under the hidden on-demand program and return its sessionId to
-   * navigate to. NON-DESTRUCTIVE: it only ever writes to the on-demand program, so the active
-   * program's week structure is never touched. Logging then works through the normal session flow.
-   */
-  suspend fun startOnDemandSession(
-  title: String, muscleGroups: String,
-  exercises: List<Triple<String, Int, String>>   // (name, sets, repsTarget)
-  ): Long = withContext(Dispatchers.IO) {
-  val programId = getOrCreateOnDemandProgramId()
-  val nextDay = (db.sessionDao().getAllSessionsOnce(programId).maxOfOrNull { it.dayNumber } ?: 0) + 1
-  db.sessionDao().insertAll(listOf(Session(
-  programId = programId, weekNumber = 1, dayNumber = nextDay, name = title, muscleGroups = muscleGroups)))
-  val session = db.sessionDao().getSessionsForWeek(1, programId).first { it.dayNumber == nextDay }
-  db.exerciseDao().insertAll(exercises.mapIndexed { i, (name, sets, reps) ->
-  Exercise(sessionId = session.id, name = name, sets = sets, repsTarget = reps, orderIndex = i)
-  })
-  session.id
   }
 
   suspend fun clearAllData() = withContext(Dispatchers.IO) {
@@ -801,24 +847,9 @@ class GymRepository(private val db: AppDatabase) {
   db.programDao().setCurrentPhase(programId, phase)
   }
 
-  /**
-   * Start a program from the library at a specific phase. Pauses any active program,
-   * activates the target, and sets its current phase (week numbers stay global so the
-   * Home screen simply opens on that phase's first week).
-   */
-  suspend fun startProgramAtPhase(programId: Long, phase: Int) = withContext(Dispatchers.IO) {
-  db.programDao().pauseActiveProgram()
-  db.programDao().setPaused(programId, false)
-  db.programDao().setCurrentPhase(programId, phase)
-  db.programDao().setActiveById(programId)
-  }
-
   // ── Session Library ─────────────────────────────────────────────────────────
 
   fun librarySessions(): Flow<List<SessionTemplate>> = db.sessionTemplateDao().getAllTemplates()
-
-  fun librarySessionExercises(templateId: Long): Flow<List<SessionTemplateExercise>> =
-  db.sessionTemplateDao().getExercisesForTemplate(templateId)
 
   suspend fun getLibrarySessionExercisesOnce(templateId: Long): List<SessionTemplateExercise> =
   withContext(Dispatchers.IO) { db.sessionTemplateDao().getExercisesForTemplateOnce(templateId) }

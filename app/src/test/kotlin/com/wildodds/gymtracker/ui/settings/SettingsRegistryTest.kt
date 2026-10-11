@@ -33,8 +33,8 @@ class SettingsRegistryTest {
   // "epley" only appears in the 1RM Calculator keywords.
   assertEquals(listOf("feat_1rm_calculator"), keys("epley"))
   assertEquals(listOf("feat_1rm_calculator"), keys("EPLEY"))
-  // "ronnie" only appears in the Rest Timer Sound keywords.
-  assertEquals(listOf("timer_sound"), keys("ronnie"))
+  // "beep" only appears in the Rest Timer Sound keywords.
+  assertEquals(listOf("timer_sound"), keys("BEEP"))
   }
 
   @Test

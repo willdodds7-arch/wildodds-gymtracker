@@ -13,9 +13,6 @@ import com.wildodds.gymtracker.data.db.entity.SessionCompletion
 import com.wildodds.gymtracker.data.parser.ParsedExercise
 import com.wildodds.gymtracker.data.parser.ParsedProgram
 import com.wildodds.gymtracker.data.parser.ParsedSession
-import com.wildodds.gymtracker.data.ai.AiParsedProgram
-import com.wildodds.gymtracker.data.reader.android.AndroidReader
-import com.wildodds.gymtracker.data.ai.ClaudeApiClient
 import com.wildodds.gymtracker.data.parser.smart.SmartParsedProgram
 import com.wildodds.gymtracker.data.parser.smart.SmartXlsxParser
 import com.wildodds.gymtracker.data.parser.smart.WeightUnit
@@ -41,7 +38,6 @@ sealed class ImportState {
   ) : ImportState()
   data class Success(val sessionCount: Int) : ImportState()
   data class Error(val message: String) : ImportState()
-  data class AiReview(val program: AiParsedProgram) : ImportState()
   // Bulk import added N programs (with phases) to the library.
   data class BulkSuccess(val programCount: Int) : ImportState()
 }
@@ -253,86 +249,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
   }.flowOn(Dispatchers.Default)
   .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), emptyList())
 
-  // ── AI-powered import (any file type) ────────────────────────────────────
-
-  fun importAnyFile(uri: Uri) {
-    viewModelScope.launch {
-      _importState.value = ImportState.Loading
-      withContext(Dispatchers.IO) {
-        try {
-          val apiKey = prefs.getString("claude_api_key", "") ?: ""
-          if (apiKey.isBlank()) throw Exception("No API key set. Go to Settings → AI Import and add your Anthropic API key.")
-          // The AI path reads the file with the SAME offline ingest pipeline as everything else;
-          // only the parsing step differs. It gets the improved extraction for free, and there is
-          // still exactly one place that turns a Uri into text.
-          val app = getApplication<Application>()
-          val text = AndroidReader.extractText(app, uri)
-          if (text.isBlank()) throw Exception("No readable text found in this file")
-          val parsed = ClaudeApiClient.parseProgram(apiKey, text)
-          if (parsed.days.isEmpty()) throw Exception("No workout days could be found in the file")
-          _importState.value = ImportState.AiReview(parsed)
-        } catch (e: Exception) {
-          _importState.value = ImportState.Error(e.message ?: "Import failed")
-        }
-      }
-    }
-  }
-
-  fun confirmAiImport(program: AiParsedProgram, name: String, weeks: Int, activate: Boolean = true) {
-    viewModelScope.launch {
-      _importState.value = ImportState.Loading
-      withContext(Dispatchers.IO) {
-        try {
-          val sessions = (1..weeks).flatMap { week ->
-            program.days.map { day ->
-              ParsedSession(
-                weekNumber   = week,
-                dayNumber    = day.dayNumber,
-                name         = day.name,
-                muscleGroups = day.muscleGroups,
-                exercises    = day.exercises.mapIndexed { i, ex ->
-                  ParsedExercise(ex.name, ex.sets, ex.repsTarget, ex.notes, i)
-                }
-              )
-            }
-          }
-          val parsed = ParsedProgram(
-            name          = name.ifBlank { program.name },
-            totalWeeks    = weeks,
-            sessions      = sessions,
-            isUserCreated = true
-          )
-          repo.importProgram(parsed, activate = activate)
-          _importState.value = ImportState.Success(sessions.size)
-        } catch (e: Exception) {
-          _importState.value = ImportState.Error(e.message ?: "Import failed")
-        }
-      }
-    }
-  }
-
   // ── Import from xlsx ──────────────────────────────────────────────────────
-
-  fun importXlsx(uri: Uri) {
-  viewModelScope.launch {
-  _importState.value = ImportState.Loading
-  withContext(Dispatchers.IO) {
-  try {
-  val stream = getApplication<Application>().contentResolver.openInputStream(uri)
-  ?: throw Exception("Cannot open file")
-  val smart = SmartXlsxParser().parse(stream)
-  if (smart.weekTemplate.isEmpty()) throw Exception("No exercises found in file")
-  _importState.value = ImportState.Preview(
-  smart  = smart,
-  editName  = smart.name,
-  editWeeks = smart.weeksDetected.coerceIn(1, 52)
-  )
-  } catch (e: Exception) {
-  _importState.value = ImportState.Error(e.message ?: "Unknown error")
-  }
-  }
-  }
-  }
 
   fun confirmSmartImport(name: String, weeks: Int, smart: SmartParsedProgram) {
   viewModelScope.launch {

@@ -101,7 +101,6 @@ class CreateProgramViewModel(app: Application) : AndroidViewModel(app) {
   fun setDescription(v: String)  { _state.value = _state.value.copy(description = v) }
   fun setCoach(v: String)  { _state.value = _state.value.copy(coach = v) }
   fun setCoachBio(v: String)  { _state.value = _state.value.copy(coachBio = v) }
-  fun setSplit(v: String)  { _state.value = _state.value.copy(split = v) }
   fun setStyle(v: String)  { _state.value = _state.value.copy(style = v) }
 
   fun setCoverImage(uri: Uri) {
@@ -112,8 +111,6 @@ class CreateProgramViewModel(app: Application) : AndroidViewModel(app) {
   } catch (_: Exception) {}
   _state.value = _state.value.copy(coverImageUri = uri.toString())
   }
-
-  fun clearCoverImage() { _state.value = _state.value.copy(coverImageUri = null) }
 
   /** For FULL programs: advance to the exercise builder. For FLEXIBLE: save directly. */
   fun proceedToBuilder() {

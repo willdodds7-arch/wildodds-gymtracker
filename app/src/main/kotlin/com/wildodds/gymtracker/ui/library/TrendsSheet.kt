@@ -9,13 +9,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.wildodds.gymtracker.data.analytics.TrendData
 import com.wildodds.gymtracker.ui.components.GlassCard
-import com.wildodds.gymtracker.ui.components.MiniBarChart
-import com.wildodds.gymtracker.ui.components.MiniLineChart
+import com.wildodds.gymtracker.ui.components.AxisBarChart
+import com.wildodds.gymtracker.ui.components.AxisLineChart
+import com.wildodds.gymtracker.ui.components.ChartPoint
+import com.wildodds.gymtracker.ui.components.formatAxisValue
 import com.wildodds.gymtracker.ui.theme.LocalAccentColor
 
 @Composable
@@ -63,12 +66,13 @@ fun TrendsSheet(
   color = MaterialTheme.colorScheme.onBackground)
   if (c.perWeek.isNotEmpty()) {
   Spacer(Modifier.height(8.dp))
-  MiniBarChart(
-  values = c.perWeek.map { it.completed.toFloat() },
-  planned = c.perWeek.map { it.planned.toFloat() },
-  color = accent
+  AxisBarChart(
+  points = c.perWeek.map { ChartPoint("W${it.week}", it.completed.toFloat()) },
+  secondary = c.perWeek.map { it.planned.toFloat() },
+  color = accent,
+  unit = "sessions"
   )
-  Text("sessions completed (solid) vs planned (faint), per week",
+  Text("Sessions completed (solid) vs planned (faint) per week. Tap a bar for its number.",
   style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
   }
   }
@@ -76,8 +80,14 @@ fun TrendsSheet(
   // ── Volume ─────────────────────────────────────────────────
   if (data.volume.size >= 2) {
   Section("Total volume per week") {
-  MiniLineChart(values = data.volume.map { it.totalKg }, color = accent)
-  Text("peak ${data.volume.maxOf { it.totalKg }.toInt()} kg",
+  val vols = data.volume.map { it.totalKg }
+  ChangeHeader(latest = vols.last(), first = vols.first(), unit = "kg")
+  AxisLineChart(
+  points = data.volume.map { ChartPoint("W${it.week}", it.totalKg) },
+  color = accent, unit = "kg", zeroBased = true,
+  highlight = setOf(vols.indexOf(vols.max()))
+  )
+  Text("Weight × reps across every set, per week · peak ${vols.max().toInt()} kg (larger dot)",
   style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
   }
   }
@@ -87,9 +97,13 @@ fun TrendsSheet(
   if (lift.points.size >= 2) {
   Section("${lift.exerciseName} — est. 1RM") {
   val prIdx = lift.points.indices.filter { lift.points[it].isE1rmPr }.toSet()
-  MiniLineChart(values = lift.points.map { it.est1rm }, color = accent, prMarkers = prIdx)
+  ChangeHeader(latest = lift.points.last().est1rm, first = lift.points.first().est1rm, unit = "kg")
+  AxisLineChart(
+  points = lift.points.map { ChartPoint("W${it.week}", it.est1rm) },
+  color = accent, unit = "kg", highlight = prIdx
+  )
   val prCount = lift.points.count { it.isWeightPr || it.isRepPr }
-  Text("latest ${lift.points.last().est1rm.toInt()} kg  ·  $prCount PR(s) — dots mark new bests",
+  Text("$prCount PR(s) — larger dots mark a new best estimated 1RM",
   style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
   }
   }
@@ -101,11 +115,39 @@ fun TrendsSheet(
   val ratio = data.balance.map {
   if (it.pullVolume > 0f) it.pushVolume / it.pullVolume else 0f
   }
-  MiniLineChart(values = ratio, color = accent)
-  Text("push : pull volume ratio per week (1.0 = balanced)",
+  AxisLineChart(
+  points = data.balance.mapIndexed { i, b -> ChartPoint("W${b.week}", ratio[i]) },
+  color = accent, referenceValue = 1f
+  )
+  val latest = ratio.last()
+  Text(
+  when {
+  latest > 1.2f -> "Push : pull ratio per week. Latest ${"%.2f".format(latest)} — push-heavy, add some pulling."
+  latest in 0.01f..0.8f -> "Push : pull ratio per week. Latest ${"%.2f".format(latest)} — pull-heavy."
+  else -> "Push : pull ratio per week. Dashed line = 1.0 (balanced)."
+  },
   style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
   }
   }
+  }
+  }
+}
+
+/** "1,250 kg  ▲ +150 kg since first week" — the number the chart is about, stated outright. */
+@Composable
+private fun ChangeHeader(latest: Float, first: Float, unit: String) {
+  val delta = latest - first
+  val up = delta >= 0f
+  Row(verticalAlignment = Alignment.Bottom, modifier = Modifier.padding(bottom = 8.dp)) {
+  Text("${formatAxisValue(latest)} $unit",
+  style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold,
+  color = MaterialTheme.colorScheme.onBackground)
+  if (delta != 0f) {
+  Spacer(Modifier.width(8.dp))
+  Text("${if (up) "▲ +" else "▼ "}${formatAxisValue(delta)} $unit since first week",
+  style = MaterialTheme.typography.labelMedium,
+  color = if (up) Color(0xFF4CAF50) else Color(0xFFF44336),
+  modifier = Modifier.padding(bottom = 2.dp))
   }
   }
 }

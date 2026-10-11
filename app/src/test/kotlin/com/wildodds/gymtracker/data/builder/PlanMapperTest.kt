@@ -247,4 +247,33 @@ class PlanMapperTest {
     assertEquals(8 * 4, parsed.sessions.size)
     assertEquals(12, parsed.sessions.first().exercises.size)
   }
+
+  // ── 12-week linear progression ─────────────────────────────────────────────
+
+  @Test
+  fun `a linear progression exercise gets its own sets and reps every week`() {
+    val squat = PlanExercise(name = "Squat", sets = working(3, "5"), notes = "Brace hard", linear12 = Linear12Spec("100"))
+    val parsed = PlanMapper.toParsed(plan(PlanWorkout(name = "Legs", exercises = listOf(squat)), weeks = 13))
+    val byWeek = parsed.sessions.sortedBy { it.weekNumber }.map { it.exercises.single() }
+    assertEquals(listOf(3, 4, 5, 5, 5, 5, 5, 4, 3, 3, 4, 5, 3), byWeek.map { it.sets })
+    assertEquals("8", byWeek[5].repsTarget)
+    assertTrue(byWeek[6].notes.contains("about 105 kg"))
+    assertTrue(byWeek[6].notes.endsWith("Brace hard"))
+    assertTrue(byWeek.all { TwelveWeekLinear.MODIFIER in it.modifiers })
+    assertTrue(PlanMapper.plannedSetsFor(1L, squat).isEmpty())
+  }
+
+  @Test
+  fun `a stored progression reads back as the spec without its generated note`() {
+    val program = Program(id = 1, name = "P", totalWeeks = 12)
+    val session = Session(id = 10, programId = 1, weekNumber = 1, dayNumber = 1, name = "Legs", muscleGroups = "")
+    val stored = Exercise(
+      id = 100, sessionId = 10, name = "Squat", sets = 3, repsTarget = "5", orderIndex = 0,
+      notes = TwelveWeekLinear.mergeNotes("Brace hard", TwelveWeekLinear.weekPlan(0, 100f).note),
+      loadValue = 100.0, modifiers = listOf(TwelveWeekLinear.MODIFIER)
+    )
+    val ex = PlanMapper.fromStored(program, listOf(session), mapOf(10L to listOf(stored))).workouts.single().exercises.single()
+    assertEquals("100", ex.linear12?.startLoad)
+    assertEquals("Brace hard", ex.notes)
+  }
 }

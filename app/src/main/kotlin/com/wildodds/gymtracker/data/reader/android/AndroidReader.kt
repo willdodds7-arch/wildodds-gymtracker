@@ -105,36 +105,6 @@ object AndroidReader {
     }
   }
 
-  /**
-   * Just the text of a picked file, for the one caller that parses it its own way (the opt-in
-   * `ClaudeApiClient` path). It goes through the same offline ingest pipeline as everything else,
-   * so there is exactly one place that turns a `Uri` into text and the AI path inherits every
-   * extraction improvement without a second code path to keep in step.
-   */
-  fun extractText(context: Context, uri: Uri, progress: IngestProgress = IngestProgress.NONE): String {
-    ensurePdfBox(context)
-    requireNotMainThread()
-    val bytes = readBytes(context, uri)
-    return com.wildodds.gymtracker.data.reader.ingest.IngestPipeline(registry(context))
-      .ingest(bytes, displayName(context, uri), mimeType(context, uri), progress)
-      .document.text
-  }
-
-  /**
-   * Several images picked at once — four photos of a printed program — read as ONE document in the
-   * order the user picked them. Reading them separately produces four one-day programs, which is
-   * never what anyone wanted.
-   */
-  fun readImages(context: Context, uris: List<Uri>, progress: IngestProgress = IngestProgress.NONE): ExtractedDocument {
-    val pages = uris.mapIndexed { i, uri ->
-      progress.report("Reading image ${i + 1} of ${uris.size}", i + 1, uris.size)
-      BitmapImageSource.decode(readBytes(context, uri), i)
-    }
-    if (pages.isEmpty()) throw IngestError.Empty("No images were picked.")
-    val input = ExtractInput(ByteArray(0), kind = SourceKind.IMAGE, progress = progress)
-    return OcrExtractor(MlKitOcrEngine(), MultiImageSource(pages)).extract(input)
-  }
-
   /** Reads a picked file, respecting the size cap BEFORE allocating a byte array for it. */
   fun readBytes(context: Context, uri: Uri, limits: IngestLimits = IngestLimits.DEFAULT): ByteArray {
     val resolver = context.applicationContext.contentResolver

@@ -33,12 +33,7 @@ jobs:
             -keyalg RSA -keysize 2048 -validity 10000
 
       # No local.properties in CI — app/build.gradle.kts falls back to these env vars.
-      # Only the anon (publishable) key is ever exposed here; it's client-side by design,
-      # protected by RLS. The service_role key must never appear in CI for app builds.
       - name: Build and run unit tests
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: ./gradlew :app:testOfflineDebugUnitTest :app:assembleOfflineDebug --no-daemon
 
       - name: Upload test reports on failure

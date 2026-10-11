@@ -196,6 +196,9 @@ object OcrRepair {
     // With no real digit anywhere, a single letter is not enough evidence to call this a number:
     // "Bs" would become "8s". "lO" — two confusables in a row — still is.
     if (body.none { it.isDigit() } && body.length < 2) return token
+    // With no real digit, only the l/I/O shapes count: "DB", "BB", "SS" are gym abbreviations
+    // (dumbbell, barbell, superset) and came back as "08", "88" and "55".
+    if (body.none { it.isDigit() } && !body.all { it in "lIOo" || it in NUMERIC_OPERATORS }) return token
 
     val fixed = buildString(body.length) {
       for (ch in body) append(CONFUSABLE[ch] ?: ch)
@@ -220,11 +223,4 @@ object OcrRepair {
   fun unifyMultiplication(s: String): String =
     Regex("""(?<=\d)\s*[×*]\s*(?=\d)""").replace(s, "x")
 
-  /**
-   * A page is importable when there is enough legible text AND the recogniser was reasonably sure.
-   * Returning false is a feature: "this image is too low quality to read" is a far better outcome
-   * than a program assembled from noise.
-   */
-  fun isLegible(r: Repaired): Boolean =
-    r.alphanumericGlyphs >= MIN_GLYPHS && r.meanConfidence >= MIN_MEAN_CONFIDENCE
 }

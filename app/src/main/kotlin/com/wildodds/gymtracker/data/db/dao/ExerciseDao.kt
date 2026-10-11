@@ -22,6 +22,10 @@ interface ExerciseDao {
   @Insert(onConflict = OnConflictStrategy.REPLACE)
   suspend fun insertAll(exercises: List<Exercise>)
 
+  /** In-place update by primary key. Never use the REPLACE insert for edits: it cascades deletes. */
+  @Update
+  suspend fun update(exercise: Exercise)
+
   @Query("UPDATE exercises SET name = :name WHERE id = :exerciseId")
   suspend fun updateName(exerciseId: Long, name: String)
 
@@ -89,6 +93,10 @@ interface ExerciseDao {
 
   @Query("UPDATE exercises SET orderIndex = :orderIndex WHERE id = :exerciseId")
   suspend fun updateOrderIndex(exerciseId: Long, orderIndex: Int)
+
+  /** Re-home one exercise into another session (day) at [orderIndex]; drops any superset link. */
+  @Query("UPDATE exercises SET sessionId = :sessionId, orderIndex = :orderIndex, supersetGroupId = NULL WHERE id = :exerciseId")
+  suspend fun moveToSession(exerciseId: Long, sessionId: Long, orderIndex: Int)
 
   @Query("""
     UPDATE exercises SET orderIndex = :newIndex

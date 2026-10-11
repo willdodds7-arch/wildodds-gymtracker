@@ -32,12 +32,6 @@ interface ImportRecordDao {
   @Query("SELECT * FROM import_records WHERE programId = :programId ORDER BY createdAt DESC, id DESC LIMIT 1")
   suspend fun findByProgram(programId: Long): ImportRecord?
 
-  /** Every import whose source is still available to re-read, newest first. */
-  @Query("""SELECT * FROM import_records
-    WHERE sourceText != '' AND programId IS NOT NULL AND programId IN (SELECT id FROM programs)
-    ORDER BY createdAt DESC""")
-  suspend fun reparsable(): List<ImportRecord>
-
   /**
    * Imports worth re-parsing: their source is available AND they were read by an OLDER reader.
    * Re-running the current reader over its own output would reach the same answer.

@@ -75,6 +75,7 @@ object ProgramPlanJson {
     put("isOptional", e.isOptional)
     e.supersetGroupId?.let { put("supersetGroupId", it) }
     put("alternatives", JSONArray(e.alternatives))
+    e.linear12?.let { put("linear12", JSONObject().put("startLoad", it.startLoad)) }
     put("sets", JSONArray(e.sets.map { s ->
       JSONObject().apply {
         put("type", s.type.name)
@@ -213,7 +214,8 @@ object ProgramPlanJson {
       notes = o.optString("notes"),
       supersetGroupId = o.optString("supersetGroupId").takeIf { it.isNotBlank() }?.let { groupIds[it] },
       alternatives = (0 until altJson.length()).map { altJson.optString(it) }.filter { it.isNotBlank() },
-      isOptional = o.optBoolean("isOptional", false)
+      isOptional = o.optBoolean("isOptional", false),
+      linear12 = o.optJSONObject("linear12")?.let { Linear12Spec(startLoad = it.optString("startLoad")) }
     )
   }
 

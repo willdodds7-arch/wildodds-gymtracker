@@ -27,7 +27,6 @@ object ZipReader {
   ) {
     operator fun get(name: String): ByteArray? = entries[name]
     fun names(): List<String> = order
-    fun startingWith(prefix: String): List<String> = order.filter { it.startsWith(prefix) }
   }
 
   fun read(

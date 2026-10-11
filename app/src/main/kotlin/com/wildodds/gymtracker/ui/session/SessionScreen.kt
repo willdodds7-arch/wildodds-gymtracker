@@ -6,7 +6,6 @@
 package com.wildodds.gymtracker.ui.session
 
 import android.media.AudioManager
-import android.media.MediaPlayer
 import android.media.ToneGenerator
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateContentSize
@@ -29,6 +28,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Check
@@ -38,6 +38,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Flight
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.FullscreenExit
@@ -45,9 +46,11 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.LinkOff
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SwapVert
@@ -65,6 +68,8 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalDensity
@@ -82,6 +87,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -98,6 +104,7 @@ import com.wildodds.gymtracker.ui.settings.FeatureFlags
 import com.wildodds.gymtracker.ui.settings.SettingsRegistry
 import com.wildodds.gymtracker.ui.settings.SettingsViewModel
 import com.wildodds.gymtracker.ui.tools.PlateCalculatorSheet
+import com.wildodds.gymtracker.ui.components.formatAxisValue
 import com.wildodds.gymtracker.ui.theme.LocalAccentColor
 import com.wildodds.gymtracker.ui.theme.LocalDarkMode
 import com.wildodds.gymtracker.ui.theme.SetRowFilled
@@ -117,10 +124,10 @@ fun SessionScreen(
   // so a running timer now only invalidates the timer.
   val timerVisible by remember(vm) {
   vm.timerState.map { it.isVisible }.distinctUntilChanged()
-  }.collectAsStateWithLifecycle(initialValue = vm.timerState.value.isVisible)
+  }.collectAsStateWithLifecycle(initialValue = false)
   val timerFullscreen by remember(vm) {
   vm.timerState.map { it.isFullscreen }.distinctUntilChanged()
-  }.collectAsStateWithLifecycle(initialValue = vm.timerState.value.isFullscreen)
+  }.collectAsStateWithLifecycle(initialValue = false)
   val featTimer     by settingsVm.featSessionTimer.collectAsStateWithLifecycle()
   val featAutofill  by settingsVm.featWeightAutofill.collectAsStateWithLifecycle()
   val featAddEx     by settingsVm.featAddExercise.collectAsStateWithLifecycle()
@@ -229,18 +236,18 @@ fun SessionScreen(
   }
   when (currentTimerSound.value) {
   "ding" -> playDing()
-  "ronnie" -> {
+  // Three short pulses, made on the device — the app ships no third-party audio.
+  // "ronnie" is what installs that predate it have stored; it plays the same pulses.
+  "pulse", "ronnie" -> {
   try {
-  val mp = MediaPlayer.create(context, R.raw.ronnie_coleman)
-  if (mp != null) {
-  mp.start()
-  mp.setOnCompletionListener { it.release() }
-  } else {
-  playDing() // placeholder file — fall back to ding
+  val toneGen = ToneGenerator(AudioManager.STREAM_RING, ToneGenerator.MAX_VOLUME)
+  repeat(3) {
+  toneGen.startTone(ToneGenerator.TONE_PROP_BEEP, 150)
+  kotlinx.coroutines.delay(260)
   }
-  } catch (_: Exception) {
-  playDing()
-  }
+  kotlinx.coroutines.delay(100)
+  toneGen.release()
+  } catch (_: Exception) { /* device doesn't support ToneGenerator */ }
   }
   // "none" → do nothing
   }
@@ -254,12 +261,32 @@ fun SessionScreen(
   // heart rate, fatigue) and `pages` is rebuilt on every set edit, so an in-flight fling/settle can
   // be cancelled mid-slide and leave the pager stranded between two pages. Whenever scrolling stops
   // at a non-trivial fractional offset, snap to the nearest whole page so it never sticks half-way.
+  //
+  // Watches "stopped AND off a page boundary" rather than just the moment scrolling stops: a snap
+  // that is itself interrupted (by a bring-into-view, below) ends off-boundary too, and must be
+  // retried rather than ignored. collectLatest drops a superseded snap.
   LaunchedEffect(pagerState) {
-  snapshotFlow { pagerState.isScrollInProgress }.collect { scrolling ->
-  if (!scrolling && kotlin.math.abs(pagerState.currentPageOffsetFraction) > 0.01f) {
-  pagerState.animateScrollToPage(pagerState.currentPage)
+  snapshotFlow {
+  !pagerState.isScrollInProgress && kotlin.math.abs(pagerState.currentPageOffsetFraction) > 0.01f
+  }.distinctUntilChanged().collectLatest { stranded ->
+  if (stranded) pagerState.animateScrollToPage(pagerState.currentPage)
   }
   }
+
+  // Dropping the keyboard with the system Back button left the pager stuck half-way between two
+  // exercises. Back hides the IME but keeps the text field focused; as the window grows back, the
+  // still-focused field keeps asking to be "brought into view", and the HorizontalPager — being
+  // scrollable — answers by scrolling sideways mid-resize. So when the keyboard goes away, release
+  // focus (nothing is being typed any more) and put the pager squarely back on its page.
+  var imeWasVisible by remember { mutableStateOf(false) }
+  LaunchedEffect(imeVisible) {
+  if (imeWasVisible && !imeVisible) {
+  focusManager.clearFocus()
+  if (kotlin.math.abs(pagerState.currentPageOffsetFraction) > 0.01f) {
+  pagerState.scrollToPage(pagerState.currentPage)
+  }
+  }
+  imeWasVisible = imeVisible
   }
 
   if (state.isLoading) {
@@ -765,7 +792,6 @@ private fun SessionLoadingSkeleton() {
 private fun TimerPanel(vm: SessionViewModel) {
   val timerState by vm.timerState.collectAsStateWithLifecycle()
   val accent = LocalAccentColor.current
-  fun Int.toMmSs() = "%d:%02d".format(this / 60, this % 60)
   val isRest = timerState.mode == SessionViewModel.TimerMode.REST
   val displaySeconds = timerState.currentSeconds
   val inDelay = timerState.delayRemaining > 0
@@ -842,14 +868,14 @@ private fun TimerPanel(vm: SessionViewModel) {
   modifier = Modifier.size(36.dp)) {
   Icon(
   if (timerState.isRunning || inDelay) Icons.Default.Pause else Icons.Default.PlayArrow,
-  null,
+  if (timerState.isRunning || inDelay) "Pause timer" else "Start timer",
   tint  = if (timerState.isRunning || inDelay) MaterialTheme.colorScheme.onSurfaceVariant else accent,
   modifier = Modifier.size(20.dp)
   )
   }
   // Reset
   IconButton(onClick = { vm.resetTimer() }, modifier = Modifier.size(36.dp)) {
-  Icon(Icons.Default.Refresh, null,
+  Icon(Icons.Default.Refresh, "Reset timer",
   tint  = MaterialTheme.colorScheme.onSurfaceVariant,
   modifier = Modifier.size(18.dp))
   }
@@ -912,11 +938,11 @@ private fun FullscreenTimerOverlay(vm: SessionViewModel) {
   modifier = Modifier.size(64.dp)) {
   Icon(
   if (timerState.isRunning || inDelay) Icons.Default.Pause else Icons.Default.PlayArrow,
-  null, tint = accent, modifier = Modifier.size(44.dp)
+  if (timerState.isRunning || inDelay) "Pause timer" else "Start timer", tint = accent, modifier = Modifier.size(44.dp)
   )
   }
   IconButton(onClick = { vm.resetTimer() }, modifier = Modifier.size(52.dp)) {
-  Icon(Icons.Default.Refresh, null,
+  Icon(Icons.Default.Refresh, "Reset timer",
   tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(30.dp))
   }
   IconButton(onClick = { vm.toggleTimerFullscreen() },
@@ -969,6 +995,41 @@ private fun ExerciseCard(
   var easierHarderTarget by remember(exercise.id) { mutableStateOf<ScoredExercise?>(null) }
   var easierHarderIsEasier by remember(exercise.id) { mutableStateOf(true) }
 
+  // Weight autofill (set 1 → later sets) is a global setting; each exercise can switch it off with
+  // its "A" button. Off for this exercise = every set's weight is typed on its own.
+  val autofillOffSet by vm.autofillOff.collectAsStateWithLifecycle()
+  val exerciseAutofillOn = exerciseKey(exercise.name) !in autofillOffSet
+  val autofillActive = featAutofill && exerciseAutofillOn
+
+  // 12-week linear progression: start it here (this week = week 1), or see / restart / stop it.
+  var showLinear12Sheet by remember(exercise.id) { mutableStateOf(false) }
+  val onLinear12 = vm.isOnLinear12(exerciseState)
+  if (showLinear12Sheet) {
+  Linear12Sheet(
+  exerciseName = exercise.name,
+  active = onLinear12,
+  currentWeek = vm.linear12Week(exerciseState),
+  initialLoad = (vm.linear12StartLoad(exerciseState)?.let { formatAxisValue(it) }
+  ?: exerciseState.sets.firstOrNull()?.weightKg).orEmpty(),
+  onStart = { load -> showLinear12Sheet = false; vm.startLinear12(exerciseIndex, load) },
+  onStop = { showLinear12Sheet = false; vm.stopLinear12(exerciseIndex) },
+  onDismiss = { showLinear12Sheet = false }
+  )
+  }
+
+  var showMoveSheet by remember(exercise.id) { mutableStateOf(false) }
+  if (showMoveSheet) {
+  MoveExerciseSheet(
+  exerciseName = exercise.name,
+  loadTargets = { vm.loadMoveTargets() },
+  onMove = { target, insertAt ->
+  showMoveSheet = false
+  vm.moveExerciseToDay(exerciseIndex, target, insertAt)
+  },
+  onDismiss = { showMoveSheet = false }
+  )
+  }
+
   if (showSwapSheet) {
   SwapExerciseSheet(
   exerciseName = exercise.name,
@@ -1009,8 +1070,7 @@ private fun ExerciseCard(
   TravelExerciseHeader(travel, accent, overlayMarker)
   }
   // ── Exercise name (tap pencil to edit) ────────────────────
-  if (travel == null || !travel.isSubstituted)
-  Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+  if (travel == null || !travel.isSubstituted) Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
   if (isEditingName) {
   LaunchedEffect(Unit) { focusRequester.requestFocus() }
   OutlinedTextField(
@@ -1044,16 +1104,28 @@ private fun ExerciseCard(
   Icon(Icons.Default.Calculate, "1RM Calculator", tint = accent, modifier = Modifier.size(20.dp))
   }
   }
+  if (featAutofill) {
+  AutofillToggle(on = exerciseAutofillOn, onToggle = { vm.toggleExerciseAutofill(exercise.name) })
+  }
   IconButton(onClick = { isEditingName = true }) {
   Icon(Icons.Default.Edit, "Rename", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
   }
-  if (swapsEnabled || easierHarderEnabled) {
   Box {
   IconButton(onClick = { showExerciseMenu = true }, modifier = Modifier.size(36.dp)) {
   Icon(Icons.Default.MoreVert, "Exercise options",
   tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
   }
   DropdownMenu(expanded = showExerciseMenu, onDismissRequest = { showExerciseMenu = false }) {
+  DropdownMenuItem(
+  text = { Text(if (onLinear12) "12-week progression…" else "12-week linear progression") },
+  onClick = { showExerciseMenu = false; showLinear12Sheet = true },
+  leadingIcon = { Icon(Icons.AutoMirrored.Filled.TrendingUp, null, tint = accent) }
+  )
+  DropdownMenuItem(
+  text = { Text("Move to another day") },
+  onClick = { showExerciseMenu = false; showMoveSheet = true },
+  leadingIcon = { Icon(Icons.Default.DateRange, null, tint = accent) }
+  )
   if (swapsEnabled) {
   DropdownMenuItem(
   text = { Text("Swap exercise") },
@@ -1078,7 +1150,6 @@ private fun ExerciseCard(
   },
   leadingIcon = { Icon(Icons.Default.KeyboardArrowUp, null, tint = accent) }
   )
-  }
   }
   }
   }
@@ -1167,10 +1238,19 @@ private fun ExerciseCard(
   }
   }
 
-  // Program notes (from import)
+  // Coach notes — the program's own instructions ("hold the last rep for 10 seconds"). Always on
+  // the card, since they're about how to do the sets, and read-only: they belong to the program.
   if (exercise.notes.isNotBlank()) {
-  Spacer(Modifier.height(4.dp))
-  Text(exercise.notes, fontStyle = FontStyle.Italic, color = accent, fontSize = 13.sp)
+  Spacer(Modifier.height(6.dp))
+  NoteBlock(label = "Coach notes", icon = Icons.Default.Lock, text = exercise.notes, emphasised = true)
+  }
+  // Athlete notes preview — the lifter's own cues, carried from session to session. Tap to edit.
+  if (userNote.isNotBlank()) {
+  Spacer(Modifier.height(6.dp))
+  NoteBlock(
+  label = "Athlete notes", icon = Icons.Default.Person, text = userNote, emphasised = false,
+  onClick = { selectedTab = 1; noteFieldValue = userNote; isEditingNote = true }
+  )
   }
 
   // Prescribed RPE / %1RM targets from the program week plan
@@ -1235,7 +1315,7 @@ private fun ExerciseCard(
   Text("Notes", modifier = Modifier.padding(vertical = 10.dp),
   fontWeight = if (selectedTab == 1) FontWeight.Bold else FontWeight.Normal,
   style = MaterialTheme.typography.labelMedium)
-  if (userNote.isNotBlank()) {
+  if (userNote.isNotBlank() || exercise.notes.isNotBlank()) {
   Spacer(Modifier.width(4.dp))
   Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(accent))
   }
@@ -1248,12 +1328,12 @@ private fun ExerciseCard(
   if (selectedTab == 0) {
   // ── Sets tab ──────────────────────────────────────────
   exerciseState.sets.forEachIndexed { setIndex, setRow ->
-  // key() by setNumber so swipe-dismiss state doesn't leak to the
-  // next row when a set is deleted and the list shifts.
-  key(setRow.setNumber) {
+  // key() by the row's stable identity — NOT setNumber, which is renumbered after a delete and
+  // used to hand the deleted row's dismissed swipe state to the row that slid into its place.
+  key(setRow.rowKey) {
   SwipeToDeleteSetRow(
   setRow = setRow, setIndex = setIndex, exerciseIndex = exerciseIndex,
-  vm = vm, featAutofill = featAutofill, unilateralMode = exercise.unilateralMode
+  vm = vm, featAutofill = autofillActive, unilateralMode = exercise.unilateralMode
   )
   }
   if (setIndex < exerciseState.sets.size - 1) Spacer(Modifier.height(8.dp))
@@ -1275,6 +1355,20 @@ private fun ExerciseCard(
   }
   } else {
   // ── Notes tab ─────────────────────────────────────────
+  // Coach notes: shown, never editable here.
+  NoteSectionHeader("Coach notes", Icons.Default.Lock)
+  if (exercise.notes.isNotBlank()) {
+  Text(exercise.notes, color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodyMedium)
+  Text("From the program — can't be edited.", style = MaterialTheme.typography.labelSmall,
+  color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 2.dp))
+  } else {
+  Text("The program has no notes for this exercise.", color = MaterialTheme.colorScheme.onSurfaceVariant,
+  style = MaterialTheme.typography.bodySmall, fontStyle = FontStyle.Italic)
+  }
+  Spacer(Modifier.height(16.dp))
+
+  // Athlete notes: the lifter's own, editable, and kept for this exercise in every session.
+  NoteSectionHeader("Athlete notes", Icons.Default.Person)
   if (isEditingNote) {
   val noteBringIntoView = remember { BringIntoViewRequester() }
   var noteHasFocus by remember { mutableStateOf(false) }
@@ -1288,7 +1382,7 @@ private fun ExerciseCard(
   modifier  = Modifier.fillMaxWidth()
   .bringIntoViewRequester(noteBringIntoView)
   .onFocusChanged { noteHasFocus = it.isFocused },
-  placeholder  = { Text("Add notes about form, cues, weight progression...") },
+  placeholder  = { Text("Your cues, form notes, seat height...") },
   minLines  = 3,
   colors  = OutlinedTextFieldDefaults.colors(focusedBorderColor = accent),
   keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences)
@@ -1323,7 +1417,7 @@ private fun ExerciseCard(
   } else {
   if (userNote.isBlank()) {
   Text(
-  "No notes yet. Tap to add notes about this exercise.",
+  "No athlete notes yet. Anything you add stays with this exercise for every session.",
   color = MaterialTheme.colorScheme.onSurfaceVariant,
   style = MaterialTheme.typography.bodySmall,
   fontStyle = FontStyle.Italic
@@ -1335,13 +1429,288 @@ private fun ExerciseCard(
   TextButton(onClick = { noteFieldValue = userNote; isEditingNote = true }) {
   Icon(Icons.Default.Edit, null, modifier = Modifier.size(16.dp), tint = accent)
   Spacer(Modifier.width(4.dp))
-  Text(if (userNote.isBlank()) "Add Note" else "Edit Note", color = accent)
+  Text(if (userNote.isBlank()) "Add athlete note" else "Edit athlete note", color = accent)
   }
   }
   }
   }
   }
   Spacer(Modifier.height(16.dp))
+  }
+}
+
+// ── 12-week linear progression sheet ──────────────────────────────────────────
+
+/**
+ * Explains the scheme, takes the athlete's starting weight (optional — prefilled from set 1), and
+ * previews all 12 weeks with the targets that weight produces. Starting makes THIS week week 1.
+ */
+@Composable
+private fun Linear12Sheet(
+  exerciseName: String,
+  active: Boolean,
+  currentWeek: Int?,
+  initialLoad: String,
+  onStart: (Float?) -> Unit,
+  onStop: () -> Unit,
+  onDismiss: () -> Unit
+) {
+  val accent = LocalAccentColor.current
+  var load by remember { mutableStateOf(initialLoad) }
+  ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+  Column(
+  Modifier
+  .fillMaxWidth()
+  .padding(horizontal = 20.dp)
+  .padding(bottom = 32.dp)
+  .imePadding()
+  .verticalScroll(rememberScrollState())
+  ) {
+  Text("12-week linear progression", fontWeight = FontWeight.Bold, fontSize = 18.sp,
+  color = MaterialTheme.colorScheme.onBackground)
+  Text(exerciseName, style = MaterialTheme.typography.bodySmall, color = accent)
+  Spacer(Modifier.height(8.dp))
+  Text(
+  if (active && currentWeek != null)
+  "You're on week $currentWeek of 12. Each week's sets, reps and target weight are in its coach notes."
+  else
+  "Builds this exercise over 12 weeks: first add sets, then reps, then weight — then repeat " +
+  "at the heavier weight. This week becomes week 1; earlier weeks aren't changed.",
+  style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant
+  )
+  Spacer(Modifier.height(12.dp))
+  OutlinedTextField(
+  value = load,
+  onValueChange = { v -> load = v.filter { it.isDigit() || it == '.' } },
+  label = { Text("Starting weight (kg)") },
+  supportingText = { Text("Optional. Used to work out each week's suggested weight.") },
+  singleLine = true,
+  keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
+  modifier = Modifier.fillMaxWidth(),
+  colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = accent)
+  )
+  com.wildodds.gymtracker.ui.components.Linear12Table(
+  startLoad = load.toFloatOrNull(),
+  currentWeek = if (active) currentWeek else 1
+  )
+  Spacer(Modifier.height(16.dp))
+  Button(
+  onClick = { onStart(load.toFloatOrNull()?.takeIf { it > 0f }) },
+  modifier = Modifier.fillMaxWidth(),
+  shape = RoundedCornerShape(12.dp),
+  colors = ButtonDefaults.buttonColors(containerColor = accent)
+  ) { Text(if (active) "Restart — make this week 1" else "Start — this week is week 1", fontWeight = FontWeight.SemiBold) }
+  if (active) {
+  TextButton(onClick = onStop, modifier = Modifier.fillMaxWidth()) {
+  Text("Stop the progression (keep this week's sets × reps)", color = MaterialTheme.colorScheme.error)
+  }
+  }
+  }
+  }
+}
+
+// ── Coach / athlete notes ─────────────────────────────────────────────────────
+
+/**
+ * A labelled note on the exercise card. Coach notes are [emphasised] (accent-tinted, lock icon,
+ * not clickable); athlete notes are quieter and open the editor when tapped.
+ */
+@Composable
+private fun NoteBlock(
+  label: String,
+  icon: androidx.compose.ui.graphics.vector.ImageVector,
+  text: String,
+  emphasised: Boolean,
+  onClick: (() -> Unit)? = null
+) {
+  val accent = LocalAccentColor.current
+  val tint = if (emphasised) accent else MaterialTheme.colorScheme.onSurfaceVariant
+  val content: @Composable () -> Unit = {
+  Column(Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 7.dp)) {
+  Row(verticalAlignment = Alignment.CenterVertically) {
+  Icon(icon, null, tint = tint, modifier = Modifier.size(12.dp))
+  Spacer(Modifier.width(4.dp))
+  Text(label.uppercase(), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold,
+  color = tint, letterSpacing = 0.6.sp)
+  if (onClick != null) {
+  Spacer(Modifier.weight(1f))
+  Icon(Icons.Default.Edit, "Edit $label", tint = tint, modifier = Modifier.size(12.dp))
+  }
+  }
+  Spacer(Modifier.height(2.dp))
+  Text(text, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onBackground,
+  maxLines = if (emphasised) Int.MAX_VALUE else 3,
+  overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+  }
+  }
+  val bg = if (emphasised) accent.copy(alpha = 0.10f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+  if (onClick != null) {
+  Surface(onClick = onClick, color = bg, shape = RoundedCornerShape(8.dp), modifier = Modifier.fillMaxWidth()) { content() }
+  } else {
+  Surface(color = bg, shape = RoundedCornerShape(8.dp), modifier = Modifier.fillMaxWidth()) { content() }
+  }
+}
+
+@Composable
+private fun NoteSectionHeader(title: String, icon: androidx.compose.ui.graphics.vector.ImageVector) {
+  Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 6.dp)) {
+  Icon(icon, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(14.dp))
+  Spacer(Modifier.width(6.dp))
+  Text(title.uppercase(), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold,
+  color = MaterialTheme.colorScheme.onSurfaceVariant, letterSpacing = 0.8.sp)
+  }
+}
+
+// ── Per-exercise autofill toggle ("A") ────────────────────────────────────────
+
+/** Filled "A" = weight autofill on for this exercise; outlined, faded "A" = off. */
+@Composable
+private fun AutofillToggle(on: Boolean, onToggle: () -> Unit) {
+  val accent = LocalAccentColor.current
+  val muted = MaterialTheme.colorScheme.onSurfaceVariant
+  Surface(
+  onClick = onToggle,
+  shape = CircleShape,
+  color = if (on) accent else Color.Transparent,
+  border = if (on) null else BorderStroke(1.5.dp, muted.copy(alpha = 0.5f)),
+  modifier = Modifier
+  .padding(horizontal = 4.dp)
+  .size(26.dp)
+  .semantics { contentDescription = if (on) "Weight autofill on — tap to turn off" else "Weight autofill off — tap to turn on" }
+  ) {
+  Box(contentAlignment = Alignment.Center) {
+  Text(
+  "A",
+  fontWeight = FontWeight.Bold,
+  fontSize = 13.sp,
+  color = if (on) MaterialTheme.colorScheme.surface else muted.copy(alpha = 0.6f)
+  )
+  }
+  }
+}
+
+// ── Move exercise to another day ──────────────────────────────────────────────
+
+/**
+ * Two steps: pick the day, then pick where in that day it goes (between its existing exercises).
+ * The days are loaded when the sheet opens so they reflect any edits made to them.
+ */
+@Composable
+private fun MoveExerciseSheet(
+  exerciseName: String,
+  loadTargets: suspend () -> List<SessionViewModel.MoveTargetDay>,
+  onMove: (SessionViewModel.MoveTargetDay, Int) -> Unit,
+  onDismiss: () -> Unit
+) {
+  val accent = LocalAccentColor.current
+  var targets by remember { mutableStateOf<List<SessionViewModel.MoveTargetDay>?>(null) }
+  var day by remember { mutableStateOf<SessionViewModel.MoveTargetDay?>(null) }
+  var insertAt by remember { mutableStateOf<Int?>(null) }
+  LaunchedEffect(Unit) { targets = loadTargets() }
+
+  ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+  Column(
+  modifier = Modifier
+  .fillMaxWidth()
+  .padding(horizontal = 20.dp)
+  .padding(bottom = 32.dp)
+  .verticalScroll(rememberScrollState())
+  ) {
+  Row(verticalAlignment = Alignment.CenterVertically) {
+  if (day != null) {
+  IconButton(onClick = { day = null; insertAt = null }, modifier = Modifier.size(36.dp)) {
+  Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back to days", tint = MaterialTheme.colorScheme.onBackground)
+  }
+  Spacer(Modifier.width(4.dp))
+  }
+  Column(Modifier.weight(1f)) {
+  Text(
+  if (day == null) "Move to another day" else "Where in ${day!!.name}?",
+  fontWeight = FontWeight.Bold, fontSize = 18.sp, color = MaterialTheme.colorScheme.onBackground
+  )
+  Text(exerciseName, style = MaterialTheme.typography.bodySmall, color = accent)
+  }
+  }
+  Spacer(Modifier.height(14.dp))
+
+  val list = targets
+  val chosen = day
+  when {
+  list == null -> Box(Modifier.fillMaxWidth().height(96.dp), contentAlignment = Alignment.Center) {
+  CircularProgressIndicator(color = accent)
+  }
+  list.isEmpty() -> Text(
+  "There are no other training days this week to move it to.",
+  style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant
+  )
+  chosen == null -> list.forEach { t ->
+  Surface(
+  onClick = { day = t; insertAt = t.exerciseNames.size },
+  shape = RoundedCornerShape(12.dp),
+  color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+  modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+  ) {
+  Row(Modifier.padding(horizontal = 14.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+  Column(Modifier.weight(1f)) {
+  Text(t.name, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground)
+  Text(
+  "Day ${t.dayNumber} · ${t.exerciseNames.size} exercise${if (t.exerciseNames.size != 1) "s" else ""}",
+  style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant
+  )
+  }
+  Icon(Icons.Default.KeyboardArrowDown, null, tint = accent,
+  modifier = Modifier.graphicsLayer { rotationZ = -90f })
+  }
+  }
+  }
+  else -> {
+  // Insertion slots between the day's existing exercises.
+  MoveSlot(exerciseName, selected = insertAt == 0) { insertAt = 0 }
+  chosen.exerciseNames.forEachIndexed { i, name ->
+  Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+  Text("${i + 1}", modifier = Modifier.width(24.dp),
+  style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+  Text(name, fontSize = 14.sp, color = MaterialTheme.colorScheme.onBackground)
+  }
+  MoveSlot(exerciseName, selected = insertAt == i + 1) { insertAt = i + 1 }
+  }
+  Spacer(Modifier.height(12.dp))
+  Text(
+  "Moves it from this week onward. It keeps your weights and reps from last time.",
+  style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant
+  )
+  Spacer(Modifier.height(12.dp))
+  Button(
+  onClick = { insertAt?.let { onMove(chosen, it) } },
+  enabled = insertAt != null,
+  modifier = Modifier.fillMaxWidth(),
+  shape = RoundedCornerShape(12.dp),
+  colors = ButtonDefaults.buttonColors(containerColor = accent)
+  ) { Text("Move to ${chosen.name}", fontWeight = FontWeight.SemiBold) }
+  }
+  }
+  }
+  }
+}
+
+/** One "drop it here" gap in the move sheet's day list; shows the exercise in place when chosen. */
+@Composable
+private fun MoveSlot(exerciseName: String, selected: Boolean, onClick: () -> Unit) {
+  val accent = LocalAccentColor.current
+  Surface(
+  onClick = onClick,
+  shape = RoundedCornerShape(10.dp),
+  color = if (selected) accent.copy(alpha = 0.15f) else Color.Transparent,
+  border = BorderStroke(1.dp, if (selected) accent else MaterialTheme.colorScheme.outline.copy(alpha = 0.35f)),
+  modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp)
+  ) {
+  Text(
+  if (selected) "→ $exerciseName" else "Put it here",
+  modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+  style = MaterialTheme.typography.labelMedium,
+  fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+  color = if (selected) accent else MaterialTheme.colorScheme.onSurfaceVariant
+  )
   }
 }
 
@@ -1356,14 +1725,19 @@ private fun SwipeToDeleteSetRow(
   featAutofill: Boolean = true,
   unilateralMode: Int = 0
 ) {
+  // confirmValueChange only approves the swipe — Material3 can invoke it more than once per
+  // gesture (threshold crossing and again on settle), so deleting from inside it removed extra
+  // sets. The delete runs exactly once, after the row has actually settled dismissed, and
+  // targets this row by its stable key rather than an index that may have shifted since.
   val dismissState = rememberSwipeToDismissBoxState(
-  confirmValueChange = { value ->
-  if (value == SwipeToDismissBoxValue.EndToStart) {
-  vm.deleteSet(exerciseIndex, setIndex)
-  true
-  } else false
-  }
+  confirmValueChange = { value -> value != SwipeToDismissBoxValue.StartToEnd }
   )
+  val rowKey = setRow.rowKey
+  LaunchedEffect(dismissState.currentValue) {
+  if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
+  vm.deleteSet(exerciseIndex, rowKey)
+  }
+  }
   SwipeToDismissBox(
   state = dismissState,
   enableDismissFromStartToEnd = false,

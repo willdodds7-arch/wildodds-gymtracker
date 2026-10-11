@@ -37,13 +37,10 @@ object AnalyticsGate {
   fun init(context: Context) { appContext = context.applicationContext }
 
   /** Fire-and-forget; safe to call from anywhere, never throws, returns immediately. */
+  @Suppress("UNUSED_PARAMETER")
   fun log(event: AnalyticsEvent) {
-    val ctx = appContext ?: return
-    scope.launch {
-      // Local-only build: consent-gated events are persisted to the on-device outbox but never
-      // uploaded (the cloud uploader was removed with the online stack).
-      runCatching { persistIfConsented(ctx, event) }
-    }
+    // The app records no usage events. The consent toggle was removed, and even an install that
+    // granted it earlier records nothing from here on. Kept as a no-op so call sites stay simple.
   }
 
   /**

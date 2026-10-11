@@ -12,6 +12,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -212,6 +213,10 @@ private fun ExerciseCard(
           DropdownMenuItem(text = { Text("Edit prescription") },
             onClick = { menuOpen = false; configureOpen = true },
             leadingIcon = { Icon(Icons.Default.Tune, null) })
+          DropdownMenuItem(
+            text = { Text(if (exercise.linear12 == null) "12-week linear progression" else "Turn off 12-week progression") },
+            onClick = { menuOpen = false; vm.setLinear12(workout.id, exercise.id, exercise.linear12 == null) },
+            leadingIcon = { Icon(Icons.AutoMirrored.Filled.TrendingUp, null) })
           DropdownMenuItem(text = { Text("Duplicate") },
             onClick = { menuOpen = false; vm.duplicateExercise(workout.id, exercise.id) },
             leadingIcon = { Icon(Icons.Default.ContentCopy, null) })
@@ -273,6 +278,42 @@ private fun ExerciseCard(
 
     Spacer(Modifier.height(8.dp))
 
+    val linear12 = exercise.linear12
+    if (linear12 != null) {
+      // ── 12-WEEK LINEAR PROGRESSION ────────────────────────────────────────
+      // Replaces the per-set editor: the sets change every week, so there is no single set list to
+      // edit. The athlete's starting weight is the one input; every week's target follows from it.
+      Column(
+        Modifier
+          .fillMaxWidth()
+          .clip(RoundedCornerShape(10.dp))
+          .background(accent.copy(alpha = 0.08f))
+          .padding(10.dp)
+      ) {
+        Text("12-WEEK LINEAR PROGRESSION", style = MaterialTheme.typography.labelSmall,
+          fontWeight = FontWeight.Bold, color = accent)
+        Text("Sets and reps change every week. Each week's target weight goes in its coach notes.",
+          style = MaterialTheme.typography.bodySmall, color = c.textSecondary)
+        Spacer(Modifier.height(8.dp))
+        OutlinedTextField(
+          value = linear12.startLoad,
+          onValueChange = { v -> vm.setLinear12StartLoad(workout.id, exercise.id, v.filter { it.isDigit() || it == '.' }) },
+          label = { Text("Starting weight (kg) — optional") },
+          singleLine = true,
+          keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
+          modifier = Modifier.fillMaxWidth(),
+          shape = RoundedCornerShape(10.dp),
+          colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = accent)
+        )
+        com.wildodds.gymtracker.ui.components.Linear12Table(
+          startLoad = linear12.startLoad.toFloatOrNull(),
+          currentWeek = 1
+        )
+        TextButton(onClick = { vm.setLinear12(workout.id, exercise.id, false) }) {
+          Text("Turn off", color = c.textSecondary)
+        }
+      }
+    } else {
     // ── EVOLVING SETS ────────────────────────────────────────────────────────
     // Shape first, numbers second. Choosing "Warm-up + working" or "Top set + back-off" writes the
     // whole ladder at once, so a real prescription is two taps rather than eight rows of typing.
@@ -313,23 +354,27 @@ private fun ExerciseCard(
       }
     }
 
+    }
+
     Spacer(Modifier.height(6.dp))
 
     Row(verticalAlignment = Alignment.CenterVertically) {
-      TextButton(onClick = { vm.addSet(workout.id, exercise.id) }, modifier = Modifier.heightIn(min = 48.dp)) {
-        Icon(Icons.Default.Add, null, tint = accent, modifier = Modifier.size(16.dp))
-        Spacer(Modifier.width(4.dp))
-        Text("Add set", color = accent)
-      }
-      TextButton(onClick = { configureOpen = !configureOpen }, modifier = Modifier.heightIn(min = 48.dp)) {
-        Text(if (configureOpen) "Hide" else "Configure", color = c.textSecondary)
+      if (linear12 == null) {
+        TextButton(onClick = { vm.addSet(workout.id, exercise.id) }, modifier = Modifier.heightIn(min = 48.dp)) {
+          Icon(Icons.Default.Add, null, tint = accent, modifier = Modifier.size(16.dp))
+          Spacer(Modifier.width(4.dp))
+          Text("Add set", color = accent)
+        }
+        TextButton(onClick = { configureOpen = !configureOpen }, modifier = Modifier.heightIn(min = 48.dp)) {
+          Text(if (configureOpen) "Hide" else "Configure", color = c.textSecondary)
+        }
       }
       TextButton(onClick = { notesOpen = !notesOpen }, modifier = Modifier.heightIn(min = 48.dp)) {
         Text("Notes", color = c.textSecondary)
       }
     }
 
-    AnimatedVisibility(visible = configureOpen) {
+    AnimatedVisibility(visible = configureOpen && linear12 == null) {
       Column {
         Text("Bulk actions", style = MaterialTheme.typography.labelSmall, color = c.textSecondary)
         Spacer(Modifier.height(4.dp))
