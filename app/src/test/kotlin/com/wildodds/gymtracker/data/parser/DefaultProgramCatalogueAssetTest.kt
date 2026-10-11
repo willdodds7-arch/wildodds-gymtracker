@@ -23,23 +23,23 @@ class DefaultProgramCatalogueAssetTest {
     assertTrue("bench hybrid present", "6-Week Bench-Focus Hybrid" in names)
     assertTrue("Russian present", "Russian Squat Routine" in names)
     assertTrue("powerlifting block present", "8-Week Powerlifting Block" in names)
-    assertTrue("Aaron's Oly split present", "Aaron's 5 Day Oly Split" in names)
+    assertTrue("Olympic lifting split present", "5-Day Olympic Lifting Split" in names)
     assertTrue("powerbuilding present", "Top-Set Powerbuilding 5-Day" in names)
     assertTrue("5x Upper Lower present", "5x Upper Lower" in names)
     assertTrue("5x Bro Split 2.0 present", "5x Bro Split 2.0" in names)
     assertTrue("Carpark Bodybuilding present", "Carpark Bodybuilding" in names)
     assertTrue("Silver-Era Space Marine present", "Silver-Era Space Marine" in names)
     assertTrue("Bronze Era Basics present", "Bronze Era Basics" in names)
-    assertTrue("JPShuru x V1NLAND present", "JPShuru x V1NLAND" in names)
-    assertTrue("JPShuru 3x2 present", "JPShuru x V1NLAND + 3x2 days per week" in names)
+    assertTrue("12-week linear 6-day split present", "12-Week Linear 6-Day Split" in names)
+    assertTrue("12-week linear 3x2 split present", "12-Week Linear 3x2 Split" in names)
     assertEquals(15, all.size)
   }
 
   @Test
-  fun jpShuru3x2_regroupsTheSameExercisesIntoThreeSessionsTwice() {
+  fun linear3x2_regroupsTheSameExercisesIntoThreeSessionsTwice() {
     val all = DefaultProgramCatalogue.load(context)
-    val base = all.first { it.name == "JPShuru x V1NLAND" }
-    val p = all.first { it.name == "JPShuru x V1NLAND + 3x2 days per week" }
+    val base = all.first { it.name == "12-Week Linear 6-Day Split" }
+    val p = all.first { it.name == "12-Week Linear 3x2 Split" }
     assertEquals(12, p.totalWeeks)
     assertEquals(6, p.daysPerWeek)
     val week1 = p.sessions.filter { it.weekNumber == 1 }.sortedBy { it.dayNumber }
@@ -61,8 +61,8 @@ class DefaultProgramCatalogueAssetTest {
   }
 
   @Test
-  fun jpShuruV1nland_runsItsMainLiftsOnTheTwelveWeekProgression() {
-    val p = DefaultProgramCatalogue.load(context).first { it.name == "JPShuru x V1NLAND" }
+  fun linear6Day_runsItsMainLiftsOnTheTwelveWeekProgression() {
+    val p = DefaultProgramCatalogue.load(context).first { it.name == "12-Week Linear 6-Day Split" }
     val lp = com.wildodds.gymtracker.data.builder.TwelveWeekLinear.MODIFIER
     assertEquals(12, p.totalWeeks)
     assertEquals(1, p.repeatWeeks) // every week is written out, since the main lifts differ by week

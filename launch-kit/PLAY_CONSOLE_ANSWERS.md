@@ -12,7 +12,7 @@ analytics, no ads, no in-app purchases. Health Connect is heart-rate read + opti
 
 | Field | Value | Notes |
 |---|---|---|
-| Package / applicationId | `com.wildodds.gymtracker.offline` | the `offline` flavor suffixes `.offline` |
+| Package / applicationId | `com.wildodds.gymtracker` | permanent once uploaded |
 | compileSdk / targetSdk | 36 (Android 16) | re-verify Play's minimum at submission time |
 | minSdk | 26 (Android 8.0) | |
 | versionCode scheme | monotonic integer, +1 per Play upload | `versionName` is the human string (e.g. `2.1.0`) |

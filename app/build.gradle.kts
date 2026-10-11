@@ -73,13 +73,12 @@ android {
     // ── Edition (single product) ────────────────────────────────────────────────
     // Wild Odds Gym Tracker is offline-only: all training data lives on-device, there is no account
     // and no server, and there are no ads or in-app purchases.
-    // The flavor is still named `offline` to keep the `.offline` applicationId (so existing installs
-    // upgrade); it also supplies the app_name string.
+    // The Play identity is the plain `com.wildodds.gymtracker` (decided 2026-10-12, before the first
+    // upload). The flavor keeps its old name only so build task names stay the same.
     flavorDimensions += "edition"
     productFlavors {
         create("offline") {
             dimension = "edition"
-            applicationIdSuffix = ".offline"
             resValue("string", "app_name", "Wild Odds Gym Tracker")
         }
     }
